@@ -36,7 +36,7 @@ The prototype is designed to show cybersecurity discipline, not just UI:
 
 ## Try the demo
 
-Open the [live demo](https://agriguardiannc.netlify.app) and choose any path from the login screen:
+Open the [live demo](https://joymckenzie.github.io/AgriGuardian/) and choose any path from the login screen:
 
 * **Sign in** with a demo account to see a specific role:
   * Owner — Angus MacDonald
