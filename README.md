@@ -1,4 +1,3 @@
-[README.md](https://github.com/user-attachments/files/29644701/README.md)
 # AgriGuardian
 
 A farm cyber-hygiene tool that reframes cybersecurity as routine maintenance — tracking the digital health of devices, networks, apps, and backups the same way a farm already tracks equipment upkeep.
