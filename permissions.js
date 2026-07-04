@@ -6,41 +6,6 @@ function canManage() {
   return currentUser.role === 'Owner' || currentUser.role === 'Manager';
 }
 
-// ── Owner-configurable role permission templates ────────────────────────────
-// The DEFAULT work-permission set each role receives when a member is invited
-// or when their role changes. The Owner edits the Manager / Technician / Farm
-// Hand templates from Settings (Role Access editor). Owner is always full
-// access (root) and Viewer is always read-only (its identity), so those two
-// are fixed and never editable. Templates are DEFAULTS, not ceilings: after a
-// member is created the Owner (or a Manager, within their own ceiling) can
-// still hand-tune that individual. Editing a template is forward-only — it
-// changes new invites and role-changes, not people already in that role.
-var roleDefaults = {
-  Manager:     { addDevices: true,  archiveDelete: false, resolveIssues: true,  assignIssues: true,  exportReports: true,  viewOnly: false },
-  Technician:  { addDevices: true,  archiveDelete: false, resolveIssues: true,  assignIssues: false, exportReports: false, viewOnly: false },
-  'Farm Hand': { addDevices: false, archiveDelete: false, resolveIssues: false, assignIssues: false, exportReports: false, viewOnly: true }
-};
-
-// Returns a fresh copy of the default perms for a role. Owner = full, Viewer =
-// read-only are fixed; Manager/Technician/Farm Hand come from roleDefaults.
-function roleTemplate(role) {
-  if (role === 'Owner')  return { addDevices: true,  archiveDelete: true,  resolveIssues: true,  assignIssues: true,  exportReports: true,  viewOnly: false };
-  if (role === 'Viewer') return { addDevices: false, archiveDelete: false, resolveIssues: false, assignIssues: false, exportReports: false, viewOnly: true };
-  var t = roleDefaults[role];
-  if (t) return { addDevices: t.addDevices, archiveDelete: t.archiveDelete, resolveIssues: t.resolveIssues, assignIssues: t.assignIssues, exportReports: t.exportReports, viewOnly: t.viewOnly };
-  return { addDevices: false, archiveDelete: false, resolveIssues: false, assignIssues: false, exportReports: false, viewOnly: true };
-}
-
-// Human-readable names + plain-language effects for each work permission.
-// Used by the confirmation prompt and the audit-log entries so what the user
-// confirms and what gets logged read the same way.
-function permLabel(key) {
-  return ({ addDevices: 'Add devices', archiveDelete: 'Archive/delete devices', resolveIssues: 'Resolve issues', assignIssues: 'Assign issues', exportReports: 'Export reports', viewOnly: 'View only' })[key] || key;
-}
-function permGrantDesc(key) {
-  return ({ addDevices: 'add new devices to the farm', archiveDelete: 'archive and delete devices', resolveIssues: 'mark security issues resolved', assignIssues: 'assign issues to other people', exportReports: 'view, download, and email farm reports' })[key] || 'perform this action';
-}
-
 function currentPerms() {
   // Principle of Least Privilege: Owner is the only role with blanket
   // operational rights. Every other role — including Manager — operates from
@@ -60,17 +25,24 @@ function currentPerms() {
       (currentUser.name && m.name === currentUser.name)
     );
     if (meMgr && meMgr.perms) return meMgr.perms;
-    return roleTemplate('Manager');
+    return { addDevices: true, archiveDelete: false, resolveIssues: true, assignIssues: true, exportReports: true, viewOnly: false };
   }
   const me = teamMembers.find(m =>
     (currentUser.phone && m.phone === currentUser.phone) ||
     (currentUser.name && m.name === currentUser.name)
   );
   if (me && me.perms) return me.perms;
-  if (me) return roleTemplate(me.role);
   // Unknown / not on the team: safest default is view-only.
-  return roleTemplate(currentUser.role);
+  return { addDevices: false, archiveDelete: false, resolveIssues: false, assignIssues: false, exportReports: false, viewOnly: true };
 }
+
+// True for any account whose stored permission set marks it view-only —
+// regardless of what that role happens to be called. Role titles below
+// Owner are fluid and Owner-configurable, so visibility logic must key off
+// this permission flag, never off a role-name string like 'Farm Hand' or
+// 'Viewer'. This is the single source of truth for "least-privilege / view
+// only" throughout the app.
+function isViewOnly() { return !!currentPerms().viewOnly; }
 
 // Hard delete (vs. archive) stays Owner-only. Managers can archive but never
 // permanently remove a member, device, or the farm itself.
@@ -101,9 +73,6 @@ function canResolveIssues(d) {
   return true;
 }
 function canAssignIssues() { const p = currentPerms(); return !p.viewOnly && !!p.assignIssues; }
-// Archiving or deleting a device or network is the destructive "archiveDelete"
-// permission. Read-only roles (e.g. Farm Hand, Viewer) never have it.
-function canArchiveDevices() { const p = currentPerms(); return !p.viewOnly && !!p.archiveDelete; }
 function canExportReports() { const p = currentPerms(); return !p.viewOnly && !!p.exportReports; }
 
 // Returns true when a device has a structural problem that goes beyond what a
@@ -139,45 +108,37 @@ function shouldShowPartialResolveBox(d) {
 
 // Principle of Least Privilege: security issues are strictly need-to-know.
 // PoLP done right: people need enough visibility to do their job.
-//  - Owner / Manager / Technician: see every device's real risk so they can
-//    triage, manage, and fix. (Manager still can't hard-delete; Technician
-//    still can't manage people. Those gates live elsewhere.)
-//  - Farm Hand: sees that devices exist so they can operate, but not the
-//    detailed risk grade — they only get a "check & report irregularities"
-//    cue. Detailed status is for the people who can act on it.
-//  - Viewer: assignment-based, like before.
+//  - Full-access roles (viewOnly: false in their perms): see every device's
+//    real risk so they can triage, manage, and fix.
+//  - View-only accounts (viewOnly: true in their perms, whatever the role is
+//    titled): a device is always visible to exist, but its detailed grade,
+//    assignee, and remediation detail are not — see canSeeDetailedRisk().
+//    This keeps the gate on the permission flag rather than a role-name
+//    string, since role titles below Owner are fluid.
 function canSeeIssue(d) {
-  if (!d) return false;
-  const r = currentUser.role;
-  if (r === 'Owner' || r === 'Manager' || r === 'Technician') return true;
-  if (r === 'Farm Hand') return true;
-  return !!(d.assignedTo && currentUser.name && d.assignedTo === currentUser.name);
+  return !!d;
 }
-// Whether to expose the precise red/yellow/green grade and resolution tools.
-// Farm Hands and Viewers see a coarse "check for irregularities" cue instead.
+// Whether to expose the precise red/yellow/green grade, assignee name, and
+// resolution tools. View-only accounts get a coarse "check for
+// irregularities" cue instead (see canSeeIssue above).
 function canSeeDetailedRisk() {
-  const r = currentUser.role;
-  return r === 'Owner' || r === 'Manager' || r === 'Technician';
+  return !isViewOnly();
 }
-// Network risk: same operational roles as device risk.
+// Network risk: same rule as device risk — full detail only for non-view-only.
 function canSeeNetworkIssue() {
-  const r = currentUser.role;
-  return r === 'Owner' || r === 'Manager' || r === 'Technician';
+  return !isViewOnly();
 }
-// Farm Hands and Viewers don't get the Network tab at all (least privilege) —
-// network posture is operational oversight for Owner/Manager/Technician.
-function canSeeNetworkTab() { return canSeeNetworkIssue(); }
 
-// The farm hygiene score is an aggregate oversight metric. It is reserved
-// for Owner, Manager, and Technician roles. Farm Hand and Viewer accounts
-// do not see the farm-wide score.
+// The farm hygiene score is an aggregate oversight metric, withheld from
+// view-only accounts.
 function canSeeHygieneScore() {
-  return ['Owner', 'Manager', 'Technician'].includes(currentUser.role);
+  return !isViewOnly();
 }
 
 // App inventory (third-party apps/services the farm uses) is Owner-only.
-// This is account-level oversight — which vendors have access to farm data —
-// not an operational tool other roles need day to day.
+// This is a separate account-level oversight gate — which vendors have
+// access to farm data — not a view-only/least-privilege matter, so it stays
+// keyed to the Owner role rather than the viewOnly flag.
 function canSeeApps() {
   return currentUser.role === 'Owner';
 }
@@ -189,79 +150,39 @@ function assignableMembers() {
   return teamMembers.filter(m => !m.archived && m.status === 'Active' && m.perms && !m.perms.viewOnly);
 }
 
-// View-only members (Farm Hand / Viewer) can still be given an assignment, but
-// it acts as an INSTRUCTION (e.g. "OK to keep using" / "check with management")
-// rather than a fix request — they can't resolve. Kept separate so the assign
-// UI can group and label them clearly.
-function viewOnlyAssignable() {
-  return teamMembers.filter(m => !m.archived && m.status === 'Active' && m.perms && m.perms.viewOnly);
-}
-
-// The most recent assignment/instruction note left for a given person on a device.
-function latestAssignmentNoteFor(d, name) {
-  if (!d || !Array.isArray(d.handoffLog) || !name) return null;
-  for (var i = d.handoffLog.length - 1; i >= 0; i--) {
-    var e = d.handoffLog[i];
-    if ((e.type === 'assign' || e.type === 'reassign') && e.to === name) return e;
-  }
-  return null;
-}
-
 // ─── Escalation: "I can't fix this, needs Owner decision" ──────────────────
 // A real cyber-hygiene workflow: a worker can identify and document a risk,
 // but disposition (replace / retire / accept) belongs to the Owner. Anyone
 // who is not Owner or Manager can push an open issue back up the chain;
 // only Owner or Manager can clear it.
 var escalatedOnlyFilter = false;
-
-// Owner-configurable: which non-Owner roles may push an issue straight up to
-// the Owner. Manager = on by default (they carry owner-level decisions up);
-// Technician = off by default (their escalations go to the Manager first).
-// The Owner edits this from Settings (Role Access). Defaults live here so the
-// behavior is correct even before the Settings editor is used.
-var escalateToOwner = { Manager: true, Technician: false };
-function canEscalateToOwner(role) { return !!escalateToOwner[role]; }
-
 function canEscalateIssue(d) {
   if (!d || d.resolved || d.archived) return false;
   // Already escalated upward — block unless returned to them
   if (d.needsOwnerAction && !d.returnedToTech) return false;
   const r = currentUser.role;
-  if (r === 'Owner') return false; // Owner is the top of the chain
-  // Manager can escalate UP to the Owner when the Owner enables it.
-  if (r === 'Manager') return canEscalateToOwner('Manager');
-  // Technician / other operational roles: must be the assigned person.
+  if (r === 'Owner' || r === 'Manager') return false;
+  // Must be the assigned person
   if (!d.assignedTo) return false;
   if (!currentUser.name || d.assignedTo !== currentUser.name) return false;
   if (!canSeeIssue(d)) return false;
-  // Any assigned open issue can be escalated — not just structural ones.
-  // (For structural issues the combined partial-resolve+escalate box handles
-  // it instead; this standalone box is suppressed there to avoid duplication.)
-  return true;
+  // Only show standalone escalate box when there's a structural issue
+  // AND the partial-resolve box is NOT handling it (prevents duplication).
+  // If shouldShowPartialResolveBox is true, the purple form covers escalation.
+  return hasStructuralIssue(d);
 }
 
 // Returns 'Manager' if an active, non-archived Manager account exists on the farm,
 // otherwise falls back to 'Owner'. This determines who the primary action-taker
 // is when an issue is escalated — the Owner is always notified either way.
 function escalationTarget() {
-  const r = currentUser.role;
-  if (r === 'Manager') return 'Owner';         // Manager escalates upward to the Owner
-  if (canEscalateToOwner(r)) return 'Owner';   // role configured to go straight to the Owner
   const mgr = teamMembers.find(m => m.role === 'Manager' && !m.archived && m.status === 'Active');
   return mgr ? 'Manager' : 'Owner';
 }
 
-function ownerDisplayName() {
-  const o = teamMembers.find(m => m.role === 'Owner' && !m.archived);
-  if (o && o.name) return o.name;
-  if (currentUser.role === 'Owner' && currentUser.name) return currentUser.name;
-  return 'Owner';
-}
-
 function escalationTargetName() {
-  if (escalationTarget() === 'Owner') return ownerDisplayName();
   const mgr = teamMembers.find(m => m.role === 'Manager' && !m.archived && m.status === 'Active');
-  return mgr ? (mgr.name || 'Manager') : ownerDisplayName();
+  return mgr ? (mgr.name || 'Manager') : 'Owner';
 }
 function canClearEscalation() {
   return currentUser.role === 'Owner' || currentUser.role === 'Manager';

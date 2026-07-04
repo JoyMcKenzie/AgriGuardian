@@ -196,8 +196,8 @@ function renderDashList() {
   // ── DEFAULT (Farm Hand, Viewer) ────────────────────────────────────────────
   } else {
     html += card(t('dashDeviceProblems'), deviceProblems, navDevices);
-    if (canSeeNetworkTab()) html += card(t('dashNetworkProblems'), networkProblems, navNetwork);
-    if (deviceProblems + networkProblems === 0) {
+    if (!isViewOnly()) html += card(t('dashNetworkProblems'), networkProblems, navNetwork);
+    if (deviceProblems + (isViewOnly() ? 0 : networkProblems) === 0) {
       html += '<div style="background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:12px 14px;font-size:13px;color:#333;display:flex;align-items:center;gap:10px"><div style="width:10px;height:10px;border-radius:50%;background:#2E7A4E;flex-shrink:0"></div><span>' + t('allGoodMsg') + '</span></div>';
     }
   }
@@ -247,3 +247,4 @@ function alertRow(level, msg, navFn, meta) {
     '<button onclick="' + navFn + '" class="alert-fix-btn" style="background:' + (isInfo ? '#5B8DB8' : '#111') + ';color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;padding:4px 10px;white-space:nowrap;flex-shrink:0">' + (isInfo ? t('reviewBtn') : t('fixBtn')) + '</button>' +
   '</div>';
 }
+

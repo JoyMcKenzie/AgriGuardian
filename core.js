@@ -16,10 +16,10 @@ function formatBuildTimestamp(src) {
 // Last-Modified header via fetch()/HEAD, but that only works over a real HTTP
 // server and fails silently under file:// (local open / extracted zip), which
 // is exactly when the stamp gets checked most. So the version is assigned by
-// hand here. Bump the line below on every edit that touches app.js — run:
+// hand here. Bump the line below on every edit that touches js/ modules — run:
 //     date -u +"%Y-%m-%dT%H:%M:%SZ"
 // and paste the result. This is a required last step of the edit workflow.
-const BUILD_TIMESTAMP = '2026-07-04T12:00:00Z';
+const BUILD_TIMESTAMP = '2026-07-04T13:37:08Z';
 
 function applyBuildTimestamp() {
   const el = document.getElementById('build-timestamp');

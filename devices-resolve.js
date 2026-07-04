@@ -95,6 +95,8 @@ function saveAll(id) {
   // Once fully resolved, clear all workflow state
   if (d.resolved) {
     if (d.assignedTo) d.assignedTo = '';
+    d.assignInstructions = '';
+    d.viewerNote = '';
     if (d.partiallyResolved) {
       d.partiallyResolved = false;
       d.partialResolveNote = '';

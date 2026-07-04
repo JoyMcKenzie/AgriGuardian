@@ -341,7 +341,7 @@
       <span id="nav-devices">Devices</span>
     </button>
 
-    <button class="nav-btn" onclick="showScreen('network',this)">
+    <button class="nav-btn" id="nav-btn-network" onclick="showScreen('network',this)">
       <span id="nav-network">Network</span>
     </button>
     <button class="nav-btn" id="nav-btn-apps" onclick="showScreen('apps',this)" style="display:none">
@@ -745,7 +745,10 @@
     </div>
 
     <div id="settings-team"></div><div style="border:1px solid #e0e0e0;border-radius:10px;overflow:hidden;margin-bottom:12px"><button onclick="toggleSettingsSection('settings-team', this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#f7f7f5;border:none;cursor:pointer;text-align:left"><span style="font-size:13px;font-weight:600;color:#1F4D2E;text-transform:uppercase;letter-spacing:0.5px" id="sec-hdr-team">Team members</span><span class="sec-arrow" style="font-size:14px;color:#888">▾</span></button><div id="sec-settings-team" style="display:none;padding:12px 14px">
-    <!-- Team members roster -->
+    <!-- Team members -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;cursor:pointer" onclick="toggleTeamSection()">
+      <span id="team-toggle-icon" style="font-size:16px;color:#888">▾</span>
+    </div>
     <div id="team-section">
     <div class="filter-row" id="user-filter-row">
       <button class="filter-btn active" id="filter-user-active" onclick="setUserFilter('active', this)">Active</button>

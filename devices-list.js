@@ -1,5 +1,7 @@
 /* AgriGuardian: device list, archive, filters */
 function renderDeviceList() {
+  const addBtn = document.getElementById('add-device-btn');
+  if (addBtn) addBtn.style.display = currentPerms().addDevices ? '' : 'none';
   let filtered = devices;
   if (deviceFilter === 'active') filtered = devices.filter(d => !d.archived);
   if (deviceFilter === 'archived') filtered = devices.filter(d => d.archived);
@@ -26,32 +28,36 @@ function renderDeviceList() {
   if (filtered.length === 0) {
     list.innerHTML = notice + '<p style="font-size:13px;color:#888;font-style:italic;padding:12px 0">No devices ' + (deviceFilter === 'archived' ? 'archived' : 'found') + '.</p>';
   } else {
-    list.innerHTML = notice + filtered.map(d => deviceCardHTML(d, canArchiveDevices())).join('');
+    list.innerHTML = notice + filtered.map(d => deviceCardHTML(d, true)).join('');
   }
 }
 
 function deviceCardHTML(d, showActions) {
   const realRisk = getRisk(d.brand, d.pw, d.healthStatus);
-  const canSee = canSeeIssue(d);
-  const coarse = canSee && !canSeeDetailedRisk();
+  // View-only accounts (any role title) get the coarse, binary treatment —
+  // gray dot, no severity, no assignee name. See permissions.js canSeeDetailedRisk().
+  const coarse = !canSeeDetailedRisk();
   const isPartial = d.partiallyResolved && !d.resolved && d.needsOwnerAction;
-  const risk = !canSee ? 'gray' : isPartial ? 'purple' : (coarse ? 'gray' : realRisk);
-  const resolvedFull = d.resolved && canSee && !coarse && !d.archived;
+  const risk = isPartial ? 'purple' : (coarse ? 'gray' : realRisk);
+  const resolvedFull = d.resolved && !coarse && !d.archived;
   const badgeClass = resolvedFull ? 'badge-green' : 'badge-' + risk;
   const dotClass = resolvedFull ? 'dot-green' : 'dot-' + risk;
-  const badgeLabel = !canSee
-    ? 'Restricted'
-    : isPartial ? t('partiallyResolvedBadge')
-    : (coarse ? 'Check & report' : getRiskBadgeLabel(risk, d.resolved));
-  const dotTitle = !canSee ? 'Not assigned to you' : isPartial ? t('partiallyResolvedBadge') : (coarse ? 'Inspect this device and report any irregularities to your manager' : '');
+  const badgeLabel = isPartial ? t('partiallyResolvedBadge')
+    : (coarse ? t('coarseCheckReportBadge') : getRiskBadgeLabel(risk, d.resolved));
+  const dotTitle = isPartial ? t('partiallyResolvedBadge') : (coarse ? t('coarseInspectTitle') : '');
   const archivedTag = d.archived ? '<span class="archived-tag">Archived</span>' : '';
-  const escalatedTag = (d.needsOwnerAction && !d.resolved && canSee)
+  const escalatedTag = (d.needsOwnerAction && !d.resolved)
     ? '<span style="margin-left:6px;display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:#7A3E00;background:#FFE5B5;border:1px solid #E6A75A;border-radius:10px;padding:1px 7px;vertical-align:middle">🚩 ' + t('escPill') + '</span>'
     : '';
-  const partialTag = (isPartial && canSee)
+  const partialTag = isPartial
     ? '<span style="margin-left:6px;display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:#5B21B6;background:#F3EEFF;border:1px solid #C4B5FD;border-radius:10px;padding:1px 7px;vertical-align:middle">⚡ ' + t('partiallyResolvedBadge') + '</span>'
     : '';
-  const actions = showActions ? (
+  // Archive/delete are destructive, account-level actions — gated by the
+  // same archiveDelete permission already modeled in currentPerms() (today:
+  // Owner only). Anyone without that permission sees the status badge
+  // instead, same as the non-actions rendering path.
+  const canManageDevice = !!currentPerms().archiveDelete;
+  const actions = (showActions && canManageDevice) ? (
     '<div class="device-actions" onclick="event.stopPropagation()">' +
       (d.archived
         ? '<button class="device-action-btn" onclick="unarchiveDevice(' + d.id + ')" title="Restore">Restore</button>'
@@ -64,12 +70,12 @@ function deviceCardHTML(d, showActions) {
     '<div class="device-info">' +
       '<div class="device-name">' + (d.label || d.type) + archivedTag + partialTag + escalatedTag + '</div>' +
       '<div class="device-brand">' + d.brand + ' &middot; ' + translateDeviceType(d.type) + '</div>' +
-      ((canSee && !coarse && d.assignedTo && !d.resolved && realRisk !== 'green')
+      ((!coarse && d.assignedTo && !d.resolved && realRisk !== 'green')
         ? '<div style="display:inline-flex;align-items:center;gap:4px;margin-top:4px;font-size:11px;color:#1F4D2E;background:#EAF3EC;border:1px solid #BBD8C2;border-radius:10px;padding:1px 8px"><i class="ti ti-user-check" style="font-size:12px"></i>' + d.assignedTo + '</div>'
         : '') +
     '</div>' +
-    (showActions
-      ? (a11ySettings.colorBlind ? '<span class="risk-badge ' + badgeClass + '" style="margin-right:4px">' + (!canSee ? '🔒' : (coarse ? '🔎' : ({red:'⛔',yellow:'⚠️',green:'✅'}[d.resolved?'green':risk]||''))) + '</span>' : '') + actions
+    (canManageDevice
+      ? (a11ySettings.colorBlind ? '<span class="risk-badge ' + badgeClass + '" style="margin-right:4px">' + (coarse ? '🔎' : ({red:'⛔',yellow:'⚠️',green:'✅'}[d.resolved?'green':risk]||'')) + '</span>' : '') + actions
       : '<span class="risk-badge ' + badgeClass + '">' + badgeLabel + '</span>') +
   '</div>';
 }
@@ -85,7 +91,7 @@ function setUserFilter(filter, btn) {
 }
 
 function archiveDevice(id) {
-  if (!canArchiveDevices()) { alert('You do not have permission to archive devices.'); return; }
+  if (!currentPerms().archiveDelete) return;
   const d = devices.find(x => x.id === id);
   if (!d) return;
   if (!confirm('Archive this device? It will be hidden from your active dashboard but its history will be kept.')) return;
@@ -97,7 +103,7 @@ function archiveDevice(id) {
 }
 
 function unarchiveDevice(id) {
-  if (!canArchiveDevices()) { alert('You do not have permission to restore devices.'); return; }
+  if (!currentPerms().archiveDelete) return;
   const d = devices.find(x => x.id === id);
   if (!d) return;
   d.archived = false;
@@ -122,7 +128,7 @@ function unarchiveDevice(id) {
 }
 
 function deleteDevice(id) {
-  if (!canArchiveDevices()) { alert('You do not have permission to delete devices.'); return; }
+  if (!canHardDelete()) return;
   const d = devices.find(x => x.id === id);
   if (!d) return;
   const hasHistory = d.resolved || d.resolveNote || d.healthStatus || d.verifiedDate || d.resolvedDate || d.healthDate;

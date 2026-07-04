@@ -129,26 +129,22 @@ function deviceTimelineHTML(d) {
     '<div style="padding:4px 2px">' + rows + '</div>';
 }
 
-// Reusable collapsible section for detail screens. Reference sections start
-// collapsed so only the areas that need work take up space on mobile. Work and
-// required sections are rendered normally (always visible) and never wrapped.
-function collapsibleSection(id, title, bodyHtml, startOpen) {
-  var open = !!startOpen;
-  return '<div class="collapse-sec" style="border:1px solid #e8e8e8;border-radius:10px;overflow:hidden;margin:12px 0">' +
-    '<button type="button" onclick="toggleCollapse(this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#f7f7f5;border:none;cursor:pointer;text-align:left">' +
-      '<span style="font-size:11px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:0.5px">' + title + '</span>' +
-      '<span class="collapse-arrow" style="font-size:14px;color:#888">' + (open ? '\u25BE' : '\u25B8') + '</span>' +
-    '</button>' +
-    '<div class="collapse-body" style="display:' + (open ? 'block' : 'none') + ';padding:12px 14px 4px">' + bodyHtml + '</div>' +
-  '</div>';
-}
-function toggleCollapse(btn) {
-  var body = btn.parentNode.querySelector('.collapse-body');
-  if (!body) return;
-  var isOpen = body.style.display !== 'none';
-  body.style.display = isOpen ? 'none' : 'block';
-  var arrow = btn.querySelector('.collapse-arrow');
-  if (arrow) arrow.textContent = isOpen ? '\u25B8' : '\u25BE';
+// Simplified device detail for view-only accounts. Deliberately minimal:
+// name/brand/type identity plus a binary status (no severity grading, no
+// assignee name, no remediation detail, no escalation/handoff history) —
+// least privilege applied to the detail page, not just the list card.
+function viewOnlyDeviceDetailHTML(d) {
+  const risk = getRisk(d.brand, d.pw, d.healthStatus);
+  const isNormal = d.resolved || risk === 'green';
+  const statusBox = isNormal
+    ? '<div class="risk-detail risk-detail-green"><div class="risk-detail-title t-green"><i class="ti ti-circle-check"></i>' + t('deviceStatusNormalTitle') + '</div><p>' + t('deviceStatusNormalMsg') + '</p></div>'
+    : '<div class="risk-detail" style="background:#F4F6F8;border:1px solid #d9dee3"><div class="risk-detail-title" style="color:#555"><i class="ti ti-alert-triangle"></i>' + t('deviceStatusAttentionTitle') + '</div><p style="color:#555">' + t('deviceStatusAttentionMsg') + '</p></div>';
+  const viewerNoteBox = (d.viewerNote && d.viewerNote.trim())
+    ? '<div class="resolve-box" style="background:#F4F6F8;border:1px solid #d9dee3;margin-top:10px"><p style="font-size:13px;color:#333;margin:0"><strong>' + t('viewerNoteDisplayLabel') + ':</strong> ' + d.viewerNote + '</p></div>'
+    : '';
+  return '<div class="device-name-large">' + (d.label || d.type) + '</div>' +
+    '<div class="device-sub">' + d.brand + ' &middot; ' + translateDeviceType(d.type) + '</div>' +
+    statusBox + viewerNoteBox;
 }
 
 function showDetail(id, keepScreen) {
@@ -157,21 +153,42 @@ function showDetail(id, keepScreen) {
   if (!d) return;
   // Log who viewed which device and when — visibility, not just action.
   logAction(t('logViewedDevice').replace('{device}', (d.label || d.type) + ' (' + d.brand + ')'), '');
+  document.getElementById('detail-content').setAttribute('data-device-id', id);
+
+  if (isViewOnly()) {
+    document.getElementById('detail-content').innerHTML = viewOnlyDeviceDetailHTML(d);
+    if (!keepScreen) {
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('screen-detail').classList.add('active');
+    }
+    return;
+  }
+
   const risk = getRisk(d.brand, d.pw, d.healthStatus);
   const why = getRiskWhy(d.brand, d.pw, risk);
   const action = getRiskAction(risk, d.pw, d.brand);
   const info = getRiskData()[d.brand] || getRiskData()["Other"];
   const iconMap = {red:'ti-alert-circle', yellow:'ti-alert-triangle', green:'ti-circle-check'};
-  document.getElementById('detail-content').setAttribute('data-device-id', id);
   document.getElementById('detail-content').innerHTML =
     '<div class="device-name-large">' + (d.label || d.type) + '</div>' +
     '<div class="device-sub">' + d.brand + ' &middot; ' + d.type + '</div>' +
-    (!canSeeIssue(d) && !d.resolved && risk !== 'green' ?
-      '<div class="risk-detail" style="background:#F4F6F8;border:1px solid #d9dee3"><div class="risk-detail-title" style="color:#555"><i class="ti ti-lock"></i>Not assigned to you</div><p style="color:#555">Security details for this device are only shown to the team member it is assigned to, plus the Owner and Manager. This protects sensitive information by limiting who can see open issues.</p></div>' :
-    d.resolved ?
+    (d.resolved ?
       '<div class="risk-detail risk-detail-green"><div class="risk-detail-title t-green">' + t('lookingGood') + '</div><p>' + t('resolvedMsg') + (d.resolvedDate ? ' ' + d.resolvedDate : '') + '. ' + t('monitorMsg2') + '</p></div>' :
       '<div class="risk-detail risk-detail-' + risk + '"><div class="risk-detail-title t-' + risk + '"><i class="ti ' + iconMap[risk] + '"></i>' + getRiskLabel(risk, false) + '</div><p>' + why + '</p></div>'
     ) +
+    // ----- PERSISTENT INSTRUCTIONS BANNER -----
+    // Shown whenever the device has an active assignment with instructions,
+    // so the assignee (and Owner/Manager for oversight) always has a clear,
+    // persistent place to read what was asked — not buried in handoff history.
+    ((d.assignedTo && d.assignInstructions && !d.resolved) ? (
+      '<div style="background:#EAF3EC;border:2px solid #BBD8C2;border-radius:10px;padding:12px 14px;margin:10px 0">' +
+        '<div style="font-weight:700;color:#1F4D2E;font-size:14px;margin-bottom:6px">📋 ' + t('instructionsBannerTitle') + '</div>' +
+        '<div style="font-size:13px;color:#3a3a3a;line-height:1.5">' +
+          '<div style="padding:8px 10px;background:#fff;border-radius:6px;border:1px solid #BBD8C2;font-style:italic">' + d.assignInstructions + '</div>' +
+        '</div>' +
+      '</div>'
+    ) : '') +
     // ----- RETURNED-TO-TECH BANNER (orange) -----
     (d.returnedToTech && !d.resolved ? (
       '<div style="background:#FFF3E0;border:2px solid #E6823A;border-radius:10px;padding:12px 14px;margin:10px 0">' +
@@ -347,7 +364,7 @@ function showDetail(id, keepScreen) {
       '</div>'
     : '')
     ) : '') +
-    collapsibleSection('devdetails-' + d.id, t('deviceDetails'), (
+    '<p class="section-title">' + t('deviceDetails') + '</p>' +
     '<div class="detail-row"><span class="detail-key">' + t('detailBrand') + '</span><span class="detail-val">' + d.brand + '</span></div>' +
     (d.model ? '<div class="detail-row"><span class="detail-key">' + t('modelLabel') + '</span><span class="detail-val">' + d.model + '</span></div>' : '') +
     (d.serial ? '<div class="detail-row"><span class="detail-key">' + t('serialLabel') + '</span><span class="detail-val">' + d.serial + '</span></div>' : '') +
@@ -359,8 +376,7 @@ function showDetail(id, keepScreen) {
     ((canResolveIssues(d) && canSeeIssue(d) && (d.brand || d.model)) ? '<div class="detail-row" style="margin-top:4px"><button onclick="checkVulnerabilities(' + d.id + ')" style="width:100%;background:#1F4D2E;color:#fff;border:none;border-radius:8px;padding:8px;font-size:13px;cursor:pointer;font-weight:500">' + t('hwVulnCheck') + '</button></div>' : '') +
     '<div id="vuln-results-' + d.id + '" style="margin-top:8px"></div>' +
     (d.autoUpdate ? '<div class="detail-row"><span class="detail-key">Auto-update</span><span class="detail-val">' + d.autoUpdate + '</span></div>' : '') +
-    (d.lastFirmware ? '<div class="detail-row"><span class="detail-key">Last device software update</span><span class="detail-val">' + new Date(d.lastFirmware).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'}) + '</span></div>' : '')
-    ), false) +
+    (d.lastFirmware ? '<div class="detail-row"><span class="detail-key">Last device software update</span><span class="detail-val">' + new Date(d.lastFirmware).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'}) + '</span></div>' : '') +
     (canSeeIssue(d) ? deviceTimelineHTML(d) : '') +
     (d.resolved ? '<div class="resolved-badge" style="margin-top:14px">✅ Marked resolved: ' + d.resolveStatus + (d.resolveNote ? ' — ' + d.resolveNote : '') + (d.resolvedDate ? '<span style="font-weight:400;margin-left:8px;color:#555">(' + d.resolvedDate + ')</span>' : '') + '</div>' : '') +
     ((canResolveIssues(d) && canSeeIssue(d) && !shouldShowPartialResolveBox(d) && (!d.needsOwnerAction || isEscalationPrimaryActor(d))) ? ('<div class="health-box">' +
@@ -419,16 +435,10 @@ function showDetail(id, keepScreen) {
     '</div>' : '')
     ) : '') +
     // ----- VIEW-ONLY note — user can neither resolve nor assign an open issue (but can see it) -----
-    ((canSeeIssue(d) && !canResolveIssues() && !canAssignIssues() && !d.resolved && (getRisk(d.brand, d.pw) !== 'green')) ? (function() {
-      var an = latestAssignmentNoteFor(d, currentUser.name);
-      return '<div class="resolve-box" style="background:#F4F6F8;border:1px solid #d9dee3">' +
-        (an ? (
-          '<div style="font-size:11px;font-weight:700;color:#1F4D2E;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">' + t('assignedInstructionLabel') + (an.from ? ' \u2014 ' + an.from : '') + '</div>' +
-          '<p style="font-size:14px;color:#111;margin:0 0 10px;padding:8px 10px;background:#fff;border:1px solid #dfe6e0;border-radius:6px">' + an.note + '</p>'
-        ) : '') +
-        '<p style="font-size:13px;color:#555;margin:0">\uD83D\uDD12 ' + t('viewOnlyIssueNote') + '</p>' +
-      '</div>';
-    })() : '') +
+    ((canSeeIssue(d) && !canResolveIssues() && !canAssignIssues() && !d.resolved && (getRisk(d.brand, d.pw) !== 'green')) ?
+      '<div class="resolve-box" style="background:#F4F6F8;border:1px solid #d9dee3">' +
+        '<p style="font-size:13px;color:#555;margin:0">🔒 ' + t('viewOnlyIssueNote') + '</p>' +
+      '</div>' : '') +
     // ----- ESCALATE: send to Manager (or Owner if no Manager) -----
     (canEscalateIssue(d) && !shouldShowPartialResolveBox(d) ? (
       '<div class="resolve-box" style="background:#FFFBF2;border:1px solid #E6C77A;margin-top:10px">' +
@@ -463,37 +473,28 @@ function showDetail(id, keepScreen) {
 // Builds the "Assign this issue" box shown to users with assign permission.
 function assignBoxHTML(d) {
   const members = assignableMembers();
-  const viewOnly = viewOnlyAssignable();
-  if (members.length === 0 && viewOnly.length === 0) {
+  if (members.length === 0) {
     return '<div class="resolve-box">' +
       '<div class="resolve-title">' + t('assignTitle') + '</div>' +
       '<p style="font-size:13px;color:#777;margin:0">' + t('noAssignableMembers') + '</p>' +
     '</div>';
   }
-  const optOf = function(m) {
-    const sel = (d.assignedTo === m.name) ? ' selected' : '';
-    const roleTag = m.role ? ' (' + m.role + ')' : '';
-    return '<option value="' + m.name.replace(/"/g,'&quot;') + '"' + sel + '>' + m.name + roleTag + '</option>';
-  };
-  let options = '<option value="">' + t('assignSelectPlaceholder') + '</option>' +
-    members.map(optOf).join('');
-  if (viewOnly.length) {
-    options += '<optgroup label="' + t('assignViewOnlyGroup') + '">' + viewOnly.map(optOf).join('') + '</optgroup>';
-  }
+  const options = '<option value="">' + t('assignSelectPlaceholder') + '</option>' +
+    members.map(function(m) {
+      const sel = (d.assignedTo === m.name) ? ' selected' : '';
+      const roleTag = m.role ? ' (' + m.role + ')' : '';
+      return '<option value="' + m.name.replace(/"/g,'&quot;') + '"' + sel + '>' + m.name + roleTag + '</option>';
+    }).join('');
   const primaryLabel = d.assignedTo ? t('reassignBtn') : t('assignBtn');
   const isReassign = !!d.assignedTo;
-  const presets = (Array.isArray(t('assignNotePresets')) ? t('assignNotePresets') : []).map(function(p) {
-    const esc = p.replace(/"/g, '&quot;');
-    return '<button type="button" data-note="' + esc + '" onclick="document.getElementById(\'assign-note-' + d.id + '\').value=this.getAttribute(\'data-note\')" style="font-size:11px;padding:4px 10px;border:1px solid #cdd9d0;border-radius:20px;background:#f4f8f5;color:#1F4D2E;cursor:pointer">' + p + '</button>';
-  }).join('');
   return '<div class="resolve-box">' +
     '<div class="resolve-title">' + t('assignTitle') + '</div>' +
     '<p style="font-size:12px;color:#777;margin:-4px 0 10px">' + t('assignDesc') + '</p>' +
-    '<select id="assign-select-' + d.id + '" style="width:100%;font-size:14px;padding:10px 12px;border:1px solid #ddd;border-radius:8px;background:#fff;font-family:inherit;margin-bottom:6px">' + options + '</select>' +
-    (viewOnly.length ? '<p style="font-size:11px;color:#7A6514;background:#FBF6E9;border:1px solid #E6D8AE;border-radius:6px;padding:6px 10px;margin:0 0 10px">' + t('assignViewOnlyHint') + '</p>' : '') +
+    '<select id="assign-select-' + d.id + '" style="width:100%;font-size:14px;padding:10px 12px;border:1px solid #ddd;border-radius:8px;background:#fff;font-family:inherit;margin-bottom:10px">' + options + '</select>' +
     '<label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px">' + t('assignNoteLabel') + ' <span style="color:#A32D2D;font-size:11px">*' + t('required') + '</span></label>' +
-    (presets ? '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px">' + presets + '</div>' : '') +
     '<textarea id="assign-note-' + d.id + '" rows="2" placeholder="' + t('assignNotePlaceholder') + '" style="width:100%;font-size:13px;padding:8px 12px;border:1px solid #ddd;border-radius:8px;resize:none;font-family:inherit;margin-bottom:10px"></textarea>' +
+    '<label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px">' + t('viewerNoteLabel') + '</label>' +
+    '<textarea id="assign-viewer-note-' + d.id + '" rows="2" placeholder="' + t('viewerNotePlaceholder') + '" style="width:100%;font-size:13px;padding:8px 12px;border:1px solid #ddd;border-radius:8px;resize:none;font-family:inherit;margin-bottom:10px">' + (d.viewerNote || '') + '</textarea>' +
     '<div style="display:flex;gap:8px">' +
       '<button class="resolve-btn" onclick="assignIssue(' + d.id + ')" style="background:#1F4D2E;flex:1">' + primaryLabel + '</button>' +
       (isReassign ? '<button class="resolve-btn" onclick="unassignIssue(' + d.id + ')" style="background:#fff;color:#A32D2D;border:1px solid #E0B4B4;flex:0 0 auto;padding-left:16px;padding-right:16px">' + t('unassignBtn') + '</button>' : '') +
@@ -507,13 +508,20 @@ function assignIssue(id) {
   if (!d) return;
   const sel = document.getElementById('assign-select-' + id);
   const noteEl = document.getElementById('assign-note-' + id);
+  const viewerNoteEl = document.getElementById('assign-viewer-note-' + id);
   if (!sel) return;
   const name = sel.value;
   const noteVal = noteEl ? noteEl.value.trim() : '';
+  const viewerNoteVal = viewerNoteEl ? viewerNoteEl.value.trim() : '';
   if (!name) { alert(t('assignSelectPlaceholder')); return; }
   if (!noteVal) { alert(t('handoffNoteRequired')); return; }
   const prev = d.assignedTo;
   d.assignedTo = name;
+  // Persistent instructions for the assignee (shown as a standing banner on
+  // the device page — separate from the handoff log history below), and a
+  // separate, simpler note that view-only accounts are allowed to see.
+  d.assignInstructions = noteVal;
+  d.viewerNote = viewerNoteVal;
   if (!Array.isArray(d.handoffLog)) d.handoffLog = [];
   d.handoffLog.push({
     type: prev ? 'reassign' : 'assign',
@@ -535,6 +543,8 @@ function unassignIssue(id) {
   if (!d) return;
   const prev = d.assignedTo;
   d.assignedTo = '';
+  d.assignInstructions = '';
+  d.viewerNote = '';
   logAction('Cleared assignment', (d.label || d.type) + (prev ? ' (was ' + prev + ')' : ''));
   renderDashList();
   renderDeviceList();
@@ -548,7 +558,7 @@ function showScreen(name, btn) {
   // by a non-Owner (e.g. stale UI state), same defense-in-depth as other role gates.
   if (name === 'apps' && !canSeeApps()) { name = 'dashboard'; btn = document.querySelector('.nav-btn'); }
   if (name === 'backups' && !canSeeBackups()) { name = 'dashboard'; btn = document.querySelector('.nav-btn'); }
-  if (name === 'network' && !canSeeNetworkTab()) { name = 'dashboard'; btn = document.querySelector('.nav-btn'); }
+  if (name === 'network' && isViewOnly()) { name = 'dashboard'; btn = document.querySelector('.nav-btn'); }
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('screen-' + name).classList.add('active');
@@ -574,6 +584,7 @@ function showScreen(name, btn) {
 }
 
 function showAddForm() {
+  if (!currentPerms().addDevices) return;
   const inline = document.getElementById('add-device-inline');
   const form = document.getElementById('screen-add');
   if (!inline || !form) return;
@@ -672,6 +683,7 @@ function selectPw(el, val) {
 }
 
 function addDevice() {
+  if (!currentPerms().addDevices) return;
   // Read from inline form if open, otherwise from screen-add
   const inline = document.getElementById('add-device-inline');
   const fromInline = inline && inline.style.display === 'block';

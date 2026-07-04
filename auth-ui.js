@@ -213,10 +213,10 @@ function _enterApp() {
   if (appsNavBtn) appsNavBtn.style.display = canSeeApps() ? '' : 'none';
   var backupsNavBtn = document.getElementById('nav-btn-backups');
   if (backupsNavBtn) backupsNavBtn.style.display = canSeeBackups() ? '' : 'none';
-  // Network tab is hidden from Farm Hands / Viewers (least privilege). It is
-  // nav button index [2] (dashboard, devices, network, ...).
-  var navBtns = document.querySelectorAll('.nav-btn');
-  if (navBtns[2]) navBtns[2].style.display = canSeeNetworkTab() ? '' : 'none';
+  // Network tab is hidden entirely for view-only accounts — they don't
+  // need network detail to do their job (least privilege).
+  var networkNavBtn = document.getElementById('nav-btn-network');
+  if (networkNavBtn) networkNavBtn.style.display = isViewOnly() ? 'none' : '';
   var appLangDd = document.getElementById('lang-dropdown');
   var loginLangDd = document.getElementById('login-lang-dropdown');
   if (appLangDd && loginLangDd) appLangDd.value = loginLangDd.value;
@@ -225,3 +225,4 @@ function _enterApp() {
   // Always land on the dashboard after sign-in, regardless of the previously active screen.
   try { showScreen('dashboard', document.querySelector('.nav-btn')); } catch(e) {}
 }
+
