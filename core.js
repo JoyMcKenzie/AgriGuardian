@@ -19,7 +19,7 @@ function formatBuildTimestamp(src) {
 // hand here. Bump the line below on every edit that touches app.js — run:
 //     date -u +"%Y-%m-%dT%H:%M:%SZ"
 // and paste the result. This is a required last step of the edit workflow.
-const BUILD_TIMESTAMP = '2026-07-03T18:59:35Z';
+const BUILD_TIMESTAMP = '2026-07-04T12:00:00Z';
 
 function applyBuildTimestamp() {
   const el = document.getElementById('build-timestamp');
