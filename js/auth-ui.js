@@ -1,4 +1,42 @@
 /* AgriGuardian: login steps and enter app */
+
+// Shared show/hide toggle for any password field. Used by sign-in, invite,
+// and password-reset fields — one function instead of one-off copies.
+function togglePwVisibility(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const icon = btn.querySelector('i');
+  if (input.type === 'password') {
+    input.type = 'text';
+    if (icon) { icon.classList.remove('ti-eye'); icon.classList.add('ti-eye-off'); }
+    btn.setAttribute('aria-label', 'Hide password');
+  } else {
+    input.type = 'password';
+    if (icon) { icon.classList.remove('ti-eye-off'); icon.classList.add('ti-eye'); }
+    btn.setAttribute('aria-label', 'Show password');
+  }
+}
+
+// Tap-to-copy for demo passwords shown on the Sign In screen. Callers must
+// pass event.stopPropagation() first (the whole card fills the sign-in form
+// on tap) so tapping the password copies it instead of filling the fields.
+function copyDemoPassword(el, pwd) {
+  var orig = el.textContent;
+  var revert = function() { setTimeout(function() { el.textContent = orig; }, 1200); };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(pwd).then(function() {
+      el.textContent = 'Copied!';
+      revert();
+    }).catch(function() {
+      el.textContent = 'Copy failed';
+      revert();
+    });
+  } else {
+    el.textContent = 'Copy failed';
+    revert();
+  }
+}
+
 function saveHealth(id, silent) {
   const d = devices.find(x => x.id === id);
   if (!d) return;
@@ -17,13 +55,8 @@ function saveHealth(id, silent) {
   return true;
 }
 
-function toggleRegTimezone(role) {
-  const tzGroup = document.getElementById('reg-timezone-group');
-  if (tzGroup) tzGroup.style.display = role === 'Owner' ? 'block' : 'none';
-}
-
 function showStep(step) {
-  ['choice','register','signin','code','invite'].forEach(s => {
+  ['choice','signin','code','invite','reset'].forEach(s => {
     const el = document.getElementById('step-' + s);
     if (el) el.style.display = 'none';
   });
@@ -40,25 +73,10 @@ function showStep(step) {
     safeLogin('lbl-demo-card1-desc', t('loginDemoCard1Desc'));
     safeLogin('lbl-demo-card2-title', t('loginDemoCard2Title'));
     safeLogin('lbl-demo-card2-desc', t('loginDemoCard2Desc'));
-    safeLogin('lbl-demo-card3-title', t('loginDemoCard3Title'));
-    safeLogin('lbl-demo-card3-desc', t('loginDemoCard3Desc'));
     safeLogin('welcome-title', t('loginWelcomeTitle'));
     safeLogin('welcome-sub', t('loginWelcomeSub'));
-    safeLogin('btn-create', t('loginCreateBtn'));
     safeLogin('btn-signin-choice', t('loginSigninBtn'));
     safeLogin('btn-invite-choice', t('loginHaveInviteBtn'));
-  }
-  if (step === 'register') {
-    safeLogin('lbl-reg-tz', t('loginFarmTz'));
-    safeLogin('lbl-reg-pass', t('loginPassword'));
-    safeLogin('lbl-reg-pass-hint-text', t('loginPassHint'));
-    safeLogin('btn-back-register', t('loginBack'));
-    safeLogin('lbl-reg-email', t('loginEmail'));
-    safeLogin('lbl-reg-email-note', t('loginOptionalReport'));
-    safePh('reg-name', t('loginNamePlaceholder'));
-    safePh('reg-farm', t('loginFarmPlaceholder'));
-    safePh('reg-pass', t('loginPassPlaceholderHint'));
-    safePh('reg-phone', t('loginPhonePlaceholderHint'));
   }
   if (step === 'signin') {
     safeLogin('lbl-phone', t('loginYourPhone'));
@@ -70,6 +88,7 @@ function showStep(step) {
     safeLogin('lbl-demo-members-sub', t('demoMembersSub'));
     safeLogin('lbl-carlos-desc', t('carlosDesc'));
     safeLogin('lbl-jamie-desc', t('jamieDesc'));
+    safeLogin('lbl-signin-pw-hygiene-note-text', t('signinPwHygieneNote'));
     safePh('pass-input', t('loginSigninPassPlaceholder'));
     safePh('phone-input', t('loginPhonePlaceholderHint'));
   }
@@ -84,8 +103,11 @@ function showStep(step) {
     safeLogin('lbl-invite-role-label', t('inviteRoleLabel'));
     safeLogin('lbl-invite-manager', t('inviteRoleManager'));
     safeLogin('lbl-invite-manager-desc', t('inviteManagerDesc'));
+    safeLogin('lbl-invite-technician', t('inviteRoleTechnician'));
+    safeLogin('lbl-invite-technician-desc', t('inviteTechnicianDesc'));
     safeLogin('lbl-invite-farmhand', t('inviteRoleFarmhand'));
     safeLogin('lbl-invite-farmhand-desc', t('inviteFarmhandDesc'));
+    safeLogin('lbl-invite-pw-hygiene-note-text', t('invitePwHygieneNote'));
     safeLogin('lbl-invite-readonly-note', t('inviteReadonlyNote'));
     safeLogin('btn-join-farm', t('inviteJoinBtn'));
     safeLogin('lbl-invite-demo-hint-title', t('inviteDemoHintTitle'));
@@ -104,17 +126,15 @@ function showStep(step) {
     safeLogin('btn-back-code', t('loginBack'));
     safeLogin('btn-verify-signin', t('loginVerifyBtn'));
   }
-  // Timezone always shown for new account creation (Owner only creates accounts)
-  if (step === 'register') {
-    const tzGroup = document.getElementById('reg-timezone-group');
-    if (tzGroup) tzGroup.style.display = 'block';
+  if (step === 'reset') {
+    safeLogin('lbl-reset-pw-hygiene-note-text', t('resetPwHygieneNote'));
   }
 }
 
 // The generic demo invite code. In a real app each invite generates a unique token.
 var DEMO_INVITE_CODE = '987654';
 // Demo profile attached to the invite code. Updated when the owner sends an invite.
-var demoInviteProfile = { name: 'Sarah Tully', phone: '(555) 014-2208', role: 'Farm Hand' };
+var demoInviteProfile = { name: 'Casey Aitch', phone: '(555) 887-3321', role: 'Technician' };
 
 function validateInviteCode() {
   var code = (document.getElementById('invite-code-input').value || '').trim().toUpperCase();
@@ -134,14 +154,17 @@ function validateInviteCode() {
   if (continueBtn) continueBtn.style.display = 'none';
   // Pre-fill the name and phone the owner entered when sending this invite (demo).
   // These fields are locked because the owner already set them.
-  var profile = demoInviteProfile || { name: 'Sarah Tully', phone: '(555) 014-2208', role: 'Farm Hand' };
+  var profile = demoInviteProfile || { name: 'Casey Aitch', phone: '(555) 887-3321', role: 'Technician' };
   var nameField = document.getElementById('invite-name');
   var phoneField = document.getElementById('invite-phone');
   if (nameField) { nameField.value = profile.name; nameField.readOnly = true; }
   if (phoneField) { phoneField.value = profile.phone; phoneField.readOnly = true; }
-  // Pre-select the role the owner assigned (if it matches one of the demo options).
+  // Pre-select AND lock the role the owner assigned — matches name/phone
+  // being locked. The role is decided by whoever sent the invite, not by
+  // the person accepting it.
   document.querySelectorAll('input[name="invite-role"]').forEach(function(r) {
     r.checked = (r.value === profile.role);
+    r.disabled = true;
   });
 }
 
@@ -158,45 +181,48 @@ function joinFarm() {
   if (pass !== pass2) { alert('Passwords do not match.'); return; }
   if (!roleEl) { alert(t('invitePickRole')); return; }
   var role = roleEl.value;
-  // Demo invite registrations are view-only regardless of role chosen
-  var perms = { addDevices: false, archiveDelete: false, resolveIssues: false, assignIssues: false, exportReports: false, viewOnly: true };
-  // Add to teamMembers so they appear in the team list
-  teamMembers.push({ phone: phone, name: name, role: role, status: 'Active', archived: false, perms: perms, demoPassword: pass });
+  var perms = defaultPermsForRole(role);
+  // The normal case: the Owner already created a pending ('Invited') record
+  // for this phone number via inviteMember(). Update it in place rather than
+  // pushing a second entry — otherwise the same person ends up listed twice,
+  // once pending and once active.
+  var existing = teamMembers.find(function(m) { return m.phone === phone; });
+  if (existing) {
+    existing.status = 'Active';
+    existing.perms = perms;
+    existing.demoPassword = pass;
+  } else {
+    teamMembers.push({ phone: phone, name: name, role: role, status: 'Active', archived: false, perms: perms, demoPassword: pass });
+  }
   // Sign them in
   currentUser = { phone: phone, name: name, role: role, farm: 'Old McDonald\'s Farm', email: '', loggedIn: true, isInviteDemo: true };
-  logAction('Joined via invite', name + ' joined as ' + role + ' (demo — view only)');
+  logAction('Joined via invite', name + ' joined as ' + role);
   _enterApp();
 }
 
 // One-tap sign-in as a pre-made demo team member (full permissions per their role)
+// Pre-fills the manual sign-in form with a demo account's real credentials.
+// The person still clicks "Send MFA code" and enters the verification code
+// themselves — going through the exact same flow as typing it in by hand.
+// Deliberately NOT a bypass: a one-tap button that skips MFA entirely would
+// undercut the thing this app exists to demonstrate.
 function signInAsDemoMember(who) {
-  // Owner is not in teamMembers — synthesize from the prefilled registration values.
-  if (who === 'angus') {
-    currentUser = {
-      phone: '(555) 123-4567', name: 'Angus MacDonald', role: 'Owner',
-      farm: "Old McDonald's Farm", email: 'angus@oldmcdonaldsfarm.demo',
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      loggedIn: true, isDemoMember: true
-    };
-    logAction('Demo sign-in', 'Angus MacDonald (Owner)');
-    _enterApp();
-    return;
-  }
-  var lookup = { carlos: 'Carlos Mendez', sarah: 'Sarah Tully', jamie: 'Jamie Ortiz' };
-  var member = teamMembers.find(function(m){ return m.name === lookup[who]; });
-  if (!member) { alert('Demo member not found.'); return; }
-  currentUser = {
-    phone: member.phone, name: member.name, role: member.role,
-    farm: 'Old McDonald\'s Farm', email: '', loggedIn: true, isDemoMember: true
-  };
-  logAction('Demo sign-in', member.name + ' (' + member.role + ')');
-  _enterApp();
+  var lookup = { angus: '(555) 123-4567', carlos: '(555) 201-3344', sarah: '(555) 442-7781', jamie: '(555) 309-6612', joni: '(555) 014-2208' };
+  var phone = lookup[who];
+  if (!DEMO_CREDENTIALS[phone]) { alert('Demo member not found.'); return; }
+  showStep('signin');
+  var phoneEl = document.getElementById('phone-input');
+  var passEl = document.getElementById('pass-input');
+  if (phoneEl) phoneEl.value = phone;
+  if (passEl) passEl.value = DEMO_CREDENTIALS[phone];
 }
 
-// Shared login completion — used by both joinFarm() and signInAsDemoMember()
+// Shared login completion — used by verifyCode() (manual sign-in, including
+// pre-filled demo accounts) and joinFarm() (invite acceptance).
 function _enterApp() {
   document.getElementById('login-wrapper').style.display = 'none';
   document.getElementById('main-app').style.display = 'block';
+  loadMyPreferences();
   document.getElementById('header-farm').textContent = currentUser.farm || '';
   // Show role badge for non-owners
   var badge = document.getElementById('header-role-badge');
@@ -214,8 +240,7 @@ function _enterApp() {
   var backupsNavBtn = document.getElementById('nav-btn-backups');
   if (backupsNavBtn) backupsNavBtn.style.display = canSeeBackups() ? '' : 'none';
   var appLangDd = document.getElementById('lang-dropdown');
-  var loginLangDd = document.getElementById('login-lang-dropdown');
-  if (appLangDd && loginLangDd) appLangDd.value = loginLangDd.value;
+  if (appLangDd) appLangDd.value = currentLang;
   setLang(currentLang, 'app');
   startSessionTimeout();
   // Always land on the dashboard after sign-in, regardless of the previously active screen.

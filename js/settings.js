@@ -4,6 +4,8 @@ var teamMembers = [
     perms: { addDevices: true, archiveDelete: false, resolveIssues: true, assignIssues: true, exportReports: true, viewOnly: false } },
   { phone: '(555) 442-7781', name: 'Sarah Tully', role: 'Technician', status: 'Active', archived: false,
     perms: { addDevices: true, archiveDelete: false, resolveIssues: true, assignIssues: false, exportReports: false, viewOnly: false } },
+  { phone: '(555) 014-2208', name: 'Joni Dear', role: 'Technician', status: 'Active', archived: false,
+    perms: { addDevices: true, archiveDelete: false, resolveIssues: true, assignIssues: false, exportReports: false, viewOnly: false } },
   { phone: '(555) 309-6612', name: 'Jamie Ortiz', role: 'Farm Hand', status: 'Active', archived: false,
     perms: { addDevices: false, archiveDelete: false, resolveIssues: false, assignIssues: false, exportReports: false, viewOnly: true } }
 ];
@@ -88,9 +90,27 @@ function renderSettings() {
     return;
   }
 
-  let filteredMembers = teamMembers;
-  if (userFilter === 'active') filteredMembers = teamMembers.filter(m => !m.archived);
-  if (userFilter === 'archived') filteredMembers = teamMembers.filter(m => m.archived);
+  // Archived/All views expose former employees' contact info — least
+  // privilege means non-managers only ever see the active roster, and a
+  // stale filter value from a previous session (userFilter is a shared
+  // global, not per-user) can't leak an unauthorized view either.
+  const archivedBtn = document.getElementById('filter-user-archived');
+  const allBtn = document.getElementById('filter-user-all');
+  if (archivedBtn) archivedBtn.style.display = canManage() ? '' : 'none';
+  if (allBtn) allBtn.style.display = canManage() ? '' : 'none';
+  if (!canManage() && userFilter !== 'active') {
+    userFilter = 'active';
+    const activeBtn = document.getElementById('filter-user-active');
+    document.querySelectorAll('#user-filter-row .filter-btn').forEach(b => b.classList.remove('active'));
+    if (activeBtn) activeBtn.classList.add('active');
+  }
+
+  let filteredMembers = teamMembers.filter(m =>
+    !((currentUser.phone && m.phone === currentUser.phone) ||
+      (currentUser.name && m.name === currentUser.name))
+  );
+  if (userFilter === 'active') filteredMembers = filteredMembers.filter(m => !m.archived);
+  if (userFilter === 'archived') filteredMembers = filteredMembers.filter(m => m.archived);
 
   if (filteredMembers.length === 0) {
     list.innerHTML = '<p style="font-size:13px;color:#888;font-style:italic;padding:8px 0">No ' + (userFilter === 'archived' ? 'archived' : '') + ' team members found.</p>';

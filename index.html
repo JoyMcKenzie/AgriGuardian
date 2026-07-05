@@ -6,6 +6,7 @@
 <title>AgriGuardian — Farm Cybersecurity Risk Tool</title>
 
 <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.44.0/tabler-icons.min.css">
 
 </head>
 <body>
@@ -33,120 +34,23 @@
     <div id="step-choice">
       <p style="font-size:16px;font-weight:600;color:#1F4D2E;margin-bottom:6px" id="welcome-title">Welcome</p>
       <p style="font-size:13px;color:#888;margin-bottom:16px" id="welcome-sub">New user or returning?</p>
-      <button class="login-btn" id="btn-create" onclick="showStep('register')">Create an account</button>
       <button class="login-btn secondary" style="margin-top:10px" id="btn-signin-choice" onclick="showStep('signin')">Sign in</button>
       <button class="login-btn secondary" style="margin-top:10px" id="btn-invite-choice" onclick="showStep('invite')">I have an invite</button>
       <div style="margin-top:20px;background:#f0f9f3;border:1px solid #C8E6C9;border-radius:10px;padding:12px 14px" id="demo-box">
         <p style="font-size:10px;color:#aaa;text-align:right;margin-bottom:8px"><span id="lbl-last-updated">Last updated:</span> <span id="build-timestamp"></span></p>
         <p id="lbl-demo-title" style="font-size:12px;font-weight:600;color:#1F4D2E;margin-bottom:8px">ⓘ How to explore this demo</p>
-        <p id="lbl-demo-subtitle" style="font-size:12px;color:#444;margin-bottom:8px"><strong>Three ways in — pick one:</strong></p>
+        <p id="lbl-demo-subtitle" style="font-size:12px;color:#444;margin-bottom:8px"><strong>Two ways in — pick one:</strong></p>
 
         <div style="background:#fff;border:1px solid #C8E6C9;border-radius:8px;padding:8px 10px;margin-bottom:6px">
-          <p id="lbl-demo-card1-title" style="font-size:12px;color:#1F4D2E;font-weight:600;margin-bottom:3px">1. Create an account → <span style="font-weight:400;color:#666">Owner mode</span></p>
-          <p id="lbl-demo-card1-desc" style="font-size:11px;color:#555;margin:0">Walk through the full Owner setup. Fields are pre-filled. Verification code: <strong style="background:#f7f7f5;padding:1px 6px;border-radius:4px;letter-spacing:1px">123456</strong></p>
-        </div>
-
-        <div style="background:#fff;border:1px solid #C8E6C9;border-radius:8px;padding:8px 10px;margin-bottom:6px">
-          <p id="lbl-demo-card2-title" style="font-size:12px;color:#1F4D2E;font-weight:600;margin-bottom:3px">2. Sign in → <span style="font-weight:400;color:#666">demo accounts already created</span></p>
-          <p id="lbl-demo-card2-desc" style="font-size:11px;color:#555;margin:0">Tap <strong>Sign in</strong> and pick a pre-made team member to see the app from their role's perspective. Credentials are shown on the next screen.</p>
+          <p id="lbl-demo-card1-title" style="font-size:12px;color:#1F4D2E;font-weight:600;margin-bottom:3px">1. Sign in → <span style="font-weight:400;color:#666">demo accounts already created</span></p>
+          <p id="lbl-demo-card1-desc" style="font-size:11px;color:#555;margin:0">Tap <strong>Sign in</strong> and pick a pre-made team member to see the app from their role's perspective. Credentials are shown on the next screen.</p>
         </div>
 
         <div style="background:#fff;border:1px solid #C8E6C9;border-radius:8px;padding:8px 10px;margin-bottom:0">
-          <p id="lbl-demo-card3-title" style="font-size:12px;color:#1F4D2E;font-weight:600;margin-bottom:3px">3. I have an invite → <span style="font-weight:400;color:#666">join an existing farm</span></p>
-          <p id="lbl-demo-card3-desc" style="font-size:11px;color:#555;margin:0">Tap <strong>I have an invite</strong> and enter code <strong style="background:#f7f7f5;padding:1px 6px;border-radius:4px;letter-spacing:1px">987654</strong> to see how a new team member accepts a farm invitation. Registration is view-only.</p>
+          <p id="lbl-demo-card2-title" style="font-size:12px;color:#1F4D2E;font-weight:600;margin-bottom:3px">2. I have an invite → <span style="font-weight:400;color:#666">join an existing farm</span></p>
+          <p id="lbl-demo-card2-desc" style="font-size:11px;color:#555;margin:0">Tap <strong>I have an invite</strong> and enter code <strong style="background:#f7f7f5;padding:1px 6px;border-radius:4px;letter-spacing:1px">987654</strong> to see how a new team member accepts a farm invitation. Registration is view-only.</p>
         </div>
       </div>
-    </div>
-
-    <!-- STEP 2: REGISTER -->
-    <div id="step-register" style="display:none">      <p style="font-size:16px;font-weight:600;color:#1F4D2E;margin-bottom:16px" id="reg-title">Create your account</p>
-      <div class="login-group">
-        <label class="login-label" id="lbl-reg-name">Your name</label>
-        <input class="login-input" type="text" id="reg-name" placeholder="e.g. Joy McKenzie" value="Angus MacDonald">
-      </div>
-      <div class="login-group">
-        <label class="login-label" id="lbl-reg-farm">Farm name</label>
-        <input class="login-input" type="text" id="reg-farm" placeholder="e.g. McKenzie Farm" value="Old McDonald's Farm">
-      </div>
-      <div class="login-group" id="reg-timezone-group" style="display:none">
-        <label class="login-label" id="lbl-reg-tz">Farm time zone</label>
-        <select class="login-input" id="reg-timezone">
-          <optgroup label="North America">
-            <option value="America/New_York">Eastern Time (ET)</option>
-            <option value="America/Chicago">Central Time (CT)</option>
-            <option value="America/Denver">Mountain Time (MT)</option>
-            <option value="America/Los_Angeles">Pacific Time (PT)</option>
-            <option value="America/Anchorage">Alaska Time (AKT)</option>
-            <option value="Pacific/Honolulu">Hawaii Time (HT)</option>
-            <option value="America/Puerto_Rico">Atlantic Time (AT)</option>
-            <option value="America/Toronto">Toronto (ET)</option>
-            <option value="America/Vancouver">Vancouver (PT)</option>
-            <option value="America/Mexico_City">Mexico City (CT)</option>
-          </optgroup>
-          <optgroup label="Central & South America">
-            <option value="America/Bogota">Bogotá (COT)</option>
-            <option value="America/Lima">Lima (PET)</option>
-            <option value="America/Sao_Paulo">São Paulo (BRT)</option>
-            <option value="America/Buenos_Aires">Buenos Aires (ART)</option>
-            <option value="America/Santiago">Santiago (CLT)</option>
-          </optgroup>
-          <optgroup label="Europe">
-            <option value="Europe/London">London (GMT/BST)</option>
-            <option value="Europe/Paris">Paris / Berlin (CET)</option>
-            <option value="Europe/Madrid">Madrid (CET)</option>
-            <option value="Europe/Rome">Rome (CET)</option>
-            <option value="Europe/Athens">Athens (EET)</option>
-            <option value="Europe/Moscow">Moscow (MSK)</option>
-          </optgroup>
-          <optgroup label="Africa">
-            <option value="Africa/Cairo">Cairo (EET)</option>
-            <option value="Africa/Nairobi">Nairobi (EAT)</option>
-            <option value="Africa/Johannesburg">Johannesburg (SAST)</option>
-            <option value="Africa/Lagos">Lagos (WAT)</option>
-            <option value="Africa/Accra">Accra (GMT)</option>
-          </optgroup>
-          <optgroup label="Middle East">
-            <option value="Asia/Dubai">Dubai (GST)</option>
-            <option value="Asia/Riyadh">Riyadh (AST)</option>
-            <option value="Asia/Baghdad">Baghdad (AST)</option>
-            <option value="Asia/Tehran">Tehran (IRST)</option>
-          </optgroup>
-          <optgroup label="Asia">
-            <option value="Asia/Karachi">Karachi (PKT)</option>
-            <option value="Asia/Kolkata">India (IST)</option>
-            <option value="Asia/Dhaka">Dhaka (BST)</option>
-            <option value="Asia/Bangkok">Bangkok (ICT)</option>
-            <option value="Asia/Shanghai">China (CST)</option>
-            <option value="Asia/Tokyo">Tokyo (JST)</option>
-            <option value="Asia/Seoul">Seoul (KST)</option>
-            <option value="Asia/Manila">Manila (PHT)</option>
-          </optgroup>
-          <optgroup label="Australia & Pacific">
-            <option value="Australia/Sydney">Sydney (AEST)</option>
-            <option value="Australia/Adelaide">Adelaide (ACST)</option>
-            <option value="Australia/Perth">Perth (AWST)</option>
-            <option value="Pacific/Auckland">Auckland (NZST)</option>
-            <option value="Pacific/Fiji">Fiji (FJT)</option>
-          </optgroup>
-        </select>
-      </div>
-      <!-- Role is assigned by Owner when invite is sent -->
-      <input type="hidden" id="reg-role" value="Owner">
-      <div class="login-group">
-        <label class="login-label" id="lbl-reg-phone">Phone number <span style="color:#888;font-weight:400;font-size:12px">(this is your username)</span></label>
-        <input class="login-input" type="tel" id="reg-phone" placeholder="(555) 000-0000" value="(555) 123-4567">
-      </div>
-      <div class="login-group">
-        <label class="login-label" id="lbl-reg-pass">Create a password</label>
-        <input class="login-input" type="password" id="reg-pass" placeholder="Min. 8 characters" value="Demo12345">
-        <p id="lbl-reg-pass-hint" style="font-size:11px;color:#888;margin-top:5px;font-style:italic">&#9432; <span id="lbl-reg-pass-hint-text">Password complexity rules will apply in production.</span></p>
-      </div>
-      <div class="login-group">
-        <label class="login-label" id="lbl-reg-email">Email <span style="color:#A32D2D;font-weight:400;font-size:12px" id="lbl-email-opt">* required — for report delivery</span></label>
-        <input class="login-input" type="email" id="reg-email" placeholder="you@example.com" value="angus@oldmcdonaldsfarm.demo">
-      </div>
-      <button class="login-btn" id="reg-send-btn" onclick="registerSendCode()">Send verification code</button>
-      <button id="btn-back-register" class="login-btn secondary" style="margin-top:8px" onclick="showStep('choice')">Back</button>
     </div>
 
     <!-- STEP 3: SIGN IN -->
@@ -159,7 +63,13 @@
       </div>
       <div class="login-group">
         <label class="login-label" id="lbl-pass">Password</label>
-        <input class="login-input" type="password" id="pass-input" placeholder="Your password">
+        <div style="position:relative">
+          <input class="login-input" type="password" id="pass-input" placeholder="Your password" style="padding-right:40px">
+          <button type="button" onclick="togglePwVisibility('pass-input', this)" aria-label="Show password" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:6px;color:#888;display:flex;align-items:center">
+            <i class="ti ti-eye" style="font-size:18px"></i>
+          </button>
+        </div>
+        <p id="lbl-signin-pw-hygiene-note" style="font-size:11px;color:#888;margin-top:5px;font-style:italic">&#9432; <span id="lbl-signin-pw-hygiene-note-text">Demo account passwords use length over complexity (NIST SP 800-63B) and are unique per account — see the profiles below to copy one.</span></p>
       </div>
       <button class="login-btn" id="send-btn" onclick="sendCode()">Send MFA code</button>
           <p style="text-align:center;margin-top:8px">
@@ -168,13 +78,13 @@
     <!-- Demo accounts -->
     <div style="margin-top:16px;background:#f0f9f3;border:1px solid #C8E6C9;border-radius:10px;padding:12px 14px">
       <p style="font-size:12px;font-weight:600;color:#1F4D2E;margin-bottom:4px" id="lbl-demo-members-title">ⓘ Demo accounts — already created</p>
-      <p style="font-size:11px;color:#555;margin-bottom:10px" id="lbl-demo-members-sub">Tap a profile for one-tap sign-in, or use the phone + password shown above. Verification code for all accounts: <strong style="background:#fff;padding:1px 6px;border-radius:4px;letter-spacing:1px">123456</strong></p>
+      <p style="font-size:11px;color:#555;margin-bottom:10px" id="lbl-demo-members-sub">Tap a profile to fill in their sign-in details, then send the code and verify like a real sign-in. Verification code for all accounts: 123456</p>
       <div style="display:flex;flex-direction:column;gap:8px">
         <button onclick="signInAsDemoMember('angus')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border:1px solid #C8E6C9;border-radius:8px;cursor:pointer;text-align:left;width:100%">
           <div style="width:36px;height:36px;border-radius:50%;background:#8B5A2B;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff;flex-shrink:0">AM</div>
           <div style="flex:1;min-width:0">
             <div style="font-size:13px;font-weight:600;color:#222">Angus MacDonald · <span style="color:#1F4D2E">Owner</span></div>
-            <div style="font-size:11px;color:#666">(555) 123-4567 · password <code style="background:#f7f7f5;padding:1px 4px;border-radius:3px">Demo12345</code></div>
+            <div style="font-size:11px;color:#666">(555) 123-4567 · password <code onclick="event.stopPropagation(); copyDemoPassword(this, 'meadow-sunrise-owner8')" title="Tap to copy" style="background:#f7f7f5;padding:1px 4px;border-radius:3px;cursor:pointer">meadow-sunrise-owner8</code></div>
           </div>
           <i class="ti ti-arrow-right" style="color:#1F4D2E;font-size:16px;flex-shrink:0"></i>
         </button>
@@ -182,7 +92,7 @@
           <div style="width:36px;height:36px;border-radius:50%;background:#1F4D2E;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff;flex-shrink:0">CM</div>
           <div style="flex:1;min-width:0">
             <div style="font-size:13px;font-weight:600;color:#222">Carlos Mendez · <span style="color:#1F4D2E">Manager</span></div>
-            <div style="font-size:11px;color:#666">(555) 201-3344 · password <code style="background:#f7f7f5;padding:1px 4px;border-radius:3px">Demo12345</code></div>
+            <div style="font-size:11px;color:#666">(555) 201-3344 · password <code onclick="event.stopPropagation(); copyDemoPassword(this, 'harvest-tractor-lead4')" title="Tap to copy" style="background:#f7f7f5;padding:1px 4px;border-radius:3px;cursor:pointer">harvest-tractor-lead4</code></div>
             <div style="font-size:11px;color:#888" id="lbl-carlos-desc">Almost all Owner abilities — cannot hard-delete</div>
           </div>
           <i class="ti ti-arrow-right" style="color:#1F4D2E;font-size:16px;flex-shrink:0"></i>
@@ -191,7 +101,16 @@
           <div style="width:36px;height:36px;border-radius:50%;background:#A0522D;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff;flex-shrink:0">ST</div>
           <div style="flex:1;min-width:0">
             <div style="font-size:13px;font-weight:600;color:#222">Sarah Tully · <span style="color:#1F4D2E">Technician</span></div>
-            <div style="font-size:11px;color:#666">(555) 442-7781 · password <code style="background:#f7f7f5;padding:1px 4px;border-radius:3px">Demo12345</code></div>
+            <div style="font-size:11px;color:#666">(555) 442-7781 · password <code onclick="event.stopPropagation(); copyDemoPassword(this, 'wrench-fieldwork-tech6')" title="Tap to copy" style="background:#f7f7f5;padding:1px 4px;border-radius:3px;cursor:pointer">wrench-fieldwork-tech6</code></div>
+            <div style="font-size:11px;color:#888">Add devices, resolve issues</div>
+          </div>
+          <i class="ti ti-arrow-right" style="color:#1F4D2E;font-size:16px;flex-shrink:0"></i>
+        </button>
+        <button onclick="signInAsDemoMember('joni')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border:1px solid #C8E6C9;border-radius:8px;cursor:pointer;text-align:left;width:100%">
+          <div style="width:36px;height:36px;border-radius:50%;background:#6B7FD7;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff;flex-shrink:0">JD</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:600;color:#222">Joni Dear · <span style="color:#1F4D2E">Technician</span></div>
+            <div style="font-size:11px;color:#666">(555) 014-2208 · password <code onclick="event.stopPropagation(); copyDemoPassword(this, 'toolkit-morning-tech3')" title="Tap to copy" style="background:#f7f7f5;padding:1px 4px;border-radius:3px;cursor:pointer">toolkit-morning-tech3</code></div>
             <div style="font-size:11px;color:#888">Add devices, resolve issues</div>
           </div>
           <i class="ti ti-arrow-right" style="color:#1F4D2E;font-size:16px;flex-shrink:0"></i>
@@ -200,7 +119,7 @@
           <div style="width:36px;height:36px;border-radius:50%;background:#5B8DB8;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff;flex-shrink:0">JO</div>
           <div style="flex:1;min-width:0">
             <div style="font-size:13px;font-weight:600;color:#222">Jamie Ortiz · <span style="color:#1F4D2E">Farm Hand</span></div>
-            <div style="font-size:11px;color:#666">(555) 309-6612 · password <code style="background:#f7f7f5;padding:1px 4px;border-radius:3px">Demo12345</code></div>
+            <div style="font-size:11px;color:#666">(555) 309-6612 · password <code onclick="event.stopPropagation(); copyDemoPassword(this, 'chores-morning-hand2')" title="Tap to copy" style="background:#f7f7f5;padding:1px 4px;border-radius:3px;cursor:pointer">chores-morning-hand2</code></div>
             <div style="font-size:11px;color:#888" id="lbl-jamie-desc">View only</div>
           </div>
           <i class="ti ti-arrow-right" style="color:#1F4D2E;font-size:16px;flex-shrink:0"></i>
@@ -218,8 +137,8 @@
         <label class="login-label" id="lbl-invite-code-label">Invite code</label>
         <input class="login-input" type="text" id="invite-code-input" placeholder="e.g. 987654" style="text-transform:uppercase;letter-spacing:2px;font-weight:600">
       </div>
-      <div id="invite-error" style="display:none;background:#FCEBEB;border:1px solid #F09595;border-radius:8px;padding:8px 12px;font-size:12px;color:#791F1F;margin-bottom:10px" id="lbl-invite-error">Invalid code. Try 987654.</div>
-      <div id="invite-confirmed" style="display:none;background:#EAF3EC;border:1px solid #BBD8C2;border-radius:10px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px">
+      <div id="invite-error" style="display:none;background:#FCEBEB;border:1px solid #F09595;border-radius:8px;padding:8px 12px;font-size:12px;color:#791F1F;margin-bottom:10px">Invalid code. Try 987654.</div>
+      <div id="invite-confirmed" style="display:none;background:#EAF3EC;border:1px solid #BBD8C2;border-radius:10px;padding:10px 14px;margin-bottom:12px;align-items:center;gap:10px">
         <i class="ti ti-check" style="color:#1F4D2E;font-size:20px;flex-shrink:0"></i>
         <div><div style="font-size:13px;font-weight:600;color:#1F4D2E" id="invite-farm-name-label">Old McDonald's Farm</div><div style="font-size:12px;color:#2E7A4E" id="lbl-invite-accepted">Code accepted — complete your profile below</div></div>
       </div>
@@ -234,11 +153,22 @@
         </div>
         <div class="login-group">
           <label class="login-label" id="lbl-invite-pw">Create password</label>
-          <input class="login-input" type="password" id="invite-pass" placeholder="At least 8 characters" autocomplete="new-password">
+          <div style="position:relative">
+            <input class="login-input" type="password" id="invite-pass" placeholder="At least 8 characters" autocomplete="new-password" value="F@rm6ua7d" readonly style="padding-right:40px">
+            <button type="button" onclick="togglePwVisibility('invite-pass', this)" aria-label="Show password" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:6px;color:#888;display:flex;align-items:center">
+              <i class="ti ti-eye" style="font-size:18px"></i>
+            </button>
+          </div>
+          <p id="lbl-invite-pw-hygiene-note" style="font-size:11px;color:#888;margin-top:5px;font-style:italic">&#9432; <span id="lbl-invite-pw-hygiene-note-text">Pre-filled with a strong example password — length matters more than complexity (NIST SP 800-63B). This field is locked for the demo.</span></p>
         </div>
         <div class="login-group">
           <label class="login-label" id="lbl-invite-pw2">Confirm password</label>
-          <input class="login-input" type="password" id="invite-pass2" placeholder="Re-enter password" autocomplete="new-password">
+          <div style="position:relative">
+            <input class="login-input" type="password" id="invite-pass2" placeholder="Re-enter password" autocomplete="new-password" value="F@rm6ua7d" readonly style="padding-right:40px">
+            <button type="button" onclick="togglePwVisibility('invite-pass2', this)" aria-label="Show password" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:6px;color:#888;display:flex;align-items:center">
+              <i class="ti ti-eye" style="font-size:18px"></i>
+            </button>
+          </div>
         </div>
         <div class="login-group">
           <label class="login-label" id="lbl-invite-role-label">Your role</label>
@@ -246,6 +176,10 @@
             <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid #ddd;border-radius:8px;cursor:pointer">
               <input type="radio" name="invite-role" value="Manager" style="accent-color:#1F4D2E;width:auto;margin-top:2px">
               <div><div style="font-size:13px;font-weight:600;color:#222" id="lbl-invite-manager">Manager</div><div style="font-size:11px;color:#888" id="lbl-invite-manager-desc">Assign issues, mark resolved, export reports</div></div>
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid #ddd;border-radius:8px;cursor:pointer">
+              <input type="radio" name="invite-role" value="Technician" style="accent-color:#1F4D2E;width:auto;margin-top:2px">
+              <div><div style="font-size:13px;font-weight:600;color:#222" id="lbl-invite-technician">Technician</div><div style="font-size:11px;color:#888" id="lbl-invite-technician-desc">Resolve assigned issues, escalate what you can't fix</div></div>
             </label>
             <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid #ddd;border-radius:8px;cursor:pointer">
               <input type="radio" name="invite-role" value="Farm Hand" style="accent-color:#1F4D2E;width:auto;margin-top:2px">
@@ -301,7 +235,13 @@
         </div>
         <div class="login-group">
           <label class="login-label" id="lbl-new-pw">New password</label>
-          <input class="login-input" type="password" id="reset-new-pass" placeholder="Min. 8 characters">
+          <div style="position:relative">
+          <input class="login-input" type="password" id="reset-new-pass" placeholder="Min. 8 characters" style="padding-right:40px">
+          <button type="button" onclick="togglePwVisibility('reset-new-pass', this)" aria-label="Show password" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:6px;color:#888;display:flex;align-items:center">
+            <i class="ti ti-eye" style="font-size:18px"></i>
+          </button>
+        </div>
+        <p id="lbl-reset-pw-hygiene-note" style="font-size:11px;color:#888;margin-top:5px;font-style:italic">&#9432; <span id="lbl-reset-pw-hygiene-note-text">Length matters more than complexity (NIST SP 800-63B) — no forced symbols or capitals, just make it long and hard to guess.</span></p>
         </div>
         <button class="login-btn" onclick="confirmReset()" id="btn-confirm-reset">Set new password</button>
       </div>
@@ -341,7 +281,7 @@
       <span id="nav-devices">Devices</span>
     </button>
 
-    <button class="nav-btn" id="nav-btn-network" onclick="showScreen('network',this)">
+    <button class="nav-btn" onclick="showScreen('network',this)">
       <span id="nav-network">Network</span>
     </button>
     <button class="nav-btn" id="nav-btn-apps" onclick="showScreen('apps',this)" style="display:none">
@@ -746,9 +686,6 @@
 
     <div id="settings-team"></div><div style="border:1px solid #e0e0e0;border-radius:10px;overflow:hidden;margin-bottom:12px"><button onclick="toggleSettingsSection('settings-team', this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#f7f7f5;border:none;cursor:pointer;text-align:left"><span style="font-size:13px;font-weight:600;color:#1F4D2E;text-transform:uppercase;letter-spacing:0.5px" id="sec-hdr-team">Team members</span><span class="sec-arrow" style="font-size:14px;color:#888">▾</span></button><div id="sec-settings-team" style="display:none;padding:12px 14px">
     <!-- Team members -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;cursor:pointer" onclick="toggleTeamSection()">
-      <span id="team-toggle-icon" style="font-size:16px;color:#888">▾</span>
-    </div>
     <div id="team-section">
     <div class="filter-row" id="user-filter-row">
       <button class="filter-btn active" id="filter-user-active" onclick="setUserFilter('active', this)">Active</button>
@@ -898,6 +835,10 @@
         <div><div class="a11y-toggle-label" id="lbl-a11y-rm">Reduced motion</div><div class="a11y-toggle-sub" id="lbl-a11y-rm-desc">Disables transitions and animations</div></div>
         <button id="btn-reduced-motion" onclick="toggleA11y('reducedMotion')" style="min-width:60px;padding:6px 12px;border-radius:20px;border:1px solid #ddd;background:#f0f0f0;color:#555;font-size:12px;cursor:pointer">Off</button>
       </div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid #eee">
+        <p style="font-size:11px;color:#888;margin-bottom:8px" id="lbl-save-defaults-note">These settings and your language choice apply to this session only, until you save them as your personal default.</p>
+        <button id="btn-save-my-defaults" onclick="saveMyPreferences()" style="width:100%;padding:9px 12px;border-radius:8px;border:1px solid #1F4D2E;background:#fff;color:#1F4D2E;font-size:13px;font-weight:600;cursor:pointer">Save as my default</button>
+      </div>
     </div>
 
     </div></div><div id="settings-security"></div><div style="border:1px solid #e0e0e0;border-radius:10px;overflow:hidden;margin-bottom:12px"><button onclick="toggleSettingsSection('settings-security', this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#f7f7f5;border:none;cursor:pointer;text-align:left"><span style="font-size:13px;font-weight:600;color:#1F4D2E;text-transform:uppercase;letter-spacing:0.5px" id="sec-hdr-security">Security</span><span class="sec-arrow" style="font-size:14px;color:#888">▾</span></button><div id="sec-settings-security" style="display:none;padding:12px 14px">
@@ -980,4 +921,4 @@
 <script src="js/devices-resolve.js"></script>
 
 </body>
-</html> 
+</html>

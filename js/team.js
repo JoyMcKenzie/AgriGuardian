@@ -1,13 +1,4 @@
 /* AgriGuardian: team invites and farm config */
-var teamSectionOpen = true;
-function toggleTeamSection() {
-  teamSectionOpen = !teamSectionOpen;
-  const sec = document.getElementById('team-section');
-  const icon = document.getElementById('team-toggle-icon');
-  if (sec) sec.style.display = teamSectionOpen ? 'block' : 'none';
-  if (icon) icon.textContent = teamSectionOpen ? '▾' : '▸';
-}
-
 function handleLocationSelect(sel) {
   document.getElementById('custom-location-row').style.display =
     sel.value === '__custom_loc__' ? 'block' : 'none';

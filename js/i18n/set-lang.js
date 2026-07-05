@@ -15,51 +15,23 @@ function setLang(lang, context) {
           '<p id="lbl-demo-card1-title" style="font-size:12px;color:#1F4D2E;font-weight:600;margin-bottom:3px">' + t('loginDemoCard1Title') + '</p>' +
           '<p id="lbl-demo-card1-desc" style="font-size:11px;color:#555;margin:0">' + t('loginDemoCard1Desc') + '</p>' +
         '</div>' +
-        '<div style="background:#fff;border:1px solid #C8E6C9;border-radius:8px;padding:8px 10px;margin-bottom:6px">' +
+        '<div style="background:#fff;border:1px solid #C8E6C9;border-radius:8px;padding:8px 10px;margin-bottom:0">' +
           '<p id="lbl-demo-card2-title" style="font-size:12px;color:#1F4D2E;font-weight:600;margin-bottom:3px">' + t('loginDemoCard2Title') + '</p>' +
           '<p id="lbl-demo-card2-desc" style="font-size:11px;color:#555;margin:0">' + t('loginDemoCard2Desc') + '</p>' +
-        '</div>' +
-        '<div style="background:#fff;border:1px solid #C8E6C9;border-radius:8px;padding:8px 10px;margin-bottom:0">' +
-          '<p id="lbl-demo-card3-title" style="font-size:12px;color:#1F4D2E;font-weight:600;margin-bottom:3px">' + t('loginDemoCard3Title') + '</p>' +
-          '<p id="lbl-demo-card3-desc" style="font-size:11px;color:#555;margin:0">' + t('loginDemoCard3Desc') + '</p>' +
         '</div>';
       applyBuildTimestamp();
     }
     safe('login-sub-text', t('appTag'));
     safe('welcome-title', t('loginWelcomeTitle'));
     safe('welcome-sub', t('loginWelcomeSub'));
-    safe('btn-create', t('loginCreateBtn'));
     safe('btn-signin-choice', t('loginSigninBtn'));
     safe('signin-title', t('loginSigninTitle'));
     safe('signin-sub', t('loginSigninSub'));
     safe('verify-title', t('loginVerifyTitle'));
-    safe('reg-title', t('loginRegTitle'));
-    safe('lbl-reg-name', t('loginName'));
-    safe('lbl-reg-farm', t('loginFarm'));
-    safe('lbl-reg-role', t('loginRole'));
-    safe('lbl-reg-phone', t('loginPhone'));
-    safe('lbl-email-opt', t('loginEmailOpt'));
-    safe('reg-send-btn', t('loginRegSend'));
     safe('lbl-phone', t('loginPhone'));
     safe('send-btn', t('loginSend'));
     safe('lbl-code', t('loginCode'));
     safe('verify-btn', t('loginVerify'));
-    const roles = t('loginRoles');
-    if (Array.isArray(roles)) {
-      ['reg-role','role-select'].forEach(selId => {
-        const sel = document.getElementById(selId);
-        // Only iterate options on real <select> elements (reg-role is a hidden input, which has no .options)
-        if (sel && sel.options) Array.from(sel.options).forEach((o,i) => { if(roles[i]) o.text = roles[i]; });
-      });
-    }
-    safe('lbl-reg-tz', t('loginFarmTz'));
-    safe('lbl-reg-pass', t('loginPassword'));
-    safe('lbl-reg-pass-hint', t('loginPassHint'));
-    safe('lbl-reg-email', t('loginEmail'));
-    safe('lbl-reg-tz', t('loginFarmTz'));
-    safe('lbl-reg-pass', t('loginPassword'));
-    safe('lbl-reg-pass-hint-text', t('loginPassHint'));
-    safe('btn-back-register', t('loginBack'));
     safe('btn-back-signin', t('loginBack'));
     safe('btn-back-code', t('loginBack'));
     safe('lbl-demo-title', 'ⓘ ' + t('loginDemoTitle'));
@@ -72,8 +44,6 @@ function setLang(lang, context) {
     safe('lbl-last-updated', t('loginLastUpdated'));
     safe('lbl-your-name', t('loginName'));
     safe('lbl-username-hint', t('loginUsernameHint'));
-    safe('lbl-reg-email', t('loginEmail'));
-    safe('lbl-reg-email-note', t('loginOptionalReport'));
     safe('lbl-signin-phone', t('loginYourPhone'));
     safe('lbl-signin-pass', t('loginPasswordLabel'));
     safe('lbl-phone-username', t('loginPhoneUsername'));
@@ -81,7 +51,6 @@ function setLang(lang, context) {
     safe('lbl-code-sent', t('loginVerificationSent'));
     safe('btn-verify-signin', t('loginVerifyBtn'));
     safe('btn-send-mfa', t('loginSendMfa'));
-    safe('lbl-btn-create-ref', t('loginCreateBtn'));
     safe('lbl-forgot-pw', t('forgotPassword'));
     safe('lbl-reset-title', t('resetTitle'));
     safe('lbl-reset-sub', t('resetSub'));
@@ -91,17 +60,13 @@ function setLang(lang, context) {
     safe('btn-confirm-reset', t('resetConfirmBtn'));
     safe('lbl-new-code', t('resetCodeLabel'));
     safe('lbl-new-pw', t('resetNewPw'));
+    safe('lbl-reset-pw-hygiene-note-text', t('resetPwHygieneNote'));
     safe('lbl-lockout-msg', t('lockoutBanner'));
     safe('lbl-lockout-seconds', t('lockoutSeconds'));
     // Update placeholders
     const setPlaceholder = (id, val) => { const el = document.getElementById(id); if(el) el.placeholder = val; };
-    setPlaceholder('reg-name', t('loginNamePlaceholder'));
-    setPlaceholder('reg-farm', t('loginFarmPlaceholder'));
-    setPlaceholder('reg-pass', t('loginPassPlaceholderHint'));
     setPlaceholder('signin-pass', t('loginSigninPassPlaceholder'));
-    setPlaceholder('reg-phone', t('loginPhonePlaceholderHint'));
     setPlaceholder('signin-phone', t('loginPhonePlaceholderHint'));
-    safe('lbl-send-code-ref', t('loginRegSend'));
     safe('lbl-verify-ref', t('loginVerifyBtn'));
     // Update choice step (demo box) labels directly
     safe('lbl-demo-title', 'ⓘ ' + t('loginDemoTitle'));
@@ -111,11 +76,8 @@ function setLang(lang, context) {
     safe('lbl-demo-card1-desc', t('loginDemoCard1Desc'));
     safe('lbl-demo-card2-title', t('loginDemoCard2Title'));
     safe('lbl-demo-card2-desc', t('loginDemoCard2Desc'));
-    safe('lbl-demo-card3-title', t('loginDemoCard3Title'));
-    safe('lbl-demo-card3-desc', t('loginDemoCard3Desc'));
     safe('welcome-title', t('loginWelcomeTitle'));
     safe('welcome-sub', t('loginWelcomeSub'));
-    safe('btn-create', t('loginCreateBtn'));
     safe('btn-signin-choice', t('loginSigninBtn'));
     // I have an invite button
     safe('btn-invite-choice', t('loginHaveInviteBtn'));
@@ -130,10 +92,11 @@ function setLang(lang, context) {
     safe('lbl-invite-role-label', t('inviteRoleLabel'));
     safe('lbl-invite-manager', t('inviteRoleManager'));
     safe('lbl-invite-manager-desc', t('inviteManagerDesc'));
-    safe('lbl-invite-role-manager-desc', t('inviteRoleManagerDesc'));
+    safe('lbl-invite-technician', t('inviteRoleTechnician'));
+    safe('lbl-invite-technician-desc', t('inviteTechnicianDesc'));
     safe('lbl-invite-farmhand', t('inviteRoleFarmhand'));
     safe('lbl-invite-farmhand-desc', t('inviteFarmhandDesc'));
-    safe('lbl-invite-role-farmhand-desc', t('inviteRoleFarmhandDesc'));
+    safe('lbl-invite-pw-hygiene-note-text', t('invitePwHygieneNote'));
     safe('lbl-invite-readonly-note', t('inviteReadonlyNote'));
     safe('btn-join-farm', t('inviteJoinBtn'));
     safe('lbl-invite-demo-hint-title', t('inviteDemoHintTitle'));
@@ -149,6 +112,7 @@ function setLang(lang, context) {
     safe('lbl-demo-members-sub', t('demoMembersSub'));
     safe('lbl-carlos-desc', t('carlosDesc'));
     safe('lbl-jamie-desc', t('jamieDesc'));
+    safe('lbl-signin-pw-hygiene-note-text', t('signinPwHygieneNote'));
     // Sign-in labels
     safe('lbl-pass', t('loginPasswordLabel'));
     safe('lbl-phone', t('loginYourPhone'));
@@ -379,13 +343,17 @@ function setLang(lang, context) {
     safeSet('lbl-a11y-cb-desc', t('a11yColorBlindDesc'));
     safeSet('lbl-a11y-rm', t('a11yReducedMotion'));
     safeSet('lbl-a11y-rm-desc', t('a11yDisableMotion'));
+    safeSet('lbl-save-defaults-note', t('saveDefaultsNote'));
+    safeSet('btn-save-my-defaults', t('saveDefaultsBtn'));
     safeSet('lbl-network-desc', t('networkConns'));
     safeSet('lbl-download-report', t('lblDownloadReport'));
     // Invite step labels live in the login DOM but stay visible — update in app context too
     safeSet('lbl-invite-role-manager-desc', t('inviteRoleManagerDesc'));
     safeSet('lbl-invite-role-farmhand-desc', t('inviteRoleFarmhandDesc'));
     safeSet('lbl-invite-manager-desc', t('inviteManagerDesc'));
+    safeSet('lbl-invite-technician-desc', t('inviteTechnicianDesc'));
     safeSet('lbl-invite-farmhand-desc', t('inviteFarmhandDesc'));
+    safeSet('lbl-invite-pw-hygiene-note-text', t('invitePwHygieneNote'));
     // MAC label in screen-add template (has child span so update text node directly)
     (function(){ var el=document.getElementById('lbl-mac'); if(el&&el.childNodes[0]&&el.childNodes[0].nodeType===3) el.childNodes[0].textContent=t('macFieldLabel')+' '; })();
     safeSet('lbl-add-network-conn', t('addNetworkConn'));

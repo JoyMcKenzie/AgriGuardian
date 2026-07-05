@@ -1,6 +1,39 @@
 /* AgriGuardian: accessibility settings */
 var a11ySettings = { largeText: false, xlText: false, highContrast: false, colorBlind: false, reducedMotion: false };
 
+// Per-user saved preferences (accessibility + language), keyed by phone
+// number — covers all five demo people, including Owner (who isn't in
+// teamMembers). Defaults stay universal (everything off, English) until
+// someone explicitly saves their own via "Save as my default" in Settings.
+var userPreferences = {};
+
+function loadMyPreferences() {
+  var saved = currentUser.phone && userPreferences[currentUser.phone];
+  if (saved) {
+    a11ySettings = { largeText: !!saved.largeText, xlText: !!saved.xlText, highContrast: !!saved.highContrast, colorBlind: !!saved.colorBlind, reducedMotion: !!saved.reducedMotion };
+    currentLang = saved.lang || 'en';
+  } else {
+    a11ySettings = { largeText: false, xlText: false, highContrast: false, colorBlind: false, reducedMotion: false };
+    currentLang = 'en';
+  }
+  applyA11yUI();
+}
+
+function saveMyPreferences() {
+  if (!currentUser.phone) return;
+  userPreferences[currentUser.phone] = {
+    largeText: a11ySettings.largeText, xlText: a11ySettings.xlText, highContrast: a11ySettings.highContrast,
+    colorBlind: a11ySettings.colorBlind, reducedMotion: a11ySettings.reducedMotion, lang: currentLang
+  };
+  logAction('Saved default preferences', currentUser.name || currentUser.phone);
+  var btn = document.getElementById('btn-save-my-defaults');
+  if (btn) {
+    var orig = btn.textContent;
+    btn.textContent = t('savedConfirm') || 'Saved!';
+    setTimeout(function() { btn.textContent = orig; }, 1500);
+  }
+}
+
 function toggleSettingsSection(id, btn) {
   const section = document.getElementById('sec-' + id);
   if (!section) return;
@@ -34,14 +67,20 @@ function goToAccessibility() {
 
 function toggleA11y(key) {
   a11ySettings[key] = !a11ySettings[key];
+  applyA11yUI();
+}
+
+function applyA11yUI() {
   const btnMap = { largeText:'btn-large-text', xlText:'btn-xl-text', highContrast:'btn-high-contrast', colorBlind:'btn-colorblind', reducedMotion:'btn-reduced-motion' };
-  const btn = document.getElementById(btnMap[key]);
-  if (btn) {
-    btn.textContent = a11ySettings[key] ? 'On' : 'Off';
-    btn.style.background = a11ySettings[key] ? '#1F4D2E' : '#f0f0f0';
-    btn.style.color = a11ySettings[key] ? '#fff' : '#555';
-    btn.style.borderColor = a11ySettings[key] ? '#1F4D2E' : '#ddd';
-  }
+  Object.keys(btnMap).forEach(function(key) {
+    const btn = document.getElementById(btnMap[key]);
+    if (btn) {
+      btn.textContent = a11ySettings[key] ? 'On' : 'Off';
+      btn.style.background = a11ySettings[key] ? '#1F4D2E' : '#f0f0f0';
+      btn.style.color = a11ySettings[key] ? '#fff' : '#555';
+      btn.style.borderColor = a11ySettings[key] ? '#1F4D2E' : '#ddd';
+    }
+  });
 
   const app = document.getElementById('main-app');
   const body = document.body;

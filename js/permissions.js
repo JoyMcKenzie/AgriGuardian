@@ -1,4 +1,21 @@
 /* AgriGuardian: roles, permissions, escalation */
+
+// Default permission set for a newly invited/joined team member, by role.
+// Shared by inviteMember() (Owner sends the invite) and joinFarm() (person
+// accepts it) so a Technician onboarded either way ends up with the same
+// real permissions — not a hardcoded view-only placeholder regardless of
+// the role actually assigned.
+function defaultPermsForRole(role) {
+  if (role === 'Manager') {
+    return { addDevices: true, archiveDelete: false, resolveIssues: true, assignIssues: true, exportReports: true, viewOnly: false };
+  }
+  if (role === 'Technician') {
+    return { addDevices: true, archiveDelete: false, resolveIssues: true, assignIssues: false, exportReports: false, viewOnly: false };
+  }
+  // Farm Hand / Viewer / anything else — least privilege
+  return { addDevices: false, archiveDelete: false, resolveIssues: false, assignIssues: false, exportReports: false, viewOnly: true };
+}
+
 function canManage() {
   // Managers have nearly all of the Owner's abilities, except they cannot
   // permanently delete the farm or remove the Owner. Use this for shared
