@@ -228,6 +228,15 @@ function togglePermission(idx, key, value) {
       return;
     }
   }
+  // Granting access is confirmed before it takes effect; revoking isn't —
+  // narrowing someone's access is always the safe direction, only widening
+  // it needs a second look.
+  const permKeyMap = { addDevices: 'permAdd', archiveDelete: 'permArchive', resolveIssues: 'permResolve', assignIssues: 'permAssign', exportReports: 'permExport', viewOnly: 'permView' };
+  const isGrant = value && key !== 'viewOnly';
+  if (isGrant && !confirm(t('confirmGrantPermission').replace('{perm}', t(permKeyMap[key]) || key).replace('{name}', m.name || m.phone))) {
+    return;
+  }
+  const before = Object.assign({}, m.perms);
   if (key === 'viewOnly' && value) {
     // Read-only overrides everything else
     m.perms.addDevices = false;
@@ -247,6 +256,10 @@ function togglePermission(idx, key, value) {
       m.perms.viewOnly = true;
     }
   }
+  // Every permission change is logged — who changed what, for whom, and
+  // which direction. Least privilege isn't just prevention; being able to
+  // review who granted access to whom is the other half of it.
+  logAction(t('logPermissionChanged'), m.name + ': ' + (t(permKeyMap[key]) || key) + ' ' + (value ? t('logGranted') : t('logRevoked')));
   renderSettings();
 }
 

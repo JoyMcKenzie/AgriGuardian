@@ -66,8 +66,13 @@ function netTimelineHTML(n) {
         '</div>' +
       '</div>';
   }).join('');
-  return '<p class="section-title" style="margin-top:18px">Network history</p>' +
-    '<div style="padding:4px 2px">' + rows + '</div>';
+  return '<button onclick="toggleSettingsSection(\'network-history-' + n.id + '\', this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 0;background:none;border:none;border-top:1px solid #eee;cursor:pointer;text-align:left;margin-top:6px">' +
+      '<span class="section-title" style="margin:0">Network history</span>' +
+      '<span class="sec-arrow" style="font-size:14px;color:#888">▸</span>' +
+    '</button>' +
+    '<div id="sec-network-history-' + n.id + '" style="display:none">' +
+    '<div style="padding:4px 2px">' + rows + '</div>' +
+    '</div>';
 }
 
 function getNetRecAction(n) {
@@ -111,7 +116,11 @@ function showNetDetail(id, keepScreen) {
         '<div class="action-text">' + getNetRecAction(n) + '</div>' +
       '</div>' : '') +
 
-    '<p class="section-title">Network details</p>' +
+    '<button onclick="toggleSettingsSection(\'network-details-' + n.id + '\', this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 0;background:none;border:none;border-top:1px solid #eee;cursor:pointer;text-align:left;margin-top:6px">' +
+      '<span class="section-title" style="margin:0">Network details</span>' +
+      '<span class="sec-arrow" style="font-size:14px;color:#888">▸</span>' +
+    '</button>' +
+    '<div id="sec-network-details-' + n.id + '" style="display:none">' +
     '<div class="detail-row"><span class="detail-key">Connection type</span><span class="detail-val">' + n.type + '</span></div>' +
     (n.hwBrand ? '<div class="detail-row"><span class="detail-key">' + t('hardwareBrand') + '</span><span class="detail-val">' + n.hwBrand + '</span></div>' : '') +
     (n.hwModel ? '<div class="detail-row"><span class="detail-key">' + t('hardwareModel') + '</span><span class="detail-val">' + n.hwModel + '</span></div>' : '') +
@@ -119,6 +128,7 @@ function showNetDetail(id, keepScreen) {
     '<div class="detail-row"><span class="detail-key">Encrypted</span><span class="detail-val">' + (n.encrypted === 'yes' ? 'Yes' : 'No / not sure') + '</span></div>' +
     ((canAct && (n.hwBrand || n.hwModel)) ? '<div class="detail-row" style="margin-top:4px"><button onclick="checkNetVulnerabilities(' + n.id + ')" style="width:100%;background:#1F4D2E;color:#fff;border:none;border-radius:8px;padding:8px;font-size:13px;cursor:pointer;font-weight:500">' + t('hwVulnCheck') + '</button></div>' : '') +
     '<div id="net-vuln-results-' + n.id + '" style="margin-top:8px"></div>' +
+    '</div>' +
 
     (n.notes ? '<div style="background:#f7f7f5;border-radius:8px;padding:10px 12px;margin:14px 0"><div style="font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">' + t('notes') + '</div><div style="font-size:13px;color:#333;white-space:pre-line">' + n.notes + '</div></div>' : '') +
 

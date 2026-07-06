@@ -125,8 +125,13 @@ function deviceTimelineHTML(d) {
       '</div>';
   }).join('');
 
-  return '<p class="section-title" style="margin-top:18px">' + t('tlTitle') + '</p>' +
-    '<div style="padding:4px 2px">' + rows + '</div>';
+  return '<button onclick="toggleSettingsSection(\'device-timeline-' + d.id + '\', this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 0;background:none;border:none;border-top:1px solid #eee;cursor:pointer;text-align:left;margin-top:6px">' +
+      '<span class="section-title" style="margin:0;margin-top:0">' + t('tlTitle') + '</span>' +
+      '<span class="sec-arrow" style="font-size:14px;color:#888">▸</span>' +
+    '</button>' +
+    '<div id="sec-device-timeline-' + d.id + '" style="display:none">' +
+    '<div style="padding:4px 2px">' + rows + '</div>' +
+    '</div>';
 }
 
 function showDetail(id, keepScreen) {
@@ -146,6 +151,7 @@ function showDetail(id, keepScreen) {
     '<div class="device-sub">' + d.brand + ' &middot; ' + d.type + '</div>' +
     (!canSeeIssue(d) && !d.resolved && risk !== 'green' ?
       '<div class="risk-detail" style="background:#F4F6F8;border:1px solid #d9dee3"><div class="risk-detail-title" style="color:#555"><i class="ti ti-lock"></i>Not assigned to you</div><p style="color:#555">Security details for this device are only shown to the team member it is assigned to, plus the Owner and Manager. This protects sensitive information by limiting who can see open issues.</p></div>' :
+    !canSeeDetailedRisk() ? '' :
     d.resolved ?
       '<div class="risk-detail risk-detail-green"><div class="risk-detail-title t-green">' + t('lookingGood') + '</div><p>' + t('resolvedMsg') + (d.resolvedDate ? ' ' + d.resolvedDate : '') + '. ' + t('monitorMsg2') + '</p></div>' :
       '<div class="risk-detail risk-detail-' + risk + '"><div class="risk-detail-title t-' + risk + '"><i class="ti ' + iconMap[risk] + '"></i>' + getRiskLabel(risk, false) + '</div><p>' + why + '</p></div>'
@@ -196,22 +202,22 @@ function showDetail(id, keepScreen) {
           '</div>'
         ) :
         isEscalationPrimaryActor(d) ? (
-          // B: Manager (or Owner when no Manager) — amber action banner
-          '<div style="background:#FFF6E5;border:2px solid #E6A75A;border-radius:10px;padding:12px 14px;margin:10px 0">' +
-            '<div style="font-weight:700;color:#7A3E00;font-size:14px;margin-bottom:6px">🚩 ' + t('escBannerTitle') + '</div>' +
+          // B: Manager (or Owner when no Manager) — purple action banner
+          '<div style="background:#F3EEFF;border:2px solid #7C3AED;border-radius:10px;padding:12px 14px;margin:10px 0">' +
+            '<div style="font-weight:700;color:#5B21B6;font-size:14px;margin-bottom:6px"><i class="ti ti-flag" style="font-size:14px;vertical-align:-2px" aria-hidden="true"></i> ' + t('escBannerTitle') + '</div>' +
             (d.partiallyResolved ?
-              '<div style="background:#F3EEFF;border:1px solid #C4B5FD;border-radius:8px;padding:8px 10px;margin-bottom:10px">' +
+              '<div style="background:#fff;border:1px solid #C4B5FD;border-radius:8px;padding:8px 10px;margin-bottom:10px">' +
                 '<div style="font-size:11px;font-weight:600;color:#5B21B6;text-transform:uppercase;letter-spacing:0.3px;margin-bottom:4px">⚡ ' + t('partialEscWhatFixed').replace('{name}', d.partialResolveBy || 'Technician') + '</div>' +
                 '<div style="font-size:13px;color:#3B0764;font-style:italic">' + (d.partialResolveNote || '') + '</div>' +
               '</div>'
             : '') +
-            '<div style="font-size:13px;color:#3a3a3a;line-height:1.5;margin-bottom:10px">' +
+            '<div style="font-size:13px;color:#3B0764;line-height:1.5;margin-bottom:10px">' +
               '<div><strong>' + t('escBannerBy') + ':</strong> ' + (d.escalation && d.escalation.by || '—') + (d.escalation && d.escalation.date ? ' ' + t('escBannerOn') + ' ' + d.escalation.date : '') + '</div>' +
               '<div style="margin-top:2px"><strong>' + t('escBannerReason') + ':</strong> ' + (d.escalation && d.escalation.reason || '—') + '</div>' +
-              ((d.escalation && d.escalation.note) ? '<div style="margin-top:6px;padding:8px 10px;background:#fff;border-radius:6px;border:1px solid #E6C7AA;font-style:italic">' + d.escalation.note + '</div>' : '') +
+              ((d.escalation && d.escalation.note) ? '<div style="margin-top:6px;padding:8px 10px;background:#fff;border-radius:6px;border:1px solid #C4B5FD;font-style:italic">' + d.escalation.note + '</div>' : '') +
             '</div>' +
             '<label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px">' + t('handoffNoteLabel') + ' <span style="color:#A32D2D;font-size:11px">*' + t('required') + '</span></label>' +
-            '<textarea id="take-ownership-note-' + d.id + '" rows="2" placeholder="' + t('takeOwnershipNotePlaceholder') + '" style="width:100%;font-size:13px;padding:8px 12px;border:1px solid #ddd;border-radius:8px;resize:none;font-family:inherit;margin-bottom:10px"></textarea>' +
+            '<textarea id="take-ownership-note-' + d.id + '" rows="2" placeholder="' + t('takeOwnershipNotePlaceholder') + '" style="width:100%;font-size:13px;padding:8px 12px;border:1px solid #C4B5FD;border-radius:8px;resize:none;font-family:inherit;margin-bottom:10px"></textarea>' +
             '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
               '<button onclick="takeOwnership(' + d.id + ')" style="flex:1;min-width:140px;background:#1F4D2E;color:#fff;border:none;border-radius:8px;padding:9px 12px;font-size:13px;font-weight:600;cursor:pointer">' + t('escTakeOwnership') + '</button>' +
               (currentUser.role === 'Manager' ?
@@ -243,19 +249,19 @@ function showDetail(id, keepScreen) {
         )
       ) : (
         // D: Technician — read-only pill
-        '<div style="background:#FFF6E5;border:1px solid #E6C77A;border-radius:8px;padding:10px 12px;margin:10px 0;font-size:13px;color:#5A4413">🚩 ' + t('escPill') + ' — ' + (d.escalation && d.escalation.reason || '') + '</div>'
+        '<div style="background:#F3EEFF;border:1px solid #C4B5FD;border-radius:8px;padding:10px 12px;margin:10px 0;font-size:13px;color:#5B21B6"><i class="ti ti-flag" style="font-size:14px;vertical-align:-2px" aria-hidden="true"></i> ' + t('escPill') + ' — ' + (d.escalation && d.escalation.reason || '') + '</div>'
       )
     ) : '') +
     // ----- HANDOFF LOG -----
-    ((Array.isArray(d.handoffLog) && d.handoffLog.length > 0 && canSeeIssue(d)) ? (
+    ((Array.isArray(d.handoffLog) && d.handoffLog.length > 0 && canSeeIssue(d) && canSeeDetailedRisk()) ? (
       '<div style="margin:14px 0">' +
         '<button onclick="toggleHandoffLog(' + d.id + ')" style="background:none;border:none;font-size:12px;font-weight:600;color:#555;cursor:pointer;padding:0;display:flex;align-items:center;gap:4px">' +
           '<i class="ti ti-history" style="font-size:14px"></i> ' + t('handoffLogTitle') + ' (' + d.handoffLog.length + ') <i class="ti ti-chevron-down" style="font-size:12px" id="handoff-chevron-' + d.id + '"></i>' +
         '</button>' +
         '<div id="handoff-log-' + d.id + '" style="display:none;margin-top:8px;border:1px solid #e5e5e5;border-radius:8px;overflow:hidden">' +
           [...d.handoffLog].reverse().map(function(entry, i) {
-            const typeIcon = entry.type === 'escalate' ? '🚩' : entry.type === 'sendBack' ? '↩️' : entry.type === 'takeOwnership' ? '✋' : entry.type === 'partialFix' ? '⚡' : entry.type === 'resolved' ? '✅' : '📋';
-            const typeLabel = entry.type === 'escalate' ? t('handoffTypeEscalate') : entry.type === 'sendBack' ? t('handoffTypeSendBack') : entry.type === 'takeOwnership' ? t('handoffTypeTakeOwnership') : entry.type === 'partialFix' ? t('handoffTypePartialFix') : entry.type === 'resolved' ? t('handoffTypeResolved') : t('handoffTypeAssign');
+            const typeIcon = entry.type === 'escalate' ? '🚩' : entry.type === 'sendBack' ? '↩️' : entry.type === 'takeOwnership' ? '✋' : entry.type === 'partialFix' ? '⚡' : entry.type === 'resolved' ? '✅' : entry.type === 'observation' ? '👁' : '📋';
+            const typeLabel = entry.type === 'escalate' ? t('handoffTypeEscalate') : entry.type === 'sendBack' ? t('handoffTypeSendBack') : entry.type === 'takeOwnership' ? t('handoffTypeTakeOwnership') : entry.type === 'partialFix' ? t('handoffTypePartialFix') : entry.type === 'resolved' ? t('handoffTypeResolved') : entry.type === 'observation' ? t('handoffTypeObservation') : t('handoffTypeAssign');
             return '<div style="padding:10px 12px;' + (i > 0 ? 'border-top:1px solid #f0f0f0;' : '') + 'background:#fafafa">' +
               '<div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px">' + typeIcon + ' ' + typeLabel + ' — ' + entry.date + '</div>' +
               '<div style="font-size:12px;color:#555;margin-bottom:2px">' + (entry.from || '?') + ' → ' + (entry.to || '?') + '</div>' +
@@ -266,7 +272,7 @@ function showDetail(id, keepScreen) {
         '</div>' +
       '</div>'
     ) : '') +
-    (canSeeIssue(d) ? (
+    (canSeeIssue(d) && canSeeDetailedRisk() ? (
     '<div class="action-box">' +
       '<div class="action-label">' + t('recommendedAction') + '</div>' +
       '<div class="action-text">' + (d.resolved ? t('recActionResolved') : action) + '</div>' +
@@ -284,8 +290,8 @@ function showDetail(id, keepScreen) {
     : '') +
     // Password-manager guidance — only when pw not changed AND not using partial-resolve box
     // (partial box already covers the password fix step)
-    ((d.pw === 'no' && !d.resolved && !shouldShowPartialResolveBox(d)) ? findDefaultLoginHTML(d) : '') +
-    ((d.pw === 'no' && !d.resolved && !shouldShowPartialResolveBox(d)) ? pwManagerCardHTML() : '') +
+    ((d.pw === 'no' && !d.resolved) ? findDefaultLoginHTML(d) : '') +
+    ((d.pw === 'no' && !d.resolved) ? pwManagerCardHTML() : '') +
     // Assignment status badge (shown for open, non-green issues)
     ((!d.resolved && getRisk(d.brand, d.pw) !== 'green') ?
       '<div style="display:flex;align-items:center;gap:8px;margin:10px 0;padding:8px 12px;border-radius:8px;font-size:13px;' +
@@ -293,39 +299,96 @@ function showDetail(id, keepScreen) {
         (d.assignedTo
           ? '<i class="ti ti-user-check"></i><span><strong>' + t('assignedToLabel') + ':</strong> ' + d.assignedTo + '</span>'
           : '<i class="ti ti-user-question"></i><span>' + t('unassignedLabel') + '</span>') +
-      '</div>' : '') +
+      '</div>' : '')
+    ) : '') +
     // ----- ASSIGN IT — only for users who can assign open, non-green issues -----
     ((canAssignIssues() && !d.resolved && (getRisk(d.brand, d.pw) !== 'green')) ? assignBoxHTML(d) : '') +
-    // ----- FIX MY PART + ESCALATE THE REST — combined action for assigned Technician -----
-    // Shown when device has both a fixable issue (password) AND a structural one (EOL/CVEs)
-    // that needs an Owner/Manager decision. Replaces the regular resolve form for this case.
-    (shouldShowPartialResolveBox(d) ?
-      '<div class="resolve-box" style="background:#FAF5FF;border:1px solid #C4B5FD;margin-top:10px">' +
-        '<div class="resolve-title" style="color:#5B21B6">⚡ ' + t('partialResolveTitle') + '</div>' +
-        '<p style="font-size:12px;color:#5B21B6;margin:-4px 0 12px;line-height:1.4">' +
-          t('partialResolveDesc') +
-        '</p>' +
-        (d.pw === 'no' ?
-          '<div style="background:#EAF3EC;border:1px solid #BBD8C2;border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:12px;color:#1F4D2E">' +
-            '🔑 ' + t('partialResolveStepPw') +
-          '</div>'
-        : '') +
-        '<label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px">' + t('partialFixNoteLabel') + ' <span style="color:#A32D2D;font-size:11px">*' + t('required') + '</span></label>' +
-        '<textarea id="partial-fix-note-' + d.id + '" rows="2" placeholder="' + t('partialFixNotePlaceholder') + '" style="width:100%;font-size:13px;padding:8px 12px;border:1px solid #C4B5FD;border-radius:8px;resize:none;font-family:inherit;margin-bottom:12px"></textarea>' +
-        '<label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px">' + t('escReasonLabel') + ' <span style="color:#A32D2D;font-size:11px">*' + t('required') + '</span></label>' +
-        '<select id="partial-esc-reason-' + d.id + '" style="width:100%;font-size:13px;padding:8px 12px;border:1px solid #C4B5FD;border-radius:8px;margin-bottom:10px;background:#fff">' +
-          '<option value="">' + t('escReasonPlaceholder') + '</option>' +
-          (Array.isArray(t('escReasons')) ? t('escReasons') : []).map(function(r) {
-            return '<option value="' + r + '">' + r + '</option>';
-          }).join('') +
-        '</select>' +
-        '<label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px">' + t('escNoteLabel').replace('{target}', escalationTargetName()) + ' <span style="color:#A32D2D;font-size:11px">*' + t('required') + '</span></label>' +
-        '<textarea id="partial-esc-note-' + d.id + '" rows="2" placeholder="' + t('escNotePlaceholder') + '" style="width:100%;font-size:13px;padding:8px 12px;border:1px solid #C4B5FD;border-radius:8px;resize:none;font-family:inherit;margin-bottom:12px"></textarea>' +
-        '<button onclick="partialResolveAndEscalate(' + d.id + ')" style="width:100%;background:#5B21B6;color:#fff;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:600;cursor:pointer">⚡ ' + t('partialResolveBtn').replace('{target}', escalationTargetName()) + '</button>' +
-      '</div>'
-    : '')
+    // ----- ADDRESS THIS ISSUE — unified resolve/escalate toggle -----
+    // One box, one clear choice, resolve is the default. Escalate is always
+    // available as the alternative, never the only option — the assigned
+    // person decides, they're not forced into escalating just because the
+    // device also happens to have a structural (EOL/CVE) problem.
+    (canResolveIssues(d) && canSeeIssue(d) &&
+     (!d.needsOwnerAction || isEscalationPrimaryActor(d)) ? (
+      (getRisk(d.brand, d.pw) === 'green' && !d.resolved ? verifyBoxHTML(d) : (
+        '<div class="resolve-box" id="action-box-' + d.id + '">' +
+          '<div class="resolve-title">' + t('addressIssueTitle') + '</div>' +
+          '<div style="display:flex;gap:8px;margin-bottom:14px">' +
+            '<button type="button" id="mode-resolve-btn-' + d.id + '" onclick="setIssueMode(' + d.id + ',\'resolve\')" class="filter-btn active" style="flex:1"><i class="ti ti-check" style="font-size:15px;vertical-align:-2px;margin-right:4px" aria-hidden="true"></i>' + t('modeResolveTab') + '</button>' +
+            (shouldShowPartialResolveBox(d) ?
+              '<button type="button" id="mode-escalate-btn-' + d.id + '" onclick="setIssueMode(' + d.id + ',\'escalate\')" class="filter-btn" style="flex:1"><i class="ti ti-flag" id="mode-escalate-icon-' + d.id + '" style="font-size:15px;vertical-align:-2px;margin-right:4px;color:#3B0764" aria-hidden="true"></i>' + t('modeEscalateTab') + '</button>'
+            : '') +
+          '</div>' +
+
+          '<div id="mode-resolve-fields-' + d.id + '">' +
+            '<p style="font-size:12px;color:#1F4D2E;line-height:1.5;margin:0 0 12px">' + t('resolveIntroDesc') + '</p>' +
+            '<div style="background:#EAF3EC;border:1px solid #BBD8C2;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:#1F4D2E;display:flex;gap:6px">' +
+              '<i class="ti ti-device-floppy" style="font-size:15px;flex-shrink:0;margin-top:1px" aria-hidden="true"></i>' +
+              '<span>' + t('resolveStepCallout') + '</span>' +
+            '</div>' +
+            '<div class="health-box" style="margin-top:0">' +
+              '<div class="health-title">' + t('healthTitle') + ' <span style="color:#A32D2D;font-size:11px;font-weight:600">* required</span></div>' +
+              '<div id="health-warning-' + d.id + '" style="display:none;background:#FCEBEB;border:1px solid #F09595;border-radius:6px;padding:8px 12px;margin-bottom:8px;font-size:12px;color:#791F1F;align-items:center;gap:6px">⚠️ Please select a device software update status before saving.</div>' +
+              (Array.isArray(t('healthOpts')) ? t('healthOpts') : []).map(function(opt) {
+                const sel = d.healthStatus === opt;
+                return '<label class="health-opt ' + (sel ? 'selected' : '') + '">' +
+                  '<input type="radio" name="health-' + d.id + '" value="' + opt + '" ' + (sel ? 'checked' : '') + ' style="width:auto;accent-color:#1F4D2E"> ' + opt +
+                '</label>';
+              }).join('') +
+              (d.healthDate ? '<p class="health-stamp">' + t('healthStamp') + ' ' + d.healthDate + '</p>' : '') +
+            '</div>' +
+            '<div style="display:flex;flex-direction:column;gap:6px;margin:12px 0 10px">' +
+              (Array.isArray(t('resolveActions')) ? t('resolveActions') : []).map(function(opt) {
+                const checked = d.resolveStatus && d.resolveStatus.split(',').map(s=>s.trim()).includes(opt);
+                return '<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:6px 10px;border:1px solid #ddd;border-radius:8px;background:' + (checked ? '#f0f9f3' : '#fff') + '">' +
+                  '<input type="checkbox" value="' + opt + '" class="resolve-action" ' + (checked ? 'checked' : '') + ' style="width:auto;accent-color:#1F4D2E"> ' + opt +
+                '</label>';
+              }).join('') +
+              (function() {
+                const otherChecked = d.resolveStatus && d.resolveStatus.split(',').map(s=>s.trim()).some(s => s.startsWith('Other:'));
+                const otherText = otherChecked ? d.resolveStatus.split(',').map(s=>s.trim()).find(s => s.startsWith('Other:')).replace('Other: ','') : '';
+                return '<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:6px 10px;border:1px solid #ddd;border-radius:8px;background:' + (otherChecked ? '#f0f9f3' : '#fff') + '">' +
+                  '<input type="checkbox" id="resolve-other-check-' + d.id + '" ' + (otherChecked ? 'checked' : '') + ' style="width:auto;accent-color:#1F4D2E" onchange="document.getElementById(\'resolve-other-text-' + d.id + '\').style.display = this.checked ? \'block\' : \'none\'">' + t('resolveOther') + '</label>' +
+                  '<input type="text" id="resolve-other-text-' + d.id + '" placeholder="' + t('describeWhatDone') + '" value="' + otherText + '" style="display:' + (otherChecked ? 'block' : 'none') + ';width:100%;font-size:13px;padding:8px 12px;border:1px solid #ddd;border-radius:8px;margin-top:-2px;font-family:inherit">';
+              })() +
+            '</div>' +
+            '<div style="margin-bottom:12px">' +
+              '<label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:6px">' + t('notes') + ' <span style="font-weight:400;color:#aaa">' + t('optional') + '</span></label>' +
+              '<p style="font-size:11px;color:#A32D2D;background:#FCEBEB;border-radius:6px;padding:6px 10px;margin-bottom:6px">⚠️ ' + t('credWarning') + '</p>' +
+              '<textarea id="resolve-note" rows="3" placeholder="' + t('notePlaceholder') + '" style="width:100%;font-size:13px;padding:8px 12px;border:1px solid #ddd;border-radius:8px;resize:none;font-family:inherit">' + (d.resolveNote || '') + '</textarea>' +
+            '</div>' +
+            '<button class="resolve-btn" onclick="saveAll(' + d.id + ')" style="background:#1F4D2E;font-size:15px;padding:13px">' + t('saveBtn') + '</button>' +
+          '</div>' +
+
+          (shouldShowPartialResolveBox(d) ?
+            '<div id="mode-escalate-fields-' + d.id + '" style="display:none">' +
+              '<p style="font-size:12px;color:#5B21B6;margin:0 0 12px;line-height:1.4">' + t('partialResolveDesc') + '</p>' +
+              (d.pw === 'no' ?
+                '<div style="background:#EAF3EC;border:1px solid #BBD8C2;border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:12px;color:#1F4D2E">🔑 ' + t('partialResolveStepPw') + '</div>'
+              : '') +
+              '<label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px">' + t('partialFixNoteLabel') + ' <span style="color:#A32D2D;font-size:11px">*' + t('required') + '</span></label>' +
+              '<textarea id="partial-fix-note-' + d.id + '" rows="2" placeholder="' + t('partialFixNotePlaceholder') + '" style="width:100%;font-size:13px;padding:8px 12px;border:1px solid #C4B5FD;border-radius:8px;resize:none;font-family:inherit;margin-bottom:12px"></textarea>' +
+              '<label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px">' + t('escReasonLabel') + ' <span style="color:#A32D2D;font-size:11px">*' + t('required') + '</span></label>' +
+              '<select id="partial-esc-reason-' + d.id + '" style="width:100%;font-size:13px;padding:8px 12px;border:1px solid #C4B5FD;border-radius:8px;margin-bottom:10px;background:#fff">' +
+                '<option value="">' + t('escReasonPlaceholder') + '</option>' +
+                (Array.isArray(t('escReasons')) ? t('escReasons') : []).map(function(r) {
+                  return '<option value="' + r + '">' + r + '</option>';
+                }).join('') +
+              '</select>' +
+              '<label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px">' + t('escNoteLabel').replace('{target}', escalationTargetName()) + ' <span style="color:#A32D2D;font-size:11px">*' + t('required') + '</span></label>' +
+              '<textarea id="partial-esc-note-' + d.id + '" rows="2" placeholder="' + t('escNotePlaceholder') + '" style="width:100%;font-size:13px;padding:8px 12px;border:1px solid #C4B5FD;border-radius:8px;resize:none;font-family:inherit;margin-bottom:12px"></textarea>' +
+              '<button onclick="partialResolveAndEscalate(' + d.id + ')" style="width:100%;background:#5B21B6;color:#fff;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:600;cursor:pointer">⚡ ' + t('partialResolveBtn').replace('{target}', escalationTargetName()) + '</button>' +
+            '</div>'
+          : '') +
+        '</div>'
+      ))
     ) : '') +
-    '<p class="section-title">' + t('deviceDetails') + '</p>' +
+    (d.resolved ? '<div class="resolved-badge" style="margin-top:14px">✅ Marked resolved: ' + d.resolveStatus + (d.resolveNote ? ' — ' + d.resolveNote : '') + (d.resolvedDate ? '<span style="font-weight:400;margin-left:8px;color:#555">(' + d.resolvedDate + ')</span>' : '') + '</div>' : '') +
+    '<button onclick="toggleSettingsSection(\'device-details-' + d.id + '\', this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 0;background:none;border:none;border-top:1px solid #eee;cursor:pointer;text-align:left;margin-top:6px">' +
+      '<span class="section-title" style="margin:0">' + t('deviceDetails') + '</span>' +
+      '<span class="sec-arrow" style="font-size:14px;color:#888">▸</span>' +
+    '</button>' +
+    '<div id="sec-device-details-' + d.id + '" style="display:none">' +
     '<div class="detail-row"><span class="detail-key">' + t('detailBrand') + '</span><span class="detail-val">' + d.brand + '</span></div>' +
     (d.model ? '<div class="detail-row"><span class="detail-key">' + t('modelLabel') + '</span><span class="detail-val">' + d.model + '</span></div>' : '') +
     (d.serial ? '<div class="detail-row"><span class="detail-key">' + t('serialLabel') + '</span><span class="detail-val">' + d.serial + '</span></div>' : '') +
@@ -338,77 +401,36 @@ function showDetail(id, keepScreen) {
     '<div id="vuln-results-' + d.id + '" style="margin-top:8px"></div>' +
     (d.autoUpdate ? '<div class="detail-row"><span class="detail-key">Auto-update</span><span class="detail-val">' + d.autoUpdate + '</span></div>' : '') +
     (d.lastFirmware ? '<div class="detail-row"><span class="detail-key">Last device software update</span><span class="detail-val">' + new Date(d.lastFirmware).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'}) + '</span></div>' : '') +
-    (canSeeIssue(d) ? deviceTimelineHTML(d) : '') +
-    (d.resolved ? '<div class="resolved-badge" style="margin-top:14px">✅ Marked resolved: ' + d.resolveStatus + (d.resolveNote ? ' — ' + d.resolveNote : '') + (d.resolvedDate ? '<span style="font-weight:400;margin-left:8px;color:#555">(' + d.resolvedDate + ')</span>' : '') + '</div>' : '') +
-    ((canResolveIssues(d) && canSeeIssue(d) && !shouldShowPartialResolveBox(d) && (!d.needsOwnerAction || isEscalationPrimaryActor(d))) ? ('<div class="health-box">' +
-      '<div class="health-title">' + t('healthTitle') + ' <span style="color:#A32D2D;font-size:11px;font-weight:600">* required</span></div>' +
-      '<div id="health-warning-' + d.id + '" style="display:none;background:#FCEBEB;border:1px solid #F09595;border-radius:6px;padding:8px 12px;margin-bottom:8px;font-size:12px;color:#791F1F;align-items:center;gap:6px">⚠️ Please select a device software update status before saving.</div>' +
-      (Array.isArray(t('healthOpts')) ? t('healthOpts') : []).map(function(opt) {
-        const sel = d.healthStatus === opt;
-        return '<label class="health-opt ' + (sel ? 'selected' : '') + '">' +
-          '<input type="radio" name="health-' + d.id + '" value="' + opt + '" ' + (sel ? 'checked' : '') + ' style="width:auto;accent-color:#1F4D2E"> ' + opt +
-        '</label>';
-      }).join('') +
-      
-      
-      (d.healthDate ? '<p class="health-stamp">' + t('healthStamp') + ' ' + d.healthDate + '</p>' : '') +
-    '</div>') : '') +
-    // ----- ADDRESS IT (resolve) -----
-    // Rules:
-    //  - Technician using partial-resolve box → hidden (purple box handles it)
-    //  - Owner when Carlos is primary actor → hidden until they click "Step in"
-    //    (takeOwnership clears the escalation, then d.needsOwnerAction becomes false
-    //    and this block renders on the next showDetail call)
-    //  - Manager (primary actor) or Owner who has stepped in → always visible
-    //  - Owner when no Manager exists (Owner IS primary) → visible as normal
-    (canResolveIssues(d) && canSeeIssue(d) &&
-     !shouldShowPartialResolveBox(d) &&
-     (!d.needsOwnerAction || isEscalationPrimaryActor(d)) ? (
-    (getRisk(d.brand, d.pw) === 'green' && !d.resolved ?
-      verifyBoxHTML(d) : '') +
-    (getRisk(d.brand, d.pw) !== 'green' || d.resolved ?
-      '<div class="resolve-box">' +
-      '<div class="resolve-title">' + t('resolveTitle') + '</div>' +
-      
-      '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">' +
-        (Array.isArray(t('resolveActions')) ? t('resolveActions') : []).map(function(opt) {
-          const checked = d.resolveStatus && d.resolveStatus.split(',').map(s=>s.trim()).includes(opt);
-          return '<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:6px 10px;border:1px solid #ddd;border-radius:8px;background:' + (checked ? '#f0f9f3' : '#fff') + '">' +
-            '<input type="checkbox" value="' + opt + '" class="resolve-action" ' + (checked ? 'checked' : '') + ' style="width:auto;accent-color:#1F4D2E"> ' + opt +
-          '</label>';
-        }).join('') +
-        (function() {
-          const otherChecked = d.resolveStatus && d.resolveStatus.split(',').map(s=>s.trim()).some(s => s.startsWith('Other:'));
-          const otherText = otherChecked ? d.resolveStatus.split(',').map(s=>s.trim()).find(s => s.startsWith('Other:')).replace('Other: ','') : '';
-          return '<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:6px 10px;border:1px solid #ddd;border-radius:8px;background:' + (otherChecked ? '#f0f9f3' : '#fff') + '">' +
-            '<input type="checkbox" id="resolve-other-check-' + d.id + '" ' + (otherChecked ? 'checked' : '') + ' style="width:auto;accent-color:#1F4D2E" onchange="document.getElementById(\'resolve-other-text-' + d.id + '\').style.display = this.checked ? \'block\' : \'none\'">' + t('resolveOther') + '</label>' +
-          '<input type="text" id="resolve-other-text-' + d.id + '" placeholder="' + t('describeWhatDone') + '" value="' + otherText + '" style="display:' + (otherChecked ? 'block' : 'none') + ';width:100%;font-size:13px;padding:8px 12px;border:1px solid #ddd;border-radius:8px;margin-top:-2px;font-family:inherit">';
-        })() +
-      '</div>' +
-      
-      
-      '<div style="margin-bottom:12px">' +
-      '<label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:6px">' + t('notes') + ' <span style="font-weight:400;color:#aaa">' + t('optional') + '</span></label>' +
-      '<p style="font-size:11px;color:#A32D2D;background:#FCEBEB;border-radius:6px;padding:6px 10px;margin-bottom:6px">⚠️ ' + t('credWarning') + '</p>' +
-      '<textarea id="resolve-note" rows="3" placeholder="' + t('notePlaceholder') + '" style="width:100%;font-size:13px;padding:8px 12px;border:1px solid #ddd;border-radius:8px;resize:none;font-family:inherit">' + (d.resolveNote || '') + '</textarea>' +
     '</div>' +
-    '<button class="resolve-btn" onclick="saveAll(' + d.id + ')" style="background:#1F4D2E;font-size:15px;padding:13px">' + t('saveBtn') + '</button>' +
-    '</div>' : '')
-    ) : '') +
+    (canSeeIssue(d) && canSeeDetailedRisk() ? deviceTimelineHTML(d) : '') +
     // ----- VIEW-ONLY note — user can neither resolve nor assign an open issue (but can see it) -----
     ((canSeeIssue(d) && !canResolveIssues() && !canAssignIssues() && !d.resolved && (getRisk(d.brand, d.pw) !== 'green')) ?
-      '<div class="resolve-box" style="background:#F4F6F8;border:1px solid #d9dee3">' +
-        '<p style="font-size:13px;color:#555;margin:0">🔒 ' + t('viewOnlyIssueNote') + '</p>' +
-      '</div>' : '') +
+      (function() {
+        const statusKey = farmHandNoteKey(d);
+        return '<div class="resolve-box" style="background:#F4F6F8;border:1px solid #d9dee3">' +
+          '<p style="font-size:13px;color:#333;margin:0;font-weight:' + (d.farmHandStatus ? '600' : '400') + '">🔒 ' + t(statusKey) + '</p>' +
+        '</div>';
+      })() : '') +
+    // ----- OBSERVATION — view-only roles can report something regardless of
+    // current status; this is their only way to flag a new problem, so it
+    // can't be nested inside the "already has a known issue" block above -----
+    (!canSeeDetailedRisk() && canSeeIssue(d) ?
+      '<div class="resolve-box" id="observation-box-' + d.id + '">' +
+        '<div class="resolve-title">' + t('observationTitle') + '</div>' +
+        '<p style="font-size:12px;color:#777;margin:-4px 0 10px">' + t('observationDesc') + '</p>' +
+        '<textarea id="observation-note-' + d.id + '" rows="2" placeholder="' + t('observationPlaceholder') + '" style="width:100%;font-size:13px;padding:8px 12px;border:1px solid #ddd;border-radius:8px;resize:none;font-family:inherit;margin-bottom:10px"></textarea>' +
+        '<button onclick="submitObservation(' + d.id + ')" style="width:100%;background:#1F4D2E;color:#fff;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:600;cursor:pointer">' + t('observationBtn') + '</button>' +
+      '</div>'
+    : '') +
     // ----- ESCALATE: send to Manager (or Owner if no Manager) -----
     (canEscalateIssue(d) && !shouldShowPartialResolveBox(d) ? (
-      '<div class="resolve-box" style="background:#FFFBF2;border:1px solid #E6C77A;margin-top:10px">' +
-        '<div class="resolve-title" style="color:#7A3E00">🚩 ' + t('escTitle') + '</div>' +
-        '<p style="font-size:12px;color:#5A4413;margin:0 0 10px 0;line-height:1.4">' +
+      '<div class="resolve-box" style="background:#FAF5FF;border:1px solid #C4B5FD;margin-top:10px">' +
+        '<div class="resolve-title" style="color:#5B21B6"><i class="ti ti-flag" style="font-size:15px;vertical-align:-2px;color:#3B0764" aria-hidden="true"></i> ' + t('escTitle') + '</div>' +
+        '<p style="font-size:12px;color:#5B21B6;margin:0 0 10px 0;line-height:1.4">' +
           t('escDesc').replace('{target}', escalationTargetName()) +
         '</p>' +
         '<label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px">' + t('escReasonLabel') + '</label>' +
-        '<select id="esc-reason-' + d.id + '" style="width:100%;font-size:13px;padding:8px 12px;border:1px solid #ddd;border-radius:8px;margin-bottom:10px;background:#fff">' +
+        '<select id="esc-reason-' + d.id + '" style="width:100%;font-size:13px;padding:8px 12px;border:1px solid #C4B5FD;border-radius:8px;margin-bottom:10px;background:#fff">' +
           '<option value="">' + t('escReasonPlaceholder') + '</option>' +
           (Array.isArray(t('escReasons')) ? t('escReasons') : []).map(function(r) {
             return '<option value="' + r + '">' + r + '</option>';
@@ -417,8 +439,8 @@ function showDetail(id, keepScreen) {
         '<label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px">' +
           t('escNoteLabel').replace('{target}', escalationTargetName()) +
         '</label>' +
-        '<textarea id="esc-note-' + d.id + '" rows="2" placeholder="' + t('escNotePlaceholder') + '" style="width:100%;font-size:13px;padding:8px 12px;border:1px solid #ddd;border-radius:8px;resize:none;font-family:inherit;margin-bottom:10px"></textarea>' +
-        '<button onclick="escalateIssue(' + d.id + ')" style="width:100%;background:#7A3E00;color:#fff;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:600;cursor:pointer">🚩 ' +
+        '<textarea id="esc-note-' + d.id + '" rows="2" placeholder="' + t('escNotePlaceholder') + '" style="width:100%;font-size:13px;padding:8px 12px;border:1px solid #C4B5FD;border-radius:8px;resize:none;font-family:inherit;margin-bottom:10px"></textarea>' +
+        '<button onclick="escalateIssue(' + d.id + ')" style="width:100%;background:#5B21B6;color:#fff;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:600;cursor:pointer"><i class="ti ti-flag" style="font-size:15px;vertical-align:-2px" aria-hidden="true"></i> ' +
           t('escSendBtn').replace('{target}', escalationTargetName()) +
         '</button>' +
       '</div>'
@@ -432,6 +454,22 @@ function showDetail(id, keepScreen) {
 }
 
 // Builds the "Assign this issue" box shown to users with assign permission.
+// Toggles the unified resolve/escalate box between its two modes. Resolve is
+// the default on every render — escalate is an available alternative the
+// assigned person switches to, never the only path they're shown.
+function setIssueMode(id, mode) {
+  const resolveFields = document.getElementById('mode-resolve-fields-' + id);
+  const escalateFields = document.getElementById('mode-escalate-fields-' + id);
+  const resolveBtn = document.getElementById('mode-resolve-btn-' + id);
+  const escalateBtn = document.getElementById('mode-escalate-btn-' + id);
+  const escalateIcon = document.getElementById('mode-escalate-icon-' + id);
+  if (resolveFields) resolveFields.style.display = mode === 'resolve' ? 'block' : 'none';
+  if (escalateFields) escalateFields.style.display = mode === 'escalate' ? 'block' : 'none';
+  if (resolveBtn) resolveBtn.classList.toggle('active', mode === 'resolve');
+  if (escalateBtn) escalateBtn.classList.toggle('active-escalate', mode === 'escalate');
+  if (escalateIcon) escalateIcon.style.color = mode === 'escalate' ? '#fff' : '#3B0764';
+}
+
 function assignBoxHTML(d) {
   const members = assignableMembers();
   if (members.length === 0) {
@@ -448,12 +486,21 @@ function assignBoxHTML(d) {
     }).join('');
   const primaryLabel = d.assignedTo ? t('reassignBtn') : t('assignBtn');
   const isReassign = !!d.assignedTo;
+  const fhStatus = d.farmHandStatus || '';
+  const fhOptions = ['', 'keep-using', 'use-caution', 'do-not-use'].map(function(val) {
+    const sel = fhStatus === val ? ' selected' : '';
+    const label = val === '' ? t('fhStatusDefault') : val === 'keep-using' ? t('fhStatusKeepUsing') : val === 'use-caution' ? t('fhStatusUseCaution') : t('fhStatusDoNotUse');
+    return '<option value="' + val + '"' + sel + '>' + label + '</option>';
+  }).join('');
   return '<div class="resolve-box">' +
     '<div class="resolve-title">' + t('assignTitle') + '</div>' +
     '<p style="font-size:12px;color:#777;margin:-4px 0 10px">' + t('assignDesc') + '</p>' +
     '<select id="assign-select-' + d.id + '" style="width:100%;font-size:14px;padding:10px 12px;border:1px solid #ddd;border-radius:8px;background:#fff;font-family:inherit;margin-bottom:10px">' + options + '</select>' +
     '<label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px">' + t('assignNoteLabel') + ' <span style="color:#A32D2D;font-size:11px">*' + t('required') + '</span></label>' +
     '<textarea id="assign-note-' + d.id + '" rows="2" placeholder="' + t('assignNotePlaceholder') + '" style="width:100%;font-size:13px;padding:8px 12px;border:1px solid #ddd;border-radius:8px;resize:none;font-family:inherit;margin-bottom:10px"></textarea>' +
+    '<label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px">' + t('fhStatusLabel') + '</label>' +
+    '<p style="font-size:11px;color:#888;margin:-2px 0 6px">' + t('fhStatusDesc') + '</p>' +
+    '<select id="fh-status-' + d.id + '" style="width:100%;font-size:13px;padding:8px 12px;border:1px solid #ddd;border-radius:8px;background:#fff;font-family:inherit;margin-bottom:10px">' + fhOptions + '</select>' +
     '<div style="display:flex;gap:8px">' +
       '<button class="resolve-btn" onclick="assignIssue(' + d.id + ')" style="background:#1F4D2E;flex:1">' + primaryLabel + '</button>' +
       (isReassign ? '<button class="resolve-btn" onclick="unassignIssue(' + d.id + ')" style="background:#fff;color:#A32D2D;border:1px solid #E0B4B4;flex:0 0 auto;padding-left:16px;padding-right:16px">' + t('unassignBtn') + '</button>' : '') +
@@ -467,6 +514,7 @@ function assignIssue(id) {
   if (!d) return;
   const sel = document.getElementById('assign-select-' + id);
   const noteEl = document.getElementById('assign-note-' + id);
+  const fhStatusEl = document.getElementById('fh-status-' + id);
   if (!sel) return;
   const name = sel.value;
   const noteVal = noteEl ? noteEl.value.trim() : '';
@@ -474,6 +522,7 @@ function assignIssue(id) {
   if (!noteVal) { alert(t('handoffNoteRequired')); return; }
   const prev = d.assignedTo;
   d.assignedTo = name;
+  d.farmHandStatus = fhStatusEl ? fhStatusEl.value : '';
   if (!Array.isArray(d.handoffLog)) d.handoffLog = [];
   d.handoffLog.push({
     type: prev ? 'reassign' : 'assign',
@@ -508,6 +557,7 @@ function showScreen(name, btn) {
   // by a non-Owner (e.g. stale UI state), same defense-in-depth as other role gates.
   if (name === 'apps' && !canSeeApps()) { name = 'dashboard'; btn = document.querySelector('.nav-btn'); }
   if (name === 'backups' && !canSeeBackups()) { name = 'dashboard'; btn = document.querySelector('.nav-btn'); }
+  if (name === 'network' && !canSeeNetworkIssue()) { name = 'dashboard'; btn = document.querySelector('.nav-btn'); }
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('screen-' + name).classList.add('active');

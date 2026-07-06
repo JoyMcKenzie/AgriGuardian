@@ -61,7 +61,11 @@ function refreshRoleDropdowns() {
     const sel = document.getElementById(id);
     if (!sel) return;
     const currentVal = sel.value;
-    let html = '<option value="Manager">' + t('roleManager') + '</option>' +
+    // Only Owner can invite another Manager — a Manager inviting a peer
+    // would be a lateral privilege move, the same thing canActOnMember()
+    // already blocks for editing/archiving. Filtering it out of the invite
+    // dropdown closes the one other place a Manager could be created.
+    let html = (currentUser.role === 'Owner' ? '<option value="Manager">' + t('roleManager') + '</option>' : '') +
       '<option value="Technician">' + t('roleTechnician') + '</option>' +
       '<option value="Farm Hand">' + t('roleFarmHand') + '</option>' +
       '<option value="Viewer">' + t('roleViewer') + '</option>';
@@ -70,7 +74,7 @@ function refreshRoleDropdowns() {
     });
     html += '<option value="__custom__">' + t('addNewRoleOption') + '</option>';
     sel.innerHTML = html;
-    if (getAllRoleNames().includes(currentVal)) sel.value = currentVal;
+    if (getAllRoleNames().includes(currentVal) && currentVal !== 'Manager') sel.value = currentVal;
   });
 }
 
@@ -89,6 +93,13 @@ function inviteMember() {
   if (!name) { alert(t('enterMemberName')); return; }
   if (!phone) { alert(t('enterPhone')); return; }
   if (teamMembers.find(m => m.phone === phone)) { alert(t('alreadyInvited')); return; }
+  // Defense-in-depth: the dropdown already hides this option for non-Owner
+  // inviters, but a stored form value or programmatic call shouldn't be
+  // able to bypass it either. Only Owner can create another Manager.
+  if (role === 'Manager' && currentUser.role !== 'Owner') {
+    alert(t('onlyOwnerCanInviteManager'));
+    return;
+  }
 
   const btn = document.getElementById('btn-invite');
   btn.textContent = t('sending');

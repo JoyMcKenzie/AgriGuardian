@@ -1,8 +1,21 @@
 /* AgriGuardian: dashboard alerts and list */
+// Devices with at least one observation reported by a view-only role that
+// hasn't been resolved yet. Farm Hand/Viewer's only contribution to the
+// workflow is reporting something — this is what makes sure it actually
+// gets seen instead of only existing if someone happens to open that exact
+// device's page or go looking in the audit log.
+function observedDevices() {
+  return devices.filter(d =>
+    !d.archived && !d.resolved &&
+    Array.isArray(d.handoffLog) &&
+    d.handoffLog.some(e => e.type === 'observation')
+  );
+}
+
 function renderDashList() {
   const activeDevices = [...devices].filter(d => !d.archived);
-  const redDevices = activeDevices.filter(d => !d.resolved && getRisk(d.brand,d.pw,d.healthStatus)==='red' && canSeeIssue(d));
-  const yellowDevices = activeDevices.filter(d => !d.resolved && getRisk(d.brand,d.pw,d.healthStatus)==='yellow' && canSeeIssue(d));
+  const redDevices = activeDevices.filter(d => !d.resolved && getRisk(d.brand,d.pw,d.healthStatus)==='red' && canSeeIssue(d) && (canSeeDetailedRisk() || canFarmHandSeeDevice(d)));
+  const yellowDevices = activeDevices.filter(d => !d.resolved && getRisk(d.brand,d.pw,d.healthStatus)==='yellow' && canSeeIssue(d) && (canSeeDetailedRisk() || canFarmHandSeeDevice(d)));
   const netRed = canSeeNetworkIssue() ? networks.filter(n => !n.resolved && !n.archived && getNetRisk(n) === 'red') : [];
   const netYellow = canSeeNetworkIssue() ? networks.filter(n => !n.resolved && !n.archived && getNetRisk(n) === 'yellow') : [];
   const deviceProblems = redDevices.length + yellowDevices.length;
@@ -80,12 +93,28 @@ function renderDashList() {
     // Escalated items — exclude partially-resolved ones (they show in the purple section below)
     const escDevs = escalatedDevices().filter(d => !d.partiallyResolved);
     if (escDevs.length > 0) {
-      html += '<p style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin:14px 0 8px">🚩 ' + t('escDashLabel') + '</p>';
+      html += '<p style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin:14px 0 8px"><i class="ti ti-flag" style="font-size:12px;color:#3B0764;vertical-align:-1px" aria-hidden="true"></i> ' + t('escDashLabel') + '</p>';
       html += escDevs.map(function(d) {
-        return '<div style="background:#FFF6E5;border:1px solid #E6A75A;border-radius:8px;padding:10px 12px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px" onclick="showDetail(' + d.id + ')">' +
+        return '<div style="background:#FAF5FF;border:1px solid #C4B5FD;border-radius:8px;padding:10px 12px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px" onclick="showDetail(' + d.id + ')">' +
           '<div>' +
-            '<div style="font-size:13px;font-weight:600;color:#7A3E00">' + (d.label || d.type) + '</div>' +
-            '<div style="font-size:12px;color:#5A4413">' + d.brand + (d.escalation && d.escalation.reason ? ' — ' + d.escalation.reason : '') + '</div>' +
+            '<div style="font-size:13px;font-weight:600;color:#5B21B6">' + (d.label || d.type) + '</div>' +
+            '<div style="font-size:12px;color:#5B21B6">' + d.brand + (d.escalation && d.escalation.reason ? ' — ' + d.escalation.reason : '') + '</div>' +
+          '</div>' +
+          '<i class="ti ti-chevron-right" style="color:#9a9a9a;font-size:16px;flex-shrink:0"></i>' +
+        '</div>';
+      }).join('');
+    }
+    // Observations reported by Farm Hand/Viewer roles — the only way those
+    // reports surface without someone happening to open the exact device.
+    const obsDevs = observedDevices();
+    if (obsDevs.length > 0) {
+      html += '<p style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin:14px 0 8px"><i class="ti ti-eye" style="font-size:12px;color:#1A3A6B;vertical-align:-1px" aria-hidden="true"></i> ' + t('obsDashLabel') + '</p>';
+      html += obsDevs.map(function(d) {
+        const lastObs = [...d.handoffLog].reverse().find(e => e.type === 'observation');
+        return '<div style="background:#F0F6FF;border:1px solid #92B4E3;border-radius:8px;padding:10px 12px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px" onclick="showDetail(' + d.id + ')">' +
+          '<div>' +
+            '<div style="font-size:13px;font-weight:600;color:#1A3A6B">' + (d.label || d.type) + '</div>' +
+            '<div style="font-size:12px;color:#1A3A6B">' + (lastObs ? lastObs.from + ' — ' + lastObs.note : '') + '</div>' +
           '</div>' +
           '<i class="ti ti-chevron-right" style="color:#9a9a9a;font-size:16px;flex-shrink:0"></i>' +
         '</div>';
@@ -131,7 +160,11 @@ function renderDashList() {
     html += card(t('dashNetworkProblems'), networkProblems, navNetwork);
     const escDevs = escalatedDevices();
     if (escDevs.length > 0) {
-      html += card('🚩 ' + t('escDashLabel'), escDevs.length, 'showEscalatedOnly()');
+      html += card('<i class="ti ti-flag" style="font-size:13px;color:#3B0764;vertical-align:-1px" aria-hidden="true"></i> ' + t('escDashLabel'), escDevs.length, 'showEscalatedOnly()');
+    }
+    const obsDevs = observedDevices();
+    if (obsDevs.length > 0) {
+      html += card('<i class="ti ti-eye" style="font-size:13px;color:#1A3A6B;vertical-align:-1px" aria-hidden="true"></i> ' + t('obsDashLabel'), obsDevs.length, navDevices);
     }
     // All assigned work
     const allAssigned = activeDevices.filter(d => d.assignedTo && !d.resolved);
@@ -195,10 +228,25 @@ function renderDashList() {
 
   // ── DEFAULT (Farm Hand, Viewer) ────────────────────────────────────────────
   } else {
-    html += card(t('dashDeviceProblems'), deviceProblems, navDevices);
-    html += card(t('dashNetworkProblems'), networkProblems, navNetwork);
-    if (deviceProblems + networkProblems === 0) {
-      html += '<div style="background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:12px 14px;font-size:13px;color:#333;display:flex;align-items:center;gap:10px"><div style="width:10px;height:10px;border-radius:50%;background:#2E7A4E;flex-shrink:0"></div><span>' + t('allGoodMsg') + '</span></div>';
+    // No separate "N problems" count card here — it would color its number
+    // by severity (red if >0), the same leak the per-device notes below are
+    // built to avoid. The device list itself, with neutral per-device notes,
+    // is the complete picture; a count on top of it adds a cue, not information.
+    html += '<p style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 8px">' + t('dashYourDevices') + '</p>';
+    if (activeDevices.length === 0) {
+      html += '<p style="font-size:13px;color:#888;font-style:italic">' + t('noDevicesFound') + '</p>';
+    } else {
+      html += activeDevices.map(function(d) {
+        const dRisk = getRisk(d.brand, d.pw, d.healthStatus);
+        const fhLabel = dRisk !== 'green' && !d.farmHandStatus ? t('fhBadgeKnownIssue')
+          : d.farmHandStatus === 'do-not-use' ? t('fhBadgeDoNotUse')
+          : d.farmHandStatus === 'use-caution' ? t('fhBadgeCaution')
+          : t('fhBadgeFine');
+        return '<div style="background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:10px 12px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px" onclick="showDetail(' + d.id + ')">' +
+          '<span style="font-size:13px;color:#333">' + (d.label || d.type) + '</span>' +
+          '<span style="font-size:12px;color:#666;font-weight:600">' + fhLabel + '</span>' +
+        '</div>';
+      }).join('');
     }
   }
 

@@ -16,6 +16,22 @@ function defaultPermsForRole(role) {
   return { addDevices: false, archiveDelete: false, resolveIssues: false, assignIssues: false, exportReports: false, viewOnly: true };
 }
 
+// Farm Hand / Viewer see every device that exists — hiding a device's
+// existence isn't what least-privilege is protecting here, its technical
+// severity is. What varies is the note: a generic one until Management
+// reviews it, a specific one after. Neither is colored by how serious the
+// underlying issue actually is — color itself is a severity cue, and that
+// judgment isn't theirs to make. Returns the note key to display, or null
+// for a genuinely healthy device (no note needed at all).
+function farmHandNoteKey(d) {
+  if (!d) return null;
+  if (getRisk(d.brand, d.pw, d.healthStatus) === 'green') return null;
+  if (d.farmHandStatus === 'keep-using') return 'fhDisplayKeepUsing';
+  if (d.farmHandStatus === 'use-caution') return 'fhDisplayUseCaution';
+  if (d.farmHandStatus === 'do-not-use') return 'fhDisplayDoNotUse';
+  return 'viewOnlyIssueNote';
+}
+
 function canManage() {
   // Managers have nearly all of the Owner's abilities, except they cannot
   // permanently delete the farm or remove the Owner. Use this for shared
@@ -99,8 +115,8 @@ function hasStructuralIssue(d) {
   return false;
 }
 
-// Should the Technician see the combined partial-resolve+escalate box instead
-// of the regular resolve form? True when:
+// Should the Technician also see the combined partial-resolve+escalate box,
+// alongside the regular resolve form (their choice which applies)? True when:
 //  - They are the assigned person (not Manager/Owner)
 //  - The device has a structural issue that needs escalation
 //  - The device is not already escalated (already dealt with)
@@ -219,6 +235,35 @@ function canSeeEscalationBanner(d) {
 function escalatedDevices() {
   return devices.filter(d => d.needsOwnerAction && !d.resolved && !d.archived);
 }
+// View-only roles can't resolve or escalate, but they can flag something —
+// this is their entire contribution to the workflow, so it has to actually
+// reach someone. Logged to the device's handoff log (Manager/Owner see it;
+// the submitter doesn't, since that log stays gated behind canSeeDetailedRisk)
+// and the audit trail.
+function submitObservation(id) {
+  const d = devices.find(x => x.id === id);
+  if (!d) return;
+  const noteEl = document.getElementById('observation-note-' + id);
+  const noteVal = noteEl ? noteEl.value.trim() : '';
+  if (!noteVal) { alert(t('observationRequired')); return; }
+  if (!Array.isArray(d.handoffLog)) d.handoffLog = [];
+  d.handoffLog.push({
+    type: 'observation',
+    from: currentUser.name || currentUser.role,
+    to: escalationTargetName(),
+    note: noteVal,
+    date: localTimestamp()
+  });
+  logAction(t('handoffTypeObservation'), (d.label || d.type) + ' — ' + noteVal);
+  const btn = document.getElementById('observation-box-' + id) ? document.getElementById('observation-box-' + id).querySelector('button') : null;
+  if (noteEl) noteEl.value = '';
+  if (btn) {
+    const orig = btn.textContent;
+    btn.textContent = t('observationSentConfirm');
+    setTimeout(function() { btn.textContent = orig; }, 1800);
+  }
+}
+
 function escalateIssue(id) {
   const d = devices.find(x => x.id === id);
   if (!d) return;

@@ -239,6 +239,8 @@ function _enterApp() {
   if (appsNavBtn) appsNavBtn.style.display = canSeeApps() ? '' : 'none';
   var backupsNavBtn = document.getElementById('nav-btn-backups');
   if (backupsNavBtn) backupsNavBtn.style.display = canSeeBackups() ? '' : 'none';
+  var networkNavBtn = document.getElementById('nav-btn-network');
+  if (networkNavBtn) networkNavBtn.style.display = canSeeNetworkIssue() ? '' : 'none';
   var appLangDd = document.getElementById('lang-dropdown');
   if (appLangDd) appLangDd.value = currentLang;
   setLang(currentLang, 'app');

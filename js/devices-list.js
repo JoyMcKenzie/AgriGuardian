@@ -1,5 +1,20 @@
 /* AgriGuardian: device list, archive, filters */
 function renderDeviceList() {
+  // Archived/All expose device history and inventory management that isn't
+  // relevant to view-only roles — same least-privilege reasoning as the team
+  // members filter. A stale filter value from a previous session can't leak
+  // an unauthorized view either, since it's shared global state, not per-user.
+  const archivedBtn = document.getElementById('filter-archived');
+  const allBtn = document.getElementById('filter-all');
+  if (archivedBtn) archivedBtn.style.display = canSeeDetailedRisk() ? '' : 'none';
+  if (allBtn) allBtn.style.display = canSeeDetailedRisk() ? '' : 'none';
+  if (!canSeeDetailedRisk() && deviceFilter !== 'active') {
+    deviceFilter = 'active';
+    const activeBtn = document.getElementById('filter-active');
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    if (activeBtn) activeBtn.classList.add('active');
+  }
+
   let filtered = devices;
   if (deviceFilter === 'active') filtered = devices.filter(d => !d.archived);
   if (deviceFilter === 'archived') filtered = devices.filter(d => d.archived);
@@ -21,7 +36,7 @@ function renderDeviceList() {
   const list = document.getElementById('device-list');
   let notice = '';
   if (escalatedOnlyFilter) {
-    notice = '<div style="background:#FFF6E5;border:1px solid #E6C77A;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:13px;color:#5A4413;display:flex;align-items:center;justify-content:space-between;gap:10px"><span>🚩 ' + t('escFilterNotice') + '</span><button onclick="clearEscalatedFilter()" style="background:#fff;border:1px solid #C9A24A;color:#5A4413;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer">' + t('escClearFilter') + '</button></div>';
+    notice = '<div style="background:#FAF5FF;border:1px solid #C4B5FD;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:13px;color:#5B21B6;display:flex;align-items:center;justify-content:space-between;gap:10px"><span><i class="ti ti-flag" style="font-size:14px;vertical-align:-2px" aria-hidden="true"></i> ' + t('escFilterNotice') + '</span><button onclick="clearEscalatedFilter()" style="background:#fff;border:1px solid #C4B5FD;color:#5B21B6;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer">' + t('escClearFilter') + '</button></div>';
   }
   if (filtered.length === 0) {
     list.innerHTML = notice + '<p style="font-size:13px;color:#888;font-style:italic;padding:12px 0">No devices ' + (deviceFilter === 'archived' ? 'archived' : 'found') + '.</p>';
@@ -35,6 +50,16 @@ function deviceCardHTML(d, showActions) {
   const canSee = canSeeIssue(d);
   const coarse = canSee && !canSeeDetailedRisk();
   const isPartial = d.partiallyResolved && !d.resolved && d.needsOwnerAction;
+  // Coarse (Farm Hand/Viewer) badge is always neutral gray, regardless of
+  // the underlying issue's severity — color itself is a cue about how
+  // serious something is, and that judgment isn't theirs to make. Short
+  // label here (list context); the full sentence version shows on the
+  // device detail page instead.
+  const fhLabel = realRisk !== 'green' && !d.farmHandStatus ? t('fhBadgeKnownIssue')
+    : d.farmHandStatus === 'do-not-use' ? t('fhBadgeDoNotUse')
+    : d.farmHandStatus === 'use-caution' ? t('fhBadgeCaution')
+    : d.farmHandStatus === 'keep-using' ? t('fhBadgeFine')
+    : t('fhBadgeFine');
   const risk = !canSee ? 'gray' : isPartial ? 'purple' : (coarse ? 'gray' : realRisk);
   const resolvedFull = d.resolved && canSee && !coarse && !d.archived;
   const badgeClass = resolvedFull ? 'badge-green' : 'badge-' + risk;
@@ -42,11 +67,11 @@ function deviceCardHTML(d, showActions) {
   const badgeLabel = !canSee
     ? 'Restricted'
     : isPartial ? t('partiallyResolvedBadge')
-    : (coarse ? 'Check & report' : getRiskBadgeLabel(risk, d.resolved));
-  const dotTitle = !canSee ? 'Not assigned to you' : isPartial ? t('partiallyResolvedBadge') : (coarse ? 'Inspect this device and report any irregularities to your manager' : '');
+    : (coarse ? fhLabel : getRiskBadgeLabel(risk, d.resolved));
+  const dotTitle = !canSee ? 'Not assigned to you' : isPartial ? t('partiallyResolvedBadge') : (coarse ? fhLabel : '');
   const archivedTag = d.archived ? '<span class="archived-tag">Archived</span>' : '';
   const escalatedTag = (d.needsOwnerAction && !d.resolved && canSee)
-    ? '<span style="margin-left:6px;display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:#7A3E00;background:#FFE5B5;border:1px solid #E6A75A;border-radius:10px;padding:1px 7px;vertical-align:middle">🚩 ' + t('escPill') + '</span>'
+    ? '<span style="margin-left:6px;display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:#5B21B6;background:#F3EEFF;border:1px solid #C4B5FD;border-radius:10px;padding:1px 7px;vertical-align:middle"><i class="ti ti-flag" style="font-size:10px" aria-hidden="true"></i> ' + t('escPill') + '</span>'
     : '';
   const partialTag = (isPartial && canSee)
     ? '<span style="margin-left:6px;display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:#5B21B6;background:#F3EEFF;border:1px solid #C4B5FD;border-radius:10px;padding:1px 7px;vertical-align:middle">⚡ ' + t('partiallyResolvedBadge') + '</span>'
