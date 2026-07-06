@@ -8,6 +8,10 @@ straight to the right file instead of cold-reading the project.
 update that file's entry below in the same turn, as part of the normal
 validate-and-deliver pipeline. A stale map is worse than no map.
 
+**Rule:** `index.html` must always include the GoatCounter tracking script
+right before `</body>`, on every delivered version:
+`<script data-goatcounter="https://agriguardian.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>`
+
 Load order (bottom-line dependency order) is in `module-load-order.json` —
 this doc is about *what things do*, that one is about *what loads first*.
 
@@ -62,8 +66,10 @@ this doc is about *what things do*, that one is about *what loads first*.
 
 ### `permissions.js` (380 lines)
 **Purpose:** Single source of truth for role-based access control — what the current user can see/do.
-**Key exports:** `canManage()`, `currentPerms()`, `defaultPermsForRole()`, `canHardDelete()`, `canActOnMember()`, `canResolveIssues()`, `canAssignIssues()`, `canExportReports()`, `hasStructuralIssue()`, `shouldShowPartialResolveBox()`, `canSeeIssue()`, `canSeeDetailedRisk()`, `canSeeNetworkIssue()`, `canSeeHygieneScore()`, `canSeeApps()`, `assignableMembers()`, `canEscalateIssue()`, `escalationTarget()`, `escalationTargetName()`, `canClearEscalation()`, `isEscalationPrimaryActor()`.
-**Depends on:** `currentUser`.
+**Key exports:** `canManage()`, `currentPerms()`, `defaultPermsForRole()`, `canFarmHandSeeDevice()`, `canHardDelete()`, `canActOnMember()`, `canResolveIssues()`, `canAssignIssues()`, `canExportReports()`, `hasStructuralIssue()`, `shouldShowPartialResolveBox()`, `canSeeIssue()`, `canSeeDetailedRisk()`, `canSeeNetworkIssue()`, `canSeeHygieneScore()`, `canSeeApps()`, `assignableMembers()`, `canEscalateIssue()`, `escalationTarget()`, `escalationTargetName()`, `canClearEscalation()`, `isEscalationPrimaryActor()`, `submitObservation()`.
+**Depends on:** `currentUser`, `getRisk()` (`risk.js`).
+**Notes:** Farm Hand/Viewer least-privilege model, corrected: **every** device is visible to them now — hiding a device's existence was never the actual protection; hiding its technical severity is. `farmHandNoteKey()` returns which note applies (generic "known issue" until reviewed, specific once Management sets a status) — but the note is **never color-coded by severity**. A colored badge is itself a cue about how serious something is, and that judgment isn't a view-only role's to make; red and yellow devices both render identically as a neutral gray "Known issue" until reviewed. Applied consistently in `devices-list.js` (badge), `devices-detail.js` (the view-only note box), and `dashboard.js` ("Your devices" list, which now also dropped the separate colored "N problems" count card for the same reason — it's redundant now that every device shows its own neutral note, and the count itself was colored red/green by severity). `submitObservation()` is the one thing view-only roles can still do regardless of current status — genuinely "observe and report," logged to the device's handoff log. `observedDevices()` (`dashboard.js`) is what makes that report actually surface to Owner/Manager instead of only existing if someone happens to open that exact device's page.
+**Fixed (found via direct code review, not a reported bug):** A Manager could previously invite or attempt to invite another Manager — a lateral privilege move `canActOnMember()` already blocked for editing/archiving, but the invite path (`team.js`'s `refreshRoleDropdowns()`/`inviteMember()`) had no equivalent guard. Fixed with both a UI filter (Manager option hidden from the dropdown unless the inviter is Owner) and a function-level check, matching the defense-in-depth pattern used elsewhere in this app.
 **Used by:** `devices-detail.js`, `devices-resolve.js`, `devices-list.js`, `apps.js`, `networks.js`, `team.js`, `settings.js`, `dashboard.js`, `auth-ui.js` (`defaultPermsForRole()` is shared by `inviteMember()` and `joinFarm()` so a role gets the same real permissions whether it was assigned by an Owner invite or accepted via the invite-code flow) — this is the RBAC gate; any "who can click this button" question starts here.
 **Known issue (from prior audit):** archive/delete/add-device actions in `devices-list.js`/`devices-detail.js` are not yet gated through this file — RBAC enforcement gap.
 
@@ -72,6 +78,7 @@ this doc is about *what things do*, that one is about *what loads first*.
 **Key exports:** `getRiskData()`, `getRisk()`, `translateLocation()`, `translateDeviceType()`, `getRiskLabel()`, `getRiskWhy()`, `getRiskAction()`.
 **Depends on:** `t()`.
 **Used by:** `devices-list.js`, `devices-detail.js`, `dashboard.js`.
+**Notes:** Also holds the seed `devices` array. 2 devices (Tractor guidance unit, Office network router) are genuinely green at the brand/data level, so Farm Hand/Viewer see them on a fresh load with zero setup. The other 4 are genuinely unreviewed — no `farmHandStatus` is hardcoded in seed data on purpose, so a demo walkthrough has to actually exercise the real feature (Owner/Manager assigns a device and sets its status through `assignBoxHTML()`) rather than a pre-baked end state. `canFarmHandSeeDevice()` (`permissions.js`) is what a device needs to pass to appear in their list at all.
 **Notes:** `getRiskData()` must remain a function (not a static object) so brand-specific notes stay translatable via `t()`.
 
 ### `networks-data.js` (145 lines)
@@ -89,19 +96,24 @@ this doc is about *what things do*, that one is about *what loads first*.
 **Key exports:** `renderDashList()`, `alertRow()`.
 **Depends on:** `risk.js`, `networks-data.js`, `permissions.js`, `t()`.
 **Used by:** entry screen after login (`auth-ui.js` routes here on successful sign-in).
+**Notes:** Escalated-devices card recolored to purple (was amber) — escalation now uses one consistent color across the app; "returned to tech" stays its own amber/orange, a distinct concept (Manager sending work back, not escalating). Farm Hand/Viewer: the "Network problems" card is removed entirely (no network access at all now, matching `nav-btn-network` being hidden in `auth-ui.js`) — showing a clickable card that just bounces them back was worse than not showing it. `deviceProblems` count now matches `canFarmHandSeeDevice()` filtering so the dashboard number agrees with what actually appears in the device list. Added a "Your devices" list to their dashboard branch — previously they only saw a problem count and an "all good" message, with no way to see their actual visible devices without navigating to the Devices tab.
 
 ### `devices-list.js` (145 lines)
 **Purpose:** Renders the device list screen; list-level actions (filter, archive, unarchive, delete).
 **Key exports:** `renderDeviceList()`, `deviceCardHTML()`, `setUserFilter()`, `archiveDevice()`, `unarchiveDevice()`, `deleteDevice()`.
 **Depends on:** `risk.js`, `permissions.js`.
-**Known issue:** archive/delete not yet RBAC-gated (see `permissions.js` note).
+**Known issue:** archive/delete not yet RBAC-gated (see `permissions.js` note) — confirmed still open, not fixed by this session's other changes.
+**Notes:** Escalated-only filter notice and the escalated pill badge recolored to purple (were amber), matching the app-wide escalation color unification. Note: the escalated pill and the existing partially-resolved pill can now appear together on the same card looking near-identical (both purple) — distinguishable only by icon/text, not color, since both concepts now share the purple family. Farm Hand/Viewer least-privilege: `renderDeviceList()` now filters out any device `canFarmHandSeeDevice()` (`permissions.js`) rejects — unreviewed non-green devices never appear in their list at all. `deviceCardHTML()`'s coarse badge shows the actual reviewed status (fine / use with caution / do not use) instead of a generic "Check & report" for every non-green device, since that copy no longer fits now that unreviewed ones are hidden rather than shown-with-a-vague-badge. Archived/All filter buttons hidden for view-only roles too, same pattern as the team-members filter — device history/inventory management isn't relevant to them.
 
-### `devices-detail.js` (687 lines — largest UI file)
+### `devices-detail.js` (~715 lines — largest UI file)
 **Purpose:** Device detail screen: full device view, add-device form, issue assignment, and `showScreen()` — the shared screen-navigation function used app-wide.
 **Key exports:** `findDefaultLoginHTML()`, `pwManagerCardHTML()`, `deviceTimelineHTML()`, `showDetail()`, `assignBoxHTML()`, `assignIssue()`, `unassignIssue()`, `showScreen()`, `showAddForm()`, `hideAddForm()`, `selectPw()`, `addDevice()`.
 **Depends on:** `risk.js`, `permissions.js`, `audit.js`.
 **Used by:** effectively every screen-switch in the app calls `showScreen()` from here.
 **Notes:** Largest single file — if a fix only touches one function, grep for it rather than viewing the whole file.
+**Fixed:** (1) An assigned Technician on a structural-issue device used to see *only* the partial-resolve+escalate box (or, briefly, both stacked with the full form buried below Device Details — easy to miss/scroll past). Rebuilt as a single unified box (`setIssueMode()`) with a Resolve/Escalate tab toggle, Resolve selected by default — the assigned person picks, and it can't be scrolled past unnoticed. (2) The message shown to view-only roles (Farm Hand/Viewer) on an open issue was a single fixed string with zero device-specific context — `assignBoxHTML()` now includes a status dropdown (`d.farmHandStatus`: keep-using / use-caution / do-not-use, or a sensible default) that the assigner sets and view-only roles actually see. (3) Found and fixed a pre-existing unclosed-paren bug: `(canSeeIssue(d) ? (...)` (wrapping the recommended-action/assignment-badge section) was never closed — harmless until this turn's restructuring changed what followed it and finally triggered a syntax error. Closed at its correct semantic boundary, right before the assign box (which already has its own independent permission gate). (4) The device timeline (`deviceTimelineHTML()`) was still gated only by `canSeeIssue(d)` — always true for Farm Hand — so it leaked the same kind of history the risk-detail box and handoff log were already correctly hidden for. Now requires `canSeeDetailedRisk()` too, consistent with the rest of the least-privilege model. (5) Device Details and Device Timeline are now genuinely collapsible (collapsed by default), reusing `toggleSettingsSection()` from `accessibility.js` rather than a new helper — this was called "labeled collapsible sections" in earlier session notes and reported done more than once, but was never actually in the code until now. (6) Removed the redundant "Device software updated" resolve-checkbox — it duplicated what the health-status question above it already asks more precisely.
+**Notes:** Escalation color unified to purple app-wide (Escalate tab, standalone escalate box, escalated pill, Manager's receiving banner) — was previously split between purple (the escalate action) and amber (the "needs attention" state), now one consistent identity. "Send Back" and "Returned to tech" are a distinct concept and correctly remain amber/orange. The Owner's "FYI" banner (Case C) stays blue — different icon (eye, not flag), different meaning (passive observation vs the escalate action), not part of this unification.
+**Fixed (previously mocked up but never actually coded — corrected):** (1) Resolve tab now has the intro paragraph + "Step 1" callout matching the approved mockup, instead of the bare old `.health-box` with no framing. (2) The risk-detail box and action-box (recommended action, partial-fix banner, pw-guidance cards, assignment badge) are now gated behind `canSeeDetailedRisk()`, not just `canSeeIssue(d)` — Farm Hand/Viewer see neither; they rely entirely on the `farmHandStatus` box further down the page. Verified directly: Farm Hand sees nothing from these two sections, Technician/Manager/Owner still see full detail.
 
 ### `devices-resolve.js` (238 lines)
 **Purpose:** Technician-facing resolve/escalate workflow and device verification.
@@ -113,7 +125,8 @@ this doc is about *what things do*, that one is about *what loads first*.
 **Purpose:** Network list/detail screens — UI layer for networks.
 **Key exports:** `renderNetworkList()`, `netTimelineHTML()`, `getNetRecAction()`, `showNetDetail()`, `checkNetVulnerabilities()`, `archiveNetwork()`, `unarchiveNetwork()`, `deleteNetwork()`, `saveNetwork()`, `selectNetPw()`, `selectNetEnc()`, `handleNetBrandSelect()`, `setNetFilter()`, `toggleNetAddForm()`, `addNetwork()`.
 **Depends on:** `networks-data.js`, `permissions.js`, `vulnerabilities.js`.
-**Relevant to locked spec:** "farm hand least-privilege access (Network tab hidden)" — the hide logic should gate entry to this screen.
+**Relevant to locked spec:** "farm hand least-privilege access (Network tab hidden)" — already implemented: `nav-btn-network` hidden in `_enterApp()` (`auth-ui.js`), plus a defense-in-depth guard in `showScreen()` (`devices-detail.js`) that bounces any direct `network` navigation back to dashboard for roles that can't see it.
+**Fixed:** Network details and Network history are now collapsible (collapsed by default), matching the same fix in `devices-detail.js` — reuses the same `toggleSettingsSection()` helper, same reasoning: reference info shouldn't be open by default, only what's actionable should be.
 
 ### `apps.js` (417 lines)
 **Purpose:** Apps inventory screen AND the 3-2-1 backup tracker screen (both live in this one file).
@@ -138,6 +151,7 @@ this doc is about *what things do*, that one is about *what loads first*.
 **Key exports:** `saveOwnerEmail()`, `renderSettings()`, `showMemberDetail()`, `permCheckbox()`, `permSummary()`, `togglePermission()`, `handleRoleSelect()`, `normalizeRole()`, `getAllRoleNames()`, `addCustomRoleIfNew()`, `normalizeName()`.
 **Depends on:** `permissions.js`.
 **Relevant to locked spec:** "Manager-to-Owner escalation toggles (Manager default on, Technician default off)" — the default values and the checkbox UI both live here.
+**Fixed:** `togglePermission()` enforced its two access guards (`canActOnMember()`, the self-escalation cap) correctly, but never actually recorded a permission change anywhere — no audit trail of who granted or revoked what, for whom. Least privilege is prevention *and* accountability; only having the first half was a real gap. Now logs every change via `logAction()`, and grants (not revokes — narrowing access is always the safe direction) require an explicit confirm() before taking effect.
 
 ### `accessibility.js` (~165 lines)
 **Purpose:** Accessibility settings (text size, contrast, etc.), the collapsible-section toggle helper, and per-user default preferences (accessibility + language).
