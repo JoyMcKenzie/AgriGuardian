@@ -1,5 +1,11 @@
 # AgriGuardian
 
+## Project Status & Legal Notice
+
+This is an individual student project developed by Joy McKenzie for academic and portfolio purposes. All Rights Reserved. See the [LICENSE](./LICENSE) file for full terms.
+
+***
+
 A farm cyber-hygiene tool that reframes cybersecurity as routine maintenance — tracking the digital health of devices, networks, apps, and backups the same way a farm already tracks equipment upkeep.
 
 [**Live demo →**](https://joymckenzie.github.io/AgriGuardian/)
@@ -42,11 +48,11 @@ Open the [live demo](https://joymckenzie.github.io/AgriGuardian/) and choose any
   * Owner — Angus MacDonald
   * Manager — Carlos Mendez
   * Technician — Sarah Tully
+  * Technician — Joni Dear
   * Farm Hand — Jamie Ortiz
-* **I have an invite** — enter code `987654` to see how a new worker joins a farm.
-* **Create account** — register a new sample farm as an Owner.
+* **I have an invite** — enter code `987654` to see how a new worker (Casey Aitch) joins a farm.
 
-No real phone number or password is required.
+No real phone number or password is required. All sign-in paths go through a unified MFA flow.
 
 ## What this is not
 
