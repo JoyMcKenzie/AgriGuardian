@@ -107,6 +107,7 @@ select:focus, input:focus { border-color: #1F4D2E; box-shadow: 0 0 0 3px rgba(31
 .filter-row { display: flex; gap: 8px; margin-bottom: 12px; }
 .filter-btn { flex: 1; padding: 7px; border: 1px solid #ddd; border-radius: 8px; background: #fff; font-size: 12px; cursor: pointer; color: #666; }
 .filter-btn.active { background: #1F4D2E; color: #fff; border-color: #1F4D2E; }
+.filter-btn.active-escalate { background: #5B21B6; color: #fff; border-color: #5B21B6; }
 .login-screen { padding: 24px 20px; }
 .login-title { font-size: 22px; font-weight: 600; color: #1F4D2E; margin-bottom: 4px; }
 .login-sub { font-size: 13px; color: #888; margin-bottom: 24px; }
