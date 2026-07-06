@@ -60,6 +60,6 @@ No real phone number or password is required. All sign-in paths go through a uni
 * Not connected to actual farm equipment, cloud accounts, or backup systems.
 * Not a vulnerability scanner — it's a manual tracking and accountability tool that helps farms organize security work they already know they should do.
 
-***
+****
 
 _Work in progress. Features, layout, and wording may change as the concept evolves._
