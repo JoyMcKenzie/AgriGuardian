@@ -181,7 +181,7 @@ function showDetail(id, keepScreen) {
     //
     // D. Technician who escalated → read-only orange pill
     //
-    ((d.needsOwnerAction && !d.resolved && canSeeIssue(d)) ? (
+    ((d.needsOwnerAction && !d.resolved && canSeeIssue(d) && canSeeDetailedRisk()) ? (
       canSeeEscalationBanner(d) ? (
         // Case A: partially-resolved + escalated — Owner sees single purple banner
         // regardless of whether Carlos or Angus is primary actor
@@ -220,11 +220,11 @@ function showDetail(id, keepScreen) {
             '<textarea id="take-ownership-note-' + d.id + '" rows="2" placeholder="' + t('takeOwnershipNotePlaceholder') + '" style="width:100%;font-size:13px;padding:8px 12px;border:1px solid #C4B5FD;border-radius:8px;resize:none;font-family:inherit;margin-bottom:10px"></textarea>' +
             '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
               '<button onclick="takeOwnership(' + d.id + ')" style="flex:1;min-width:140px;background:#1F4D2E;color:#fff;border:none;border-radius:8px;padding:9px 12px;font-size:13px;font-weight:600;cursor:pointer">' + t('escTakeOwnership') + '</button>' +
-              (currentUser.role === 'Manager' ?
+              (canClearEscalation() ?
                 '<button onclick="showSendBackForm(' + d.id + ')" style="flex:1;min-width:140px;background:#7A3200;color:#fff;border:none;border-radius:8px;padding:9px 12px;font-size:13px;font-weight:600;cursor:pointer">' + t('sendBackBtn') + '</button>'
               : '') +
             '</div>' +
-            (currentUser.role === 'Manager' ?
+            (canClearEscalation() ?
               '<div id="send-back-form-' + d.id + '" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid #E6C77A">' +
                 '<label style="font-size:12px;font-weight:600;color:#7A3200;display:block;margin-bottom:4px">' + t('sendBackNoteLabel') + ' <span style="color:#A32D2D;font-size:11px">*' + t('required') + '</span></label>' +
                 '<textarea id="send-back-note-' + d.id + '" rows="3" placeholder="' + t('sendBackNotePlaceholder') + '" style="width:100%;font-size:13px;padding:8px 12px;border:1px solid #E6A75A;border-radius:8px;resize:none;font-family:inherit;margin-bottom:10px"></textarea>' +
@@ -394,21 +394,30 @@ function showDetail(id, keepScreen) {
     (d.serial ? '<div class="detail-row"><span class="detail-key">' + t('serialLabel') + '</span><span class="detail-val">' + d.serial + '</span></div>' : '') +
     (d.mac ? '<div class="detail-row"><span class="detail-key">' + t('macLabel') + '</span><span class="detail-val" style="font-family:monospace;font-size:13px">' + d.mac + '</span></div>' : '') +
     '<div class="detail-row"><span class="detail-key">' + t('deviceTypeLabel') + '</span><span class="detail-val">' + translateDeviceType(d.type) + '</span></div>' +
-    '<div class="detail-row"><span class="detail-key">' + t('defaultPwChanged') + '</span><span class="detail-val">' + (d.pw==='yes'?t('detailPwYes'):t('detailPwNo')) + '</span></div>' +
-    '<div class="detail-row"><span class="detail-key">' + t('manufacturerSupport') + '</span><span class="detail-val">' + t(info.support==='Limited'?'limitedLabel':info.support==='Supported'?'supportedLabel':'unknownLabel') + '</span></div>' +
-    '<div class="detail-row"><span class="detail-key">' + t('knownVulnerabilities') + '</span><span class="detail-val">' + (info.cve > 0 ? info.cve + ' ' + t('cveFound') : t('cveNone')) + '</span></div>' +
-    ((canResolveIssues(d) && canSeeIssue(d) && (d.brand || d.model)) ? '<div class="detail-row" style="margin-top:4px"><button onclick="checkVulnerabilities(' + d.id + ')" style="width:100%;background:#1F4D2E;color:#fff;border:none;border-radius:8px;padding:8px;font-size:13px;cursor:pointer;font-weight:500">' + t('hwVulnCheck') + '</button></div>' : '') +
-    '<div id="vuln-results-' + d.id + '" style="margin-top:8px"></div>' +
-    (d.autoUpdate ? '<div class="detail-row"><span class="detail-key">Auto-update</span><span class="detail-val">' + d.autoUpdate + '</span></div>' : '') +
-    (d.lastFirmware ? '<div class="detail-row"><span class="detail-key">Last device software update</span><span class="detail-val">' + new Date(d.lastFirmware).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'}) + '</span></div>' : '') +
+    (canSeeDetailedRisk() ? (
+      '<div class="detail-row"><span class="detail-key">' + t('defaultPwChanged') + '</span><span class="detail-val">' + (d.pw==='yes'?t('detailPwYes'):t('detailPwNo')) + '</span></div>' +
+      '<div class="detail-row"><span class="detail-key">' + t('manufacturerSupport') + '</span><span class="detail-val">' + t(info.support==='Limited'?'limitedLabel':info.support==='Supported'?'supportedLabel':'unknownLabel') + '</span></div>' +
+      '<div class="detail-row"><span class="detail-key">' + t('knownVulnerabilities') + '</span><span class="detail-val">' + (info.cve > 0 ? info.cve + ' ' + t('cveFound') : t('cveNone')) + '</span></div>' +
+      ((canResolveIssues(d) && canSeeIssue(d) && (d.brand || d.model)) ? '<div class="detail-row" style="margin-top:4px"><button onclick="checkVulnerabilities(' + d.id + ')" style="width:100%;background:#1F4D2E;color:#fff;border:none;border-radius:8px;padding:8px;font-size:13px;cursor:pointer;font-weight:500">' + t('hwVulnCheck') + '</button></div>' : '') +
+      '<div id="vuln-results-' + d.id + '" style="margin-top:8px"></div>' +
+      (d.autoUpdate ? '<div class="detail-row"><span class="detail-key">Auto-update</span><span class="detail-val">' + d.autoUpdate + '</span></div>' : '') +
+      (d.lastFirmware ? '<div class="detail-row"><span class="detail-key">Last device software update</span><span class="detail-val">' + new Date(d.lastFirmware).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'}) + '</span></div>' : '')
+    ) : '') +
     '</div>' +
     (canSeeIssue(d) && canSeeDetailedRisk() ? deviceTimelineHTML(d) : '') +
     // ----- VIEW-ONLY note — user can neither resolve nor assign an open issue (but can see it) -----
     ((canSeeIssue(d) && !canResolveIssues() && !canAssignIssues() && !d.resolved && (getRisk(d.brand, d.pw) !== 'green')) ?
       (function() {
         const statusKey = farmHandNoteKey(d);
-        return '<div class="resolve-box" style="background:#F4F6F8;border:1px solid #d9dee3">' +
-          '<p style="font-size:13px;color:#333;margin:0;font-weight:' + (d.farmHandStatus ? '600' : '400') + '">🔒 ' + t(statusKey) + '</p>' +
+        const isCaution = d.farmHandStatus === 'use-caution' || d.farmHandStatus === 'do-not-use';
+        const isFine = d.farmHandStatus === 'keep-using';
+        const fh = isCaution
+          ? { icon: 'ti-alert-triangle', color: '#7A6514', bg: '#FBF6E9', border: '#F5E9B8' }
+          : isFine
+          ? { icon: 'ti-thumb-up', color: '#1F4D2E', bg: '#EAF3EC', border: '#BBD8C2' }
+          : { icon: 'ti-info-circle', color: '#555', bg: '#F4F6F8', border: '#dde2e6' };
+        return '<div class="resolve-box" style="background:' + fh.bg + ';border:1px solid ' + fh.border + '">' +
+          '<p style="font-size:13px;color:' + fh.color + ';margin:0;font-weight:600;display:flex;align-items:center;gap:8px"><i class="ti ' + fh.icon + '" style="font-size:16px" aria-hidden="true"></i> ' + t(statusKey) + '</p>' +
         '</div>';
       })() : '') +
     // ----- OBSERVATION — view-only roles can report something regardless of
@@ -487,9 +496,9 @@ function assignBoxHTML(d) {
   const primaryLabel = d.assignedTo ? t('reassignBtn') : t('assignBtn');
   const isReassign = !!d.assignedTo;
   const fhStatus = d.farmHandStatus || '';
-  const fhOptions = ['', 'keep-using', 'use-caution', 'do-not-use'].map(function(val) {
+  const fhOptions = ['', 'keep-using', 'use-caution'].map(function(val) {
     const sel = fhStatus === val ? ' selected' : '';
-    const label = val === '' ? t('fhStatusDefault') : val === 'keep-using' ? t('fhStatusKeepUsing') : val === 'use-caution' ? t('fhStatusUseCaution') : t('fhStatusDoNotUse');
+    const label = val === '' ? t('fhStatusDefault') : val === 'keep-using' ? t('fhStatusKeepUsing') : t('fhStatusUseCaution');
     return '<option value="' + val + '"' + sel + '>' + label + '</option>';
   }).join('');
   return '<div class="resolve-box">' +

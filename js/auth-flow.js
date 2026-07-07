@@ -12,6 +12,11 @@ var DEMO_CREDENTIALS = {
   '(555) 014-2208': 'toolkit-morning-tech3'
 };
 
+// Staged sign-in result, set only by a successful sendCode() and consumed
+// only by verifyCode(). Never let currentUser be assumed valid just because
+// the code screen is showing.
+var pendingLogin = null;
+
 // Resolves a demo phone number to {name, role, email}. Owner is a special
 // case (not in teamMembers); everyone else is looked up live so a role
 // change made during the demo session is reflected correctly here too.
@@ -40,15 +45,18 @@ function sendCode() {
   const phone = Object.keys(DEMO_CREDENTIALS).find(function(p) { return normalizePhone(p) === normalized; });
   if (!phone || DEMO_CREDENTIALS[phone] !== pass) {
     alert('Phone number or password not recognized. Use one of the demo accounts shown below, or tap a profile to fill them in automatically.');
+    pendingLogin = null;
     return;
   }
   const account = resolveDemoAccount(phone);
-  if (!account) { alert('Demo account not found.'); return; }
-  currentUser.phone = phone;
-  currentUser.name = account.name;
-  currentUser.role = account.role;
-  currentUser.farm = "Old McDonald's Farm";
-  currentUser.email = account.email || '';
+  if (!account) { alert('Demo account not found.'); pendingLogin = null; return; }
+  // Staged, not applied yet — verifyCode() is what actually commits this to
+  // currentUser, and only if this exact object is still here when it runs.
+  // currentUser itself is never touched until the code is verified, so a
+  // verify step reached without a fresh, successful sendCode() first has
+  // nothing valid to fall back on — it can't silently reuse whoever was
+  // signed in before.
+  pendingLogin = { phone: phone, name: account.name, role: account.role, farm: "Old McDonald's Farm", email: account.email || '' };
   const btn = document.getElementById('send-btn');
   btn.textContent = t('sending');
   btn.disabled = true;

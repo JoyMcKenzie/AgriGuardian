@@ -88,15 +88,18 @@ function canResolveIssues(d) {
   const p = currentPerms();
   if (p.viewOnly || !p.resolveIssues) return false;
   if (!d) return true; // backwards-compat: no device context = perm check only
-  // If assigned, only the assigned person + Manager + Owner can resolve.
-  if (d.assignedTo) {
-    const r = currentUser.role;
-    if (r === 'Owner' || r === 'Manager') return true;
-    return !!(currentUser.name && d.assignedTo === currentUser.name);
-  }
-  // Unassigned: anyone with resolveIssues perm can act.
-  return true;
+  const r = currentUser.role;
+  if (r === 'Owner' || r === 'Manager') return true;
+  // RULE (2026-07-06, explicit): non-Owner/Manager roles may only resolve
+  // work explicitly assigned to them — no "unassigned = anyone can act"
+  // exception anymore. A Technician must wait to be assigned, period.
+  return !!(d.assignedTo && currentUser.name && d.assignedTo === currentUser.name);
 }
+// Archive/restore/delete for devices and networks — was documented in a
+// prior changelog entry as already gated, but the actual code had no such
+// function at all; buttons rendered unconditionally for every role
+// (verified 2026-07-06, Farm Hand could see live Archive/Delete controls).
+function canArchiveDevices() { const p = currentPerms(); return !p.viewOnly && !!p.archiveDelete; }
 function canAssignIssues() { const p = currentPerms(); return !p.viewOnly && !!p.assignIssues; }
 function canExportReports() { const p = currentPerms(); return !p.viewOnly && !!p.exportReports; }
 
@@ -115,9 +118,12 @@ function hasStructuralIssue(d) {
   return false;
 }
 
-// Should the Technician also see the combined partial-resolve+escalate box,
-// alongside the regular resolve form (their choice which applies)? True when:
-//  - They are the assigned person (not Manager/Owner)
+// Should the assigned person also see the combined partial-resolve+escalate
+// box, alongside the regular resolve form (their choice which applies)?
+// True for Technician OR Manager when:
+//  - They are the assigned person (Owner excluded — nobody above them to
+//    escalate to; a Manager assigning themselves work can still escalate to
+//    Owner, or to a different Manager if one exists)
 //  - The device has a structural issue that needs escalation
 //  - The device is not already escalated (already dealt with)
 //  - The device is not yet partially resolved (already done)
@@ -126,7 +132,7 @@ function shouldShowPartialResolveBox(d) {
   if (d.needsOwnerAction) return false; // already escalated
   if (d.partiallyResolved) return false; // already done partial fix
   const r = currentUser.role;
-  if (r === 'Owner' || r === 'Manager') return false; // they use the full form
+  if (r === 'Owner') return false; // nobody above the Owner to escalate to
   if (!d.assignedTo || d.assignedTo !== currentUser.name) return false;
   return hasStructuralIssue(d);
 }
@@ -191,7 +197,7 @@ function canEscalateIssue(d) {
   // Already escalated upward — block unless returned to them
   if (d.needsOwnerAction && !d.returnedToTech) return false;
   const r = currentUser.role;
-  if (r === 'Owner' || r === 'Manager') return false;
+  if (r === 'Owner') return false; // nobody above the Owner to escalate to
   // Must be the assigned person
   if (!d.assignedTo) return false;
   if (!currentUser.name || d.assignedTo !== currentUser.name) return false;
@@ -206,12 +212,14 @@ function canEscalateIssue(d) {
 // otherwise falls back to 'Owner'. This determines who the primary action-taker
 // is when an issue is escalated — the Owner is always notified either way.
 function escalationTarget() {
-  const mgr = teamMembers.find(m => m.role === 'Manager' && !m.archived && m.status === 'Active');
+  const mgr = teamMembers.find(m => m.role === 'Manager' && !m.archived && m.status === 'Active' &&
+    !((currentUser.phone && m.phone === currentUser.phone) || (currentUser.name && m.name === currentUser.name)));
   return mgr ? 'Manager' : 'Owner';
 }
 
 function escalationTargetName() {
-  const mgr = teamMembers.find(m => m.role === 'Manager' && !m.archived && m.status === 'Active');
+  const mgr = teamMembers.find(m => m.role === 'Manager' && !m.archived && m.status === 'Active' &&
+    !((currentUser.phone && m.phone === currentUser.phone) || (currentUser.name && m.name === currentUser.name)));
   return mgr ? (mgr.name || 'Manager') : 'Owner';
 }
 function canClearEscalation() {
@@ -384,7 +392,7 @@ function takeOwnership(id) {
   showDetail(id);
 }
 function sendBackToTech(id) {
-  if (currentUser.role !== 'Manager') return;
+  if (!canClearEscalation()) return;
   const d = devices.find(x => x.id === id);
   if (!d || !d.needsOwnerAction || d.resolved) return;
   const noteEl = document.getElementById('send-back-note-' + id);
@@ -435,6 +443,31 @@ function showEscalatedOnly() {
 function clearEscalatedFilter() {
   escalatedOnlyFilter = false;
   renderDeviceList();
+}
+
+// ─── Network assignment & return-to-assigner ───────────────────────────────
+// Networks don't have device-style brand/CVE data, so there's no equivalent
+// of hasStructuralIssue() gating escalation — any assigned person can hand a
+// network issue back to whoever specifically assigned it to them, any time
+// they're stuck, carrying whatever remediation checklist progress they've
+// made so far. This is deliberately simpler than the device escalation
+// system (which targets a farm-wide Manager/Owner tier) — it targets the
+// specific person (n.assignedBy) who made the assignment.
+function canReturnNetIssue(n) {
+  if (!n || n.resolved || n.archived) return false;
+  if (n.needsOwnerAction && !n.returnedToAssigner) return false; // already sent up, not yet handed back down
+  const r = currentUser.role;
+  if (r === 'Owner' || r === 'Manager') return false;
+  if (!n.assignedTo) return false;
+  if (!currentUser.name || n.assignedTo !== currentUser.name) return false;
+  return true;
+}
+// Can the current user clear/act on a returned network issue? Whoever
+// originally assigned it (n.assignedBy), or any Owner/Manager as a backstop.
+function canActOnReturnedNet(n) {
+  if (!n || !n.needsOwnerAction) return false;
+  if (currentUser.role === 'Owner' || currentUser.role === 'Manager') return true;
+  return !!(currentUser.name && n.assignedBy === currentUser.name);
 }
 
 

@@ -18,7 +18,7 @@ function resolveCustomBrand(input) {
   const trimmed = input.trim();
   if (!trimmed) return null;
   const norm = normalizeName(trimmed);
-  const builtIn = ['John Deere','Valley Irrigation','Hog Slat','DeLaval','Trimble','DJI','Arable'];
+  const builtIn = ['John Deere','Valley Irrigation','Hog Slat','DeLaval','Trimble','DJI','Arable','Apple','Samsung','Dell'];
   const existing = builtIn.concat(customBrands).find(b => normalizeName(b) === norm);
   if (existing) {
     alert('"' + trimmed + '" is too similar to an existing brand: "' + existing + '". Using "' + existing + '" instead.');

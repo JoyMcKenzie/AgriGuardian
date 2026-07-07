@@ -241,6 +241,11 @@ function _enterApp() {
   if (backupsNavBtn) backupsNavBtn.style.display = canSeeBackups() ? '' : 'none';
   var networkNavBtn = document.getElementById('nav-btn-network');
   if (networkNavBtn) networkNavBtn.style.display = canSeeNetworkIssue() ? '' : 'none';
+  // Hygiene Report and Activity Log are farm-wide security summaries — not
+  // appropriate for view-only roles, same reasoning as the risk-detail box
+  // and device timeline being gated behind canSeeDetailedRisk() elsewhere.
+  var reportButtons = document.getElementById('report-buttons');
+  if (reportButtons) reportButtons.style.display = canSeeHygieneScore() ? 'flex' : 'none';
   var appLangDd = document.getElementById('lang-dropdown');
   if (appLangDd) appLangDd.value = currentLang;
   setLang(currentLang, 'app');

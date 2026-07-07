@@ -37,6 +37,7 @@ function logOut(timedOut) {
   clearTimeout(timeoutTimer);
   clearInterval(countdownTimer);
   currentUser = { phone: '', role: '', farm: '', name: '', loggedIn: false };
+  pendingLogin = null;
   // Reset accessibility + language to universal default — these are
   // per-user preferences (see accessibility.js), not global session state,
   // so nothing from the last person's session should carry into the next.
@@ -149,7 +150,13 @@ function verifyCode() {
     return;
   }
   failedAttempts = 0;
-  currentUser.loggedIn = true;
+  if (!pendingLogin) {
+    alert('Your session expired. Please send a new code.');
+    showStep('signin');
+    return;
+  }
+  currentUser = { phone: pendingLogin.phone, name: pendingLogin.name, role: pendingLogin.role, farm: pendingLogin.farm, email: pendingLogin.email, loggedIn: true };
+  pendingLogin = null;
   logAction('Login', 'Signed in successfully');
   _enterApp();
 }

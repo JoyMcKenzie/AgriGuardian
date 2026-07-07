@@ -9,6 +9,9 @@ function getRiskData() {
     "DJI": { support: "Supported", cve: 0, notes: t('noteDJI') },
     "Arable": { support: "Supported", cve: 0, notes: t('noteArable') },
     "Netgear": { support: "Supported", cve: 0, notes: t('noteNetgear') },
+    "Apple": { support: "Supported", cve: 0, notes: t('noteApple') },
+    "Samsung": { support: "Supported", cve: 0, notes: t('noteSamsung') },
+    "Dell": { support: "Supported", cve: 0, notes: t('noteDell') },
     "Other": { support: "Unknown", cve: 1, notes: t('noteOther') }
   };
 }
@@ -28,7 +31,7 @@ function translateLocation(loc) {
   return m[loc] || loc;
 }
 function translateDeviceType(type) {
-  const m = {'Irrigation controller':t('typeIrrigation'),'Livestock monitor':t('typeLivestock'),'Soil sensor':t('typeSoil'),'Feed system':t('typeFeed'),'Barn ventilation controller':t('typeBarnVent'),'Network gateway':t('typeNetGateway'),'GPS / guidance system':t('typeGPS'),'Automation controller':t('typeAutomation'),'Robotic milker':t('typeRoboticMilker'),'Weather station':t('typeWeather'),'Drone':t('typeDrone')};
+  const m = {'Irrigation controller':t('typeIrrigation'),'Livestock monitor':t('typeLivestock'),'Soil sensor':t('typeSoil'),'Feed system':t('typeFeed'),'Barn ventilation controller':t('typeBarnVent'),'Network gateway':t('typeNetGateway'),'GPS / guidance system':t('typeGPS'),'Automation controller':t('typeAutomation'),'Robotic milker':t('typeRoboticMilker'),'Weather station':t('typeWeather'),'Drone':t('typeDrone'),'Smartphone':t('typeSmartphone'),'Laptop':t('typeLaptop'),'Tablet':t('typeTablet')};
   return m[type] || type;
 }
 function getRiskLabel(r, resolved) {
@@ -60,8 +63,12 @@ let devices = [
   { id: 3, addedDate: "Jan 20, 2026", flaggedDate: "Jan 20, 2026", contactNotes: "Dealer: Midwest Irrigation — 555-7710\nInstalled: June 2020\nWarranty: 5yr parts", brand: "Valley Irrigation", type: "Irrigation controller", label: "North pivot", model: "Valley 8000 Series", serial: "VI-2020-77523", mac: "00:1A:2B:3C:4D:5E", pw: "yes", location: "North field", connection: "Cellular (LTE/5G)", resolved: false, resolveStatus: "", assignedTo: "", resolveNote: "", resolvedDate: "", verifiedDate: "", healthStatus: "", healthNote: "", healthDate: "", archived: false },
   { id: 4, addedDate: "Jan 20, 2026", flaggedDate: "Jan 20, 2026", contactNotes: "Dealer: Green Country JD — Tom Hill 555-2241\nPurchased: 2019\nJDLink subscription active", brand: "John Deere", type: "GPS / guidance system", label: "Tractor guidance unit", model: "StarFire 7000", serial: "JD-2019-55847", mac: "D4:F5:13:88:2C:01", pw: "yes", location: "North field", connection: "Wi-Fi", resolved: false, resolveStatus: "", assignedTo: "", resolveNote: "", resolvedDate: "", verifiedDate: "", healthStatus: "🟢 Updates automatically", healthNote: "", healthDate: "Pre-loaded", archived: false, needsOwnerAction: false, escalation: {} },
   { id: 5, addedDate: "Feb 2, 2026", flaggedDate: "Feb 2, 2026", brand: "Siemens", type: "Automation controller", label: "Grain bin automation controller", model: "SIMATIC S7-1200", serial: "SI-2020-6ES7214", mac: "00:1B:1B:99:44:2F", pw: "no", location: "Grain bins", connection: "Ethernet (hardwired)", resolved: false, resolveStatus: "", assignedTo: "", resolveNote: "", resolvedDate: "", verifiedDate: "", healthStatus: "", healthNote: "", healthDate: "", archived: false, contactNotes: "" },
-  { id: 6, addedDate: "Feb 2, 2026", flaggedDate: "Feb 2, 2026", brand: "Netgear", type: "Network gateway", label: "Office network router", model: "Nighthawk R7000", serial: "NG-2019-R7000-4821", mac: "C0:3F:0E:7D:11:88", pw: "yes", location: "Main house", connection: "Ethernet (hardwired)", resolved: false, resolveStatus: "", assignedTo: "", resolveNote: "", resolvedDate: "", verifiedDate: "", healthStatus: "", healthNote: "", healthDate: "", archived: false, contactNotes: "Dealer: Rural Tech Supply — Mike Torres 555-8821\nPurchase: Jan 2019\nWarranty expired" }
+  { id: 6, addedDate: "Feb 2, 2026", flaggedDate: "Feb 2, 2026", brand: "Netgear", type: "Network gateway", label: "Office network router", model: "Nighthawk R7000", serial: "NG-2019-R7000-4821", mac: "C0:3F:0E:7D:11:88", pw: "yes", location: "Main house", connection: "Ethernet (hardwired)", resolved: false, resolveStatus: "", assignedTo: "", resolveNote: "", resolvedDate: "", verifiedDate: "", healthStatus: "", healthNote: "", healthDate: "", archived: false, contactNotes: "Dealer: Rural Tech Supply — Mike Torres 555-8821\nPurchase: Jan 2019\nWarranty expired" },
+  { id: 7, addedDate: "Jun 15, 2026", flaggedDate: "", contactNotes: "Owner's personal phone, also used for farm business (email, banking app, AgriGuardian).", brand: "Apple", type: "Smartphone", label: "Owner's iPhone", model: "iPhone 15", serial: "", mac: "", pw: "yes", location: "Main house", connection: "Cellular (LTE/5G)", resolved: false, resolveStatus: "", assignedTo: "", resolveNote: "", resolvedDate: "", verifiedDate: "", healthStatus: "", healthNote: "", healthDate: "", archived: false },
+  { id: 8, addedDate: "Jun 15, 2026", flaggedDate: "Jun 15, 2026", contactNotes: "Farm manager's phone — used for team communication and the invite/onboarding flow.", brand: "Samsung", type: "Smartphone", label: "Farm manager's Android phone", model: "Galaxy S23", serial: "", mac: "", pw: "no", location: "Main house", connection: "Cellular (LTE/5G)", resolved: false, resolveStatus: "", assignedTo: "", resolveNote: "", resolvedDate: "", verifiedDate: "", healthStatus: "", healthNote: "", healthDate: "", archived: false },
+  { id: 9, addedDate: "Jun 15, 2026", flaggedDate: "", contactNotes: "Farm office laptop — used for bookkeeping, dealer portals, and email.", brand: "Dell", type: "Laptop", label: "Farm office laptop", model: "Latitude 5440", serial: "", mac: "", pw: "yes", location: "Main house", connection: "Wi-Fi", resolved: false, resolveStatus: "", assignedTo: "", resolveNote: "", resolvedDate: "", verifiedDate: "", healthStatus: "", healthNote: "", healthDate: "", archived: false },
+  { id: 10, addedDate: "Jun 15, 2026", flaggedDate: "", contactNotes: "Shared tablet used for field record-keeping and the FieldView app.", brand: "Apple", type: "Tablet", label: "Farm records tablet", model: "iPad (10th generation)", serial: "", mac: "", pw: "yes", location: "Main house", connection: "Wi-Fi", resolved: false, resolveStatus: "", assignedTo: "", resolveNote: "", resolvedDate: "", verifiedDate: "", healthStatus: "", healthNote: "", healthDate: "", archived: false }
 ];
-let nextId = 7;
+let nextId = 11;
 
 

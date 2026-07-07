@@ -14,6 +14,13 @@ function renderDeviceList() {
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     if (activeBtn) activeBtn.classList.add('active');
   }
+  // Sorting by risk level implies caring about severity ordering, which
+  // contradicts treating "known issue" as a single neutral state for
+  // view-only roles — same reasoning as the badge colors being removed.
+  const sortSelect = document.getElementById('sort-select');
+  const sortRiskOpt = document.getElementById('opt-sort-risk');
+  if (sortRiskOpt) sortRiskOpt.style.display = canSeeDetailedRisk() ? '' : 'none';
+  if (sortSelect && !canSeeDetailedRisk() && sortSelect.value === 'risk') sortSelect.value = 'label';
 
   let filtered = devices;
   if (deviceFilter === 'active') filtered = devices.filter(d => !d.archived);
@@ -50,33 +57,37 @@ function deviceCardHTML(d, showActions) {
   const canSee = canSeeIssue(d);
   const coarse = canSee && !canSeeDetailedRisk();
   const isPartial = d.partiallyResolved && !d.resolved && d.needsOwnerAction;
-  // Coarse (Farm Hand/Viewer) badge is always neutral gray, regardless of
-  // the underlying issue's severity — color itself is a cue about how
-  // serious something is, and that judgment isn't theirs to make. Short
-  // label here (list context); the full sentence version shows on the
-  // device detail page instead.
-  const fhLabel = realRisk !== 'green' && !d.farmHandStatus ? t('fhBadgeKnownIssue')
-    : d.farmHandStatus === 'do-not-use' ? t('fhBadgeDoNotUse')
-    : d.farmHandStatus === 'use-caution' ? t('fhBadgeCaution')
-    : d.farmHandStatus === 'keep-using' ? t('fhBadgeFine')
-    : t('fhBadgeFine');
+  // Coarse (Farm Hand/Viewer) indicator: three states only (2026-07-06,
+  // explicit) — Fine / Known issue / Use with caution. "Do-not-use" as a 4th
+  // state is retired. Themed but deliberately calm colors (reusing the
+  // app's brand green and neutral amber, not a red/alarm palette) rather
+  // than the previous plain-gray-text treatment, so it doesn't read as
+  // "nothing's happening here" while still not signaling crisis severity.
+  const fhCaution = d.farmHandStatus === 'use-caution' || d.farmHandStatus === 'do-not-use';
+  const fhFine = d.farmHandStatus === 'keep-using' || (realRisk === 'green' && !d.farmHandStatus);
+  const fh = fhCaution
+    ? { label: t('fhBadgeCaution'), icon: 'ti-alert-triangle', color: '#7A6514', bg: '#FBF6E9', border: '#F5E9B8' }
+    : fhFine
+    ? { label: t('fhBadgeFine'), icon: 'ti-thumb-up', color: '#1F4D2E', bg: '#EAF3EC', border: '#BBD8C2' }
+    : { label: t('fhBadgeKnownIssue'), icon: 'ti-info-circle', color: '#555', bg: '#F4F6F8', border: '#dde2e6' };
   const risk = !canSee ? 'gray' : isPartial ? 'purple' : (coarse ? 'gray' : realRisk);
   const resolvedFull = d.resolved && canSee && !coarse && !d.archived;
   const badgeClass = resolvedFull ? 'badge-green' : 'badge-' + risk;
   const dotClass = resolvedFull ? 'dot-green' : 'dot-' + risk;
+  const fhIcon = fh.icon;
   const badgeLabel = !canSee
     ? 'Restricted'
     : isPartial ? t('partiallyResolvedBadge')
-    : (coarse ? fhLabel : getRiskBadgeLabel(risk, d.resolved));
-  const dotTitle = !canSee ? 'Not assigned to you' : isPartial ? t('partiallyResolvedBadge') : (coarse ? fhLabel : '');
+    : (coarse ? fh.label : getRiskBadgeLabel(risk, d.resolved));
+  const dotTitle = !canSee ? 'Not assigned to you' : isPartial ? t('partiallyResolvedBadge') : (coarse ? fh.label : '');
   const archivedTag = d.archived ? '<span class="archived-tag">Archived</span>' : '';
-  const escalatedTag = (d.needsOwnerAction && !d.resolved && canSee)
+  const escalatedTag = (d.needsOwnerAction && !d.resolved && canSee && canSeeDetailedRisk())
     ? '<span style="margin-left:6px;display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:#5B21B6;background:#F3EEFF;border:1px solid #C4B5FD;border-radius:10px;padding:1px 7px;vertical-align:middle"><i class="ti ti-flag" style="font-size:10px" aria-hidden="true"></i> ' + t('escPill') + '</span>'
     : '';
-  const partialTag = (isPartial && canSee)
+  const partialTag = (isPartial && canSee && canSeeDetailedRisk())
     ? '<span style="margin-left:6px;display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:#5B21B6;background:#F3EEFF;border:1px solid #C4B5FD;border-radius:10px;padding:1px 7px;vertical-align:middle">⚡ ' + t('partiallyResolvedBadge') + '</span>'
     : '';
-  const actions = showActions ? (
+  const actions = (showActions && canArchiveDevices()) ? (
     '<div class="device-actions" onclick="event.stopPropagation()">' +
       (d.archived
         ? '<button class="device-action-btn" onclick="unarchiveDevice(' + d.id + ')" title="Restore">Restore</button>'
@@ -85,7 +96,9 @@ function deviceCardHTML(d, showActions) {
     '</div>'
   ) : '';
   return '<div class="device-card" onclick="showDetail(' + d.id + ')" style="' + (d.archived ? 'opacity:0.6' : '') + '">' +
-    '<div class="risk-dot ' + dotClass + '" title="' + dotTitle + '"></div>' +
+    (coarse
+      ? '<div style="width:20px;height:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0" title="' + dotTitle + '"><i class="ti ' + fhIcon + '" style="font-size:17px;color:' + fh.color + '" aria-hidden="true"></i></div>'
+      : '<div class="risk-dot ' + dotClass + '" title="' + dotTitle + '"></div>') +
     '<div class="device-info">' +
       '<div class="device-name">' + (d.label || d.type) + archivedTag + partialTag + escalatedTag + '</div>' +
       '<div class="device-brand">' + d.brand + ' &middot; ' + translateDeviceType(d.type) + '</div>' +
@@ -94,8 +107,12 @@ function deviceCardHTML(d, showActions) {
         : '') +
     '</div>' +
     (showActions
-      ? (a11ySettings.colorBlind ? '<span class="risk-badge ' + badgeClass + '" style="margin-right:4px">' + (!canSee ? '🔒' : (coarse ? '🔎' : ({red:'⛔',yellow:'⚠️',green:'✅'}[d.resolved?'green':risk]||''))) + '</span>' : '') + actions
-      : '<span class="risk-badge ' + badgeClass + '">' + badgeLabel + '</span>') +
+      ? (coarse
+          ? '<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:' + fh.color + ';background:' + fh.bg + ';border:1px solid ' + fh.border + ';border-radius:20px;padding:3px 10px;flex-shrink:0"><i class="ti ' + fh.icon + '" style="font-size:12px" aria-hidden="true"></i>' + fh.label + '</span>'
+          : ((a11ySettings.colorBlind ? '<span class="risk-badge ' + badgeClass + '" style="margin-right:4px">' + (!canSee ? '🔒' : ({red:'⛔',yellow:'⚠️',green:'✅'}[d.resolved?'green':risk]||'')) + '</span>' : '') + actions))
+      : (coarse
+          ? '<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:' + fh.color + ';background:' + fh.bg + ';border:1px solid ' + fh.border + ';border-radius:20px;padding:3px 10px"><i class="ti ' + fh.icon + '" style="font-size:12px" aria-hidden="true"></i>' + fh.label + '</span>'
+          : '<span class="risk-badge ' + badgeClass + '">' + badgeLabel + '</span>')) +
   '</div>';
 }
 
@@ -110,6 +127,7 @@ function setUserFilter(filter, btn) {
 }
 
 function archiveDevice(id) {
+  if (!canArchiveDevices()) return;
   const d = devices.find(x => x.id === id);
   if (!d) return;
   if (!confirm('Archive this device? It will be hidden from your active dashboard but its history will be kept.')) return;
@@ -121,6 +139,7 @@ function archiveDevice(id) {
 }
 
 function unarchiveDevice(id) {
+  if (!canArchiveDevices()) return;
   const d = devices.find(x => x.id === id);
   if (!d) return;
   d.archived = false;
@@ -145,6 +164,7 @@ function unarchiveDevice(id) {
 }
 
 function deleteDevice(id) {
+  if (!canHardDelete()) return;
   const d = devices.find(x => x.id === id);
   if (!d) return;
   const hasHistory = d.resolved || d.resolveNote || d.healthStatus || d.verifiedDate || d.resolvedDate || d.healthDate;

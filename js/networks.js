@@ -29,10 +29,12 @@ function renderNetworkList() {
       '</div>' +
       '<div class="device-actions" onclick="event.stopPropagation()">' +
         (a11ySettings.colorBlind ? '<span class="risk-badge badge-' + displayRisk + '" style="margin-right:2px">' + ({red:'⛔',yellow:'⚠️',green:'✅'}[displayRisk]||'') + '</span>' : '') +
-        (n.archived
-          ? '<button class="device-action-btn" onclick="unarchiveNetwork(' + n.id + ')">Restore</button>'
-          : '<button class="device-action-btn" onclick="archiveNetwork(' + n.id + ')">'+t('archive')+'</button>') +
-        '<button class="device-action-btn danger" onclick="deleteNetwork(' + n.id + ')">'+t('delete')+'</button>' +
+        (canArchiveDevices() ? (
+          (n.archived
+            ? '<button class="device-action-btn" onclick="unarchiveNetwork(' + n.id + ')">Restore</button>'
+            : '<button class="device-action-btn" onclick="archiveNetwork(' + n.id + ')">'+t('archive')+'</button>') +
+          (canHardDelete() ? '<button class="device-action-btn danger" onclick="deleteNetwork(' + n.id + ')">'+t('delete')+'</button>' : '')
+        ) : '') +
       '</div>' +
     '</div>';
   }).join('');
@@ -85,6 +87,84 @@ function getNetRecAction(n) {
   return 'Review this network connection.';
 }
 
+// ─── Animated accordion helper for the network detail screen ───────────────
+// Uses a nested wrapper (outer = overflow/max-height/transition only, inner =
+// actual padding/border/content) so max-height:0 fully collapses the section
+// with no residual padding gap, and measures real scrollHeight at toggle time
+// so it works correctly regardless of how long a given network's notes,
+// history, etc. actually are (unlike a hardcoded guess).
+function netAccSection(key, netId, iconClass, title, previewHTML, bodyHTML, startOpen) {
+  var bodyId = 'net-acc-body-' + key + '-' + netId;
+  var btnId = 'net-acc-btn-' + key + '-' + netId;
+  var chevId = 'net-acc-chev-' + key + '-' + netId;
+  return '<div style="border:1px solid #ddd;border-radius:10px;margin-bottom:8px;overflow:hidden">' +
+    '<button type="button" id="' + btnId + '" onclick="toggleNetAcc(\'' + key + '\',' + netId + ')" aria-expanded="' + (startOpen?'true':'false') + '" style="width:100%;display:flex;align-items:center;gap:8px;padding:13px 12px;background:' + (startOpen?'#EAF3EC':'#fff') + ';border:none;text-align:left;cursor:pointer;min-height:44px;transition:background-color 0.2s ease;font-family:inherit">' +
+      '<i class="ti ' + iconClass + '" style="font-size:16px;color:#1F4D2E;flex-shrink:0"></i>' +
+      '<span style="font-size:13px;font-weight:500;color:#1a1a1a;flex-shrink:0">' + title + '</span>' +
+      '<span style="margin-left:auto;font-size:11px;color:#888;white-space:nowrap;flex-shrink:1;padding-left:6px;overflow:hidden;text-overflow:ellipsis;max-width:150px">' + (previewHTML||'') + '</span>' +
+      '<i id="' + chevId + '" class="ti ti-chevron-down" style="font-size:15px;color:#888;flex-shrink:0;display:inline-block;transform:rotate(' + (startOpen?'180deg':'0deg') + ');transition:transform 0.25s ease"></i>' +
+    '</button>' +
+    '<div id="' + bodyId + '" data-open="' + (startOpen?'true':'false') + '" style="overflow:hidden;transition:max-height 0.3s ease;max-height:0px">' +
+      '<div style="padding:0 14px 12px;border-top:1px solid #f0f0f0">' + bodyHTML + '</div>' +
+    '</div>' +
+  '</div>';
+}
+// Called once after showNetDetail() sets innerHTML — measures each section's
+// real content height so open-by-default sections render at the right size
+// and closed ones start fully collapsed with no residual gap.
+function initNetAccordionState(netId) {
+  document.querySelectorAll('[id^="net-acc-body-"][id$="-' + netId + '"]').forEach(function(wrap) {
+    var isOpen = wrap.getAttribute('data-open') === 'true';
+    var inner = wrap.firstElementChild;
+    wrap.style.maxHeight = isOpen ? (inner ? inner.scrollHeight : wrap.scrollHeight) + 'px' : '0px';
+  });
+}
+function toggleNetAcc(key, netId) {
+  var wrap = document.getElementById('net-acc-body-' + key + '-' + netId);
+  var btn = document.getElementById('net-acc-btn-' + key + '-' + netId);
+  var chev = document.getElementById('net-acc-chev-' + key + '-' + netId);
+  if (!wrap || !btn) return;
+  var inner = wrap.firstElementChild;
+  var isOpen = wrap.getAttribute('data-open') === 'true';
+  if (isOpen) {
+    wrap.style.maxHeight = '0px';
+    wrap.setAttribute('data-open', 'false');
+    btn.style.backgroundColor = '#fff';
+  } else {
+    wrap.style.maxHeight = (inner ? inner.scrollHeight : wrap.scrollHeight) + 'px';
+    wrap.setAttribute('data-open', 'true');
+    btn.style.backgroundColor = '#EAF3EC';
+  }
+  if (chev) chev.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+  btn.setAttribute('aria-expanded', String(!isOpen));
+}
+
+// Assignment box for network issues — mirrors devices-detail.js's
+// assignBoxHTML(), minus the device-only Farm Hand status field (Farm Hand
+// has no network access at all, per the existing least-privilege model).
+function netAssignBoxHTML(n) {
+  const members = assignableMembers();
+  if (members.length === 0) {
+    return '<p style="font-size:12.5px;color:#777;margin:0">' + t('noAssignableMembers') + '</p>';
+  }
+  const options = '<option value="">' + t('assignSelectPlaceholder') + '</option>' +
+    members.map(function(m) {
+      const sel = (n.assignedTo === m.name) ? ' selected' : '';
+      const roleTag = m.role ? ' (' + m.role + ')' : '';
+      return '<option value="' + m.name.replace(/"/g,'&quot;') + '"' + sel + '>' + m.name + roleTag + '</option>';
+    }).join('');
+  const primaryLabel = n.assignedTo ? t('reassignBtn') : t('assignBtn');
+  const isReassign = !!n.assignedTo;
+  return '<p style="font-size:11px;color:#888;margin:0 0 8px">' + t('assignDesc') + '</p>' +
+    '<select id="net-assign-select-' + n.id + '" style="width:100%;font-size:13px;padding:9px 10px;border:1px solid #ddd;border-radius:8px;background:#fff;font-family:inherit;margin-bottom:8px">' + options + '</select>' +
+    '<label style="font-size:11px;font-weight:600;color:#555;display:block;margin-bottom:4px">' + t('assignNoteLabel') + ' <span style="color:#A32D2D">*' + t('required') + '</span></label>' +
+    '<textarea id="net-assign-note-' + n.id + '" rows="2" placeholder="' + t('assignNotePlaceholder') + '" style="width:100%;font-size:12.5px;padding:8px 10px;border:1px solid #ddd;border-radius:8px;resize:none;font-family:inherit;margin-bottom:8px"></textarea>' +
+    '<div style="display:flex;gap:8px">' +
+      '<button onclick="assignNetIssue(' + n.id + ')" style="flex:1;background:#1F4D2E;color:#fff;border:none;border-radius:8px;padding:9px;font-size:12.5px;font-weight:500">' + primaryLabel + '</button>' +
+      (isReassign ? '<button onclick="unassignNetIssue(' + n.id + ')" style="flex:0 0 auto;background:#fff;color:#A32D2D;border:1px solid #E0B4B4;border-radius:8px;padding:9px 14px;font-size:12.5px;font-weight:500">' + t('unassignBtn') + '</button>' : '') +
+    '</div>';
+}
+
 function showNetDetail(id, keepScreen) {
   currentDetailView = { type: 'network', id: id };
   const n = networks.find(x => x.id === id);
@@ -96,7 +176,11 @@ function showNetDetail(id, keepScreen) {
 
   const risk = getNetRisk(n);
   const canSee = canSeeNetworkIssue();
-  const canAct = canResolveIssues() && canSee;
+  const canAct = canResolveIssues(n) && canSee;
+  const canAssign = canAssignIssues() && canSee;
+  const isAssignee = !!(n.assignedTo && currentUser.name && n.assignedTo === currentUser.name);
+  const canReturn = canReturnNetIssue(n);
+  const canActOnReturn = canActOnReturnedNet(n);
   const iconMap = { red:'ti-alert-circle', yellow:'ti-alert-triangle', green:'ti-circle-check' };
 
   panel.innerHTML =
@@ -110,50 +194,75 @@ function showNetDetail(id, keepScreen) {
         '<div class="risk-detail risk-detail-' + risk + '"><div class="risk-detail-title t-' + risk + '"><i class="ti ' + iconMap[risk] + '"></i>' + getNetRiskLabel(risk) + '</div><p>' + getNetRiskWhy(n) + '</p></div>'
     ) +
 
-    (canSee ?
-      '<div class="action-box">' +
-        '<div class="action-label">' + t('recommendedAction') + '</div>' +
-        '<div class="action-text">' + getNetRecAction(n) + '</div>' +
+    // Purple "returned to you" banner — parallel to the device escalation
+    // banner, but targeted at the specific person who made the assignment
+    // rather than a farm-wide Manager/Owner tier.
+    ((n.needsOwnerAction && canActOnReturn) ?
+      '<div style="background:#F3EEFF;border:1px solid #C4B5FD;border-radius:10px;padding:12px 14px;margin-bottom:14px">' +
+        '<div style="font-weight:700;color:#5B21B6;font-size:13px;margin-bottom:6px"><i class="ti ti-corner-up-left"></i> ' + t('netReturnedTitle') + '</div>' +
+        '<div style="font-size:13px;color:#3B0764;line-height:1.5">' +
+          '<div><strong>' + (n.assignedTo || 'They') + '</strong> ' + t('netReturnSentNote') + '</div>' +
+          '<div style="margin-top:4px;padding:8px 10px;background:#fff;border-radius:6px;border:1px solid #C4B5FD;font-style:italic">' + (n.returnNote || '') + '</div>' +
+        '</div>' +
       '</div>' : '') +
 
-    '<button onclick="toggleSettingsSection(\'network-details-' + n.id + '\', this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 0;background:none;border:none;border-top:1px solid #eee;cursor:pointer;text-align:left;margin-top:6px">' +
-      '<span class="section-title" style="margin:0">Network details</span>' +
-      '<span class="sec-arrow" style="font-size:14px;color:#888">▸</span>' +
-    '</button>' +
-    '<div id="sec-network-details-' + n.id + '" style="display:none">' +
-    '<div class="detail-row"><span class="detail-key">Connection type</span><span class="detail-val">' + n.type + '</span></div>' +
-    (n.hwBrand ? '<div class="detail-row"><span class="detail-key">' + t('hardwareBrand') + '</span><span class="detail-val">' + n.hwBrand + '</span></div>' : '') +
-    (n.hwModel ? '<div class="detail-row"><span class="detail-key">' + t('hardwareModel') + '</span><span class="detail-val">' + n.hwModel + '</span></div>' : '') +
-    '<div class="detail-row"><span class="detail-key">Default password changed</span><span class="detail-val">' + (n.pw === 'yes' ? 'Yes' : 'No / not sure') + '</span></div>' +
-    '<div class="detail-row"><span class="detail-key">Encrypted</span><span class="detail-val">' + (n.encrypted === 'yes' ? 'Yes' : 'No / not sure') + '</span></div>' +
-    ((canAct && (n.hwBrand || n.hwModel)) ? '<div class="detail-row" style="margin-top:4px"><button onclick="checkNetVulnerabilities(' + n.id + ')" style="width:100%;background:#1F4D2E;color:#fff;border:none;border-radius:8px;padding:8px;font-size:13px;cursor:pointer;font-weight:500">' + t('hwVulnCheck') + '</button></div>' : '') +
-    '<div id="net-vuln-results-' + n.id + '" style="margin-top:8px"></div>' +
-    '</div>' +
+    (canSee ? (
 
-    (n.notes ? '<div style="background:#f7f7f5;border-radius:8px;padding:10px 12px;margin:14px 0"><div style="font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">' + t('notes') + '</div><div style="font-size:13px;color:#333;white-space:pre-line">' + n.notes + '</div></div>' : '') +
+      netAccSection('fix', n.id, 'ti-bulb', 'How to fix this', '', '<p style="font-size:12.5px;color:#333;line-height:1.6;margin:10px 0 0">' + getNetRecAction(n) + '</p>', (!n.resolved && risk !== 'green')) +
 
-    (canSee ? netTimelineHTML(n) : '') +
+      // Assignment section — visible to whoever can assign (Manager/Owner) or
+      // to the current assignee viewing their own assignment.
+      ((canAssign || isAssignee) ?
+        netAccSection('assign', n.id, 'ti-user-question', 'Assignment',
+          n.assignedTo ? n.assignedTo : t('unassignedLabel'),
+          (canAssign ? netAssignBoxHTML(n) :
+            '<div style="font-size:12.5px;color:#333;line-height:1.6;margin-top:10px">' +
+              '<div style="margin-bottom:6px"><strong>' + t('assignedToLabel') + ':</strong> ' + (n.assignedTo || '—') + '</div>' +
+            '</div>'
+          ), false) : '') +
+
+      netAccSection('details', n.id, 'ti-list-details', 'Network details',
+        (n.pw === 'yes' ? '' : 'No pw') + (n.pw !== 'yes' && n.encrypted !== 'yes' ? ' · ' : '') + (n.encrypted === 'yes' ? '' : 'Not encrypted'),
+        '<div class="detail-row" style="border-bottom:1px solid #f0f0f0;padding:8px 0"><span class="detail-key">Connection type</span><span class="detail-val">' + n.type + '</span></div>' +
+        (n.hwBrand ? '<div class="detail-row" style="border-bottom:1px solid #f0f0f0;padding:8px 0"><span class="detail-key">' + t('hardwareBrand') + '</span><span class="detail-val">' + n.hwBrand + '</span></div>' : '') +
+        (n.hwModel ? '<div class="detail-row" style="border-bottom:1px solid #f0f0f0;padding:8px 0"><span class="detail-key">' + t('hardwareModel') + '</span><span class="detail-val">' + n.hwModel + '</span></div>' : '') +
+        '<div class="detail-row" style="border-bottom:1px solid #f0f0f0;padding:8px 0"><span class="detail-key">Default password changed</span><span class="detail-val">' + (n.pw === 'yes' ? 'Yes' : 'No / not sure') + '</span></div>' +
+        '<div class="detail-row" style="padding:8px 0"><span class="detail-key">Encrypted</span><span class="detail-val">' + (n.encrypted === 'yes' ? 'Yes' : 'No / not sure') + '</span></div>' +
+        ((canAct && (n.hwBrand || n.hwModel)) ? '<div style="margin-top:10px"><button onclick="checkNetVulnerabilities(' + n.id + ')" style="width:100%;background:#1F4D2E;color:#fff;border:none;border-radius:8px;padding:8px;font-size:12.5px;cursor:pointer;font-weight:500">' + t('hwVulnCheck') + '</button></div>' : '') +
+        '<div id="net-vuln-results-' + n.id + '" style="margin-top:8px"></div>',
+        false) +
+
+      (n.notes ? netAccSection('notes', n.id, 'ti-note', t('notes'), n.notes.split('\n')[0], '<div style="font-size:12.5px;color:#333;line-height:1.5;white-space:pre-line;margin-top:10px">' + n.notes + '</div>', false) : '') +
+
+      (function(){
+        var hist = netTimelineHTML(n);
+        return hist ? netAccSection('history', n.id, 'ti-history', 'Network history', '', hist, false) : '';
+      })()
+
+    ) : '') +
 
     (n.resolved ? '<div class="resolved-badge" style="margin-top:14px">✅ Marked resolved: ' + n.resolveStatus + (n.note ? ' — ' + n.note : '') + (n.savedDate ? '<span style="font-weight:400;margin-left:8px;color:#555">(' + n.savedDate + ')</span>' : '') + '</div>' : '') +
 
     (canAct ?
-      '<div class="resolve-box">' +
-        '<div class="resolve-title">' + t('whatWasDone') + '</div>' +
-        '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px">' +
+      netAccSection('resolve', n.id, 'ti-checklist', t('netRemediationChecklist'), '',
+        '<div style="display:flex;flex-direction:column;gap:6px;margin:10px 0 12px">' +
         (Array.isArray(t('netActions')) ? t('netActions') : []).map(function(opt) {
           const checked = n.resolveStatus && n.resolveStatus.includes(opt);
-          return '<label style="display:flex;align-items:center;gap:8px;font-size:13px;padding:6px 10px;border:1px solid #ddd;border-radius:8px;cursor:pointer;background:' + (checked?'#f0f9f3':'#fff') + '">' +
+          return '<label style="display:flex;align-items:center;gap:8px;font-size:12.5px;padding:6px 10px;border:1px solid #ddd;border-radius:8px;cursor:pointer;background:' + (checked?'#f0f9f3':'#fff') + '">' +
             '<input type="checkbox" value="' + opt + '" class="net-action" ' + (checked?'checked':'') + ' style="width:auto;accent-color:#1F4D2E"> ' + opt +
           '</label>';
         }).join('') +
         '</div>' +
         '<div style="margin-bottom:12px">' +
-          '<label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:6px">' + t('additionalNotes') + ' <span style="color:#aaa;font-weight:400">' + t('optional') + '</span></label>' +
+          '<label style="font-size:11px;font-weight:600;color:#555;display:block;margin-bottom:6px">' + t('additionalNotes') + ' <span style="color:#aaa;font-weight:400">' + t('optional') + '</span></label>' +
           '<p style="font-size:11px;color:#A32D2D;background:#FCEBEB;border-radius:6px;padding:6px 10px;margin-bottom:6px">⚠️ ' + t('credWarning') + '</p>' +
-          '<textarea id="net-note-' + id + '" rows="3" placeholder="' + t('netNotePlaceholder') + '" style="width:100%;font-size:13px;padding:8px 12px;border:1px solid #ddd;border-radius:8px;resize:none;font-family:inherit">' + (n.note || '') + '</textarea>' +
+          '<textarea id="net-note-' + id + '" rows="3" placeholder="' + t('netNotePlaceholder') + '" style="width:100%;font-size:12.5px;padding:8px 10px;border:1px solid #ddd;border-radius:8px;resize:none;font-family:inherit">' + (n.note || '') + '</textarea>' +
         '</div>' +
-        '<button class="resolve-btn" onclick="saveNetwork(' + id + ')" style="background:#1F4D2E;font-size:15px;padding:13px">' + t('saveBtn') + '</button>' +
-      '</div>' : '') +
+        '<div style="display:flex;gap:8px">' +
+          '<button onclick="saveNetwork(' + id + ')" style="flex:1;background:#1F4D2E;color:#fff;border:none;border-radius:8px;padding:11px;font-size:13px;font-weight:500">' + t('saveBtn') + '</button>' +
+          (canReturn ? '<button onclick="returnNetIssue(' + id + ')" style="flex:0 0 auto;background:#fff;color:#5B21B6;border:1px solid #C4B5FD;border-radius:8px;padding:11px 14px;font-size:13px;font-weight:500">' + t('netReturnBtn') + ' ' + (n.assignedBy || 'assigner') + '</button>' : '') +
+        '</div>',
+        true) : '') +
 
     ((canSee && !canAct && !n.resolved && risk !== 'green') ?
       '<div class="resolve-box" style="background:#F4F6F8;border:1px solid #d9dee3">' +
@@ -165,6 +274,80 @@ function showNetDetail(id, keepScreen) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById('screen-net-detail').classList.add('active');
   }
+  initNetAccordionState(id);
+}
+
+// Assign / reassign a network issue to a team member. Mirrors devices-detail.js's
+// assignIssue(), minus the device-only Farm Hand status field. Reassigning
+// (or assigning fresh) clears any pending return-to-assigner state, since a
+// new assignment supersedes it.
+function assignNetIssue(id) {
+  if (!canAssignIssues()) return;
+  const n = networks.find(x => x.id === id);
+  if (!n) return;
+  const sel = document.getElementById('net-assign-select-' + id);
+  const noteEl = document.getElementById('net-assign-note-' + id);
+  if (!sel) return;
+  const name = sel.value;
+  const noteVal = noteEl ? noteEl.value.trim() : '';
+  if (!name) { alert(t('assignSelectPlaceholder')); return; }
+  if (!noteVal) { alert(t('handoffNoteRequired')); return; }
+  const prev = n.assignedTo;
+  n.assignedTo = name;
+  n.assignedBy = currentUser.name || currentUser.role;
+  n.needsOwnerAction = false;
+  n.returnedToAssigner = false;
+  n.returnNote = '';
+  if (!Array.isArray(n.handoffLog)) n.handoffLog = [];
+  n.handoffLog.push({ type: prev ? 'reassign' : 'assign', from: currentUser.name || currentUser.role, to: name, note: noteVal, date: localTimestamp() });
+  logAction(prev ? 'Reassigned network issue' : 'Assigned network issue', (n.label || n.type) + ' → ' + name + (prev ? ' (was ' + prev + ')' : '') + ' | ' + noteVal);
+  renderDashList();
+  renderNetworkList();
+  showNetDetail(id);
+}
+
+function unassignNetIssue(id) {
+  if (!canAssignIssues()) return;
+  const n = networks.find(x => x.id === id);
+  if (!n) return;
+  const prev = n.assignedTo;
+  n.assignedTo = '';
+  n.assignedBy = '';
+  n.needsOwnerAction = false;
+  n.returnedToAssigner = false;
+  n.returnNote = '';
+  logAction('Cleared network assignment', (n.label || n.type) + (prev ? ' (was ' + prev + ')' : ''));
+  renderDashList();
+  renderNetworkList();
+  showNetDetail(id);
+}
+
+// Assignee hands the issue back to whoever assigned it, carrying forward
+// whatever remediation-checklist progress they've made (n.resolveStatus is
+// saved exactly like a normal saveNetwork() call would) plus a required note
+// explaining what's blocking the rest. This does NOT mark the issue resolved.
+function returnNetIssue(id) {
+  if (!canReturnNetIssue(networks.find(x => x.id === id))) return;
+  const n = networks.find(x => x.id === id);
+  if (!n) return;
+  const panel = document.getElementById('net-detail-content');
+  const ctx = panel || document;
+  const checked = ctx.querySelectorAll('.net-action:checked');
+  n.resolveStatus = Array.from(checked).map(c => c.value).join(', ');
+  if (n.resolveStatus.includes('Password changed')) n.pw = 'yes';
+  if (n.resolveStatus.includes('Encryption enabled')) n.encrypted = 'yes';
+  const noteEl = ctx.querySelector('#net-note-' + id);
+  const note = noteEl ? noteEl.value.trim() : '';
+  if (!note) { alert(t('handoffNoteRequired')); return; }
+  n.returnNote = note;
+  n.returnedToAssigner = true;
+  n.needsOwnerAction = true;
+  if (!Array.isArray(n.handoffLog)) n.handoffLog = [];
+  n.handoffLog.push({ type: 'return', from: currentUser.name || currentUser.role, to: n.assignedBy, note: note, date: localTimestamp() });
+  logAction('Returned network issue to assigner', (n.label || n.type) + ' → ' + (n.assignedBy || '') + (n.resolveStatus ? ' | progress: ' + n.resolveStatus : '') + ' | ' + note);
+  renderDashList();
+  renderNetworkList();
+  showScreen('network', document.querySelectorAll('.nav-btn')[2]);
 }
 
 function checkNetVulnerabilities(netId) {
@@ -186,6 +369,7 @@ function checkNetVulnerabilities(netId) {
 }
 
 function archiveNetwork(id) {
+  if (!canArchiveDevices()) return;
   const n = networks.find(x => x.id === id);
   if (!n) return;
   if (!confirm('Archive ' + n.label + '? It will be hidden from your active list but its history will be kept. You can restore it later.')) return;
@@ -196,6 +380,7 @@ function archiveNetwork(id) {
 }
 
 function unarchiveNetwork(id) {
+  if (!canArchiveDevices()) return;
   const n = networks.find(x => x.id === id);
   if (!n) return;
   n.archived = false;
@@ -217,6 +402,7 @@ function unarchiveNetwork(id) {
 }
 
 function deleteNetwork(id) {
+  if (!canHardDelete()) return;
   const n = networks.find(x => x.id === id);
   if (!n) return;
   const hasHistory = n.resolveStatus || n.note || n.resolved;

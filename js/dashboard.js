@@ -14,8 +14,8 @@ function observedDevices() {
 
 function renderDashList() {
   const activeDevices = [...devices].filter(d => !d.archived);
-  const redDevices = activeDevices.filter(d => !d.resolved && getRisk(d.brand,d.pw,d.healthStatus)==='red' && canSeeIssue(d) && (canSeeDetailedRisk() || canFarmHandSeeDevice(d)));
-  const yellowDevices = activeDevices.filter(d => !d.resolved && getRisk(d.brand,d.pw,d.healthStatus)==='yellow' && canSeeIssue(d) && (canSeeDetailedRisk() || canFarmHandSeeDevice(d)));
+  const redDevices = activeDevices.filter(d => !d.resolved && getRisk(d.brand,d.pw,d.healthStatus)==='red' && canSeeIssue(d) && canSeeDetailedRisk());
+  const yellowDevices = activeDevices.filter(d => !d.resolved && getRisk(d.brand,d.pw,d.healthStatus)==='yellow' && canSeeIssue(d) && canSeeDetailedRisk());
   const netRed = canSeeNetworkIssue() ? networks.filter(n => !n.resolved && !n.archived && getNetRisk(n) === 'red') : [];
   const netYellow = canSeeNetworkIssue() ? networks.filter(n => !n.resolved && !n.archived && getNetRisk(n) === 'yellow') : [];
   const deviceProblems = redDevices.length + yellowDevices.length;
@@ -238,13 +238,20 @@ function renderDashList() {
     } else {
       html += activeDevices.map(function(d) {
         const dRisk = getRisk(d.brand, d.pw, d.healthStatus);
-        const fhLabel = dRisk !== 'green' && !d.farmHandStatus ? t('fhBadgeKnownIssue')
-          : d.farmHandStatus === 'do-not-use' ? t('fhBadgeDoNotUse')
-          : d.farmHandStatus === 'use-caution' ? t('fhBadgeCaution')
-          : t('fhBadgeFine');
+        // Three states only (2026-07-06, explicit): Fine / Known issue / Use
+        // with caution. "Do-not-use" as a 4th state is retired — themed but
+        // deliberately calm colors (no red/alarm), reusing the app's existing
+        // brand green and neutral amber rather than inventing new hues.
+        const isCaution = d.farmHandStatus === 'use-caution' || d.farmHandStatus === 'do-not-use';
+        const isFine = d.farmHandStatus === 'keep-using' || (dRisk === 'green' && !d.farmHandStatus);
+        const fh = isCaution
+          ? { label: t('fhBadgeCaution'), icon: 'ti-alert-triangle', color: '#7A6514', bg: '#FBF6E9', border: '#F5E9B8' }
+          : isFine
+          ? { label: t('fhBadgeFine'), icon: 'ti-thumb-up', color: '#1F4D2E', bg: '#EAF3EC', border: '#BBD8C2' }
+          : { label: t('fhBadgeKnownIssue'), icon: 'ti-info-circle', color: '#555', bg: '#F4F6F8', border: '#dde2e6' };
         return '<div style="background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:10px 12px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px" onclick="showDetail(' + d.id + ')">' +
           '<span style="font-size:13px;color:#333">' + (d.label || d.type) + '</span>' +
-          '<span style="font-size:12px;color:#666;font-weight:600">' + fhLabel + '</span>' +
+          '<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:' + fh.color + ';background:' + fh.bg + ';border:1px solid ' + fh.border + ';border-radius:20px;padding:3px 10px"><i class="ti ' + fh.icon + '" style="font-size:12px" aria-hidden="true"></i> ' + fh.label + '</span>' +
         '</div>';
       }).join('');
     }

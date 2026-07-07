@@ -85,10 +85,6 @@ function renderSettings() {
   // Team list with permission management
   const list = document.getElementById('team-list');
   if (!list) return;
-  if (teamMembers.length === 0) {
-    list.innerHTML = '<p style="font-size:13px;color:#888;font-style:italic;padding:8px 0">No team members added yet.</p>';
-    return;
-  }
 
   // Archived/All views expose former employees' contact info — least
   // privilege means non-managers only ever see the active roster, and a
@@ -105,7 +101,14 @@ function renderSettings() {
     if (activeBtn) activeBtn.classList.add('active');
   }
 
-  let filteredMembers = teamMembers.filter(m =>
+  // Owner isn't in teamMembers at all (a separate identity, see auth-flow.js),
+  // so the team list could never show them or their contact info regardless
+  // of who was viewing. Every other role needs a way to reach the Owner by
+  // phone, so a synthetic entry is added here for display purposes only —
+  // showMemberDetail() special-cases this phone number rather than trying
+  // to treat it like a real teamMembers record with editable perms.
+  const ownerEntry = { phone: '(555) 123-4567', name: 'Angus MacDonald', role: 'Owner', status: 'Active', archived: false };
+  let filteredMembers = teamMembers.concat([ownerEntry]).filter(m =>
     !((currentUser.phone && m.phone === currentUser.phone) ||
       (currentUser.name && m.name === currentUser.name))
   );
@@ -146,6 +149,16 @@ function showMemberDetail(phone) {
   const panel = document.getElementById('member-detail-panel');
   if (!panel) return;
   if (!phone) { panel.innerHTML = ''; return; }
+  // Owner is a separate identity, not a real teamMembers record — just show
+  // contact info so anyone needing to reach the Owner by phone can. No edit
+  // controls, no permission checkboxes: nothing here to safely act on.
+  if (phone === '(555) 123-4567') {
+    panel.innerHTML = '<div style="background:#f7f7f5;border-radius:10px;padding:12px 14px">' +
+      '<div style="font-size:14px;font-weight:600;color:#111">Angus MacDonald</div>' +
+      '<div style="font-size:12px;color:#888;margin-top:3px">' + phone + ' &middot; Owner</div>' +
+    '</div>';
+    return;
+  }
   const m = teamMembers.find(x => x.phone === phone);
   if (!m) return;
   const realIdx = teamMembers.indexOf(m);
@@ -234,6 +247,10 @@ function togglePermission(idx, key, value) {
   const permKeyMap = { addDevices: 'permAdd', archiveDelete: 'permArchive', resolveIssues: 'permResolve', assignIssues: 'permAssign', exportReports: 'permExport', viewOnly: 'permView' };
   const isGrant = value && key !== 'viewOnly';
   if (isGrant && !confirm(t('confirmGrantPermission').replace('{perm}', t(permKeyMap[key]) || key).replace('{name}', m.name || m.phone))) {
+    // The checkbox's native .checked already flipped when the user clicked
+    // it, before this handler ran — without re-rendering, it would stay
+    // visually toggled even though m.perms was never actually updated.
+    renderSettings();
     return;
   }
   const before = Object.assign({}, m.perms);

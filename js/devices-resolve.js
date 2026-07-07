@@ -73,22 +73,21 @@ function saveAll(id) {
   if (otherChk && otherChk.checked && otherTxt && otherTxt.value.trim()) {
     statusParts.push('Other: ' + otherTxt.value.trim());
   }
-  // "Device software updated" is good hygiene but is not by itself proof that
-  // the underlying issue was addressed (e.g. weak password, no MFA, replaced
-  // hardware). Require at least one other action before marking resolved.
-  var softwareOnlyLabels = ['Device software updated','Software del dispositivo actualizado'];
-  var nonSoftwareParts = statusParts.filter(function(s){ return softwareOnlyLabels.indexOf(s) === -1; });
-  if (statusParts.length > 0 && nonSoftwareParts.length === 0) {
+  // Real bug found via user report: with no requirement here, clicking "Mark
+  // as resolved" with zero boxes checked used to silently set d.resolved =
+  // false and reset the form anyway — looking like success while doing
+  // nothing. At least one action is now required, same as health-status.
+  if (statusParts.length === 0) {
     if (warningEl) {
-      warningEl.textContent = '⚠️ "Device software updated" alone cannot resolve this issue. Select at least one other action that addresses the underlying problem.';
+      warningEl.textContent = '⚠️ Select at least one action that addresses this issue before marking it resolved.';
       warningEl.style.display = 'flex';
       warningEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } else {
-      alert('"Device software updated" alone cannot resolve this issue. Select at least one other action that addresses the underlying problem.');
+      alert('Select at least one action that addresses this issue before marking it resolved.');
     }
     return;
   }
-  d.resolved = nonSoftwareParts.length > 0;
+  d.resolved = true;
   d.resolveStatus = statusParts.join(', ');
   if (d.resolved && !d.resolvedDate) d.resolvedDate = localTimestamp();
   if (!d.resolved) d.resolvedDate = '';
@@ -153,11 +152,6 @@ function saveAll(id) {
   // Clear health radio so it prompts fresh (Fix 1)
   const healthSelReset = ctx.querySelector('input[name="health-' + id + '"]:checked');
   if (healthSelReset) healthSelReset.checked = false;
-  // Clear form-state on the device record so it re-renders blank
-  d.resolveStatus = '';
-  d.resolveNote = '';
-  d.healthStatus = '';
-  d.healthDate = '';
 
   renderDashList();
   renderDeviceList();
