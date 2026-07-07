@@ -497,10 +497,20 @@ function toggleNetAddForm() {
     safePh('net-hw-brand', t('enterBrandPlaceholder'));
     safePh('net-hw-model', t('netModelPlaceholder'));
   }
-  // Hide/show network list and sort row
+  // Hide/show network list and sort row.
+  // BUG FIX (2026-07-07): this used to select the sort row via
+  // `document.querySelector('#screen-network div[style*="align-items:center"]')`
+  // — a fragile match-by-inline-style selector. The title/button row directly
+  // above (holding "+ Add network" itself) also contains "align-items:center"
+  // in its style, and comes first in the DOM, so querySelector grabbed THAT
+  // instead of the intended sort row. Once the form was opened once, the
+  // title/button row got hidden and stayed hidden (its style.display isn't
+  // reset by screen navigation — the static markup persists across tab
+  // switches), making "+ Add network" appear to vanish permanently after the
+  // first visit. Fixed by giving the sort row a real id and targeting that.
   const netList = document.getElementById('network-list');
   const filterRow = document.getElementById('net-filter-row');
-  const sortContainer = document.querySelector('#screen-network div[style*="align-items:center"]');
+  const sortContainer = document.getElementById('net-sort-row');
   if (netList) netList.style.display = isOpen ? '' : 'none';
   if (filterRow) filterRow.style.display = isOpen ? '' : 'none';
   if (sortContainer) sortContainer.style.display = isOpen ? '' : 'none';

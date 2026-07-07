@@ -514,7 +514,7 @@
       <button class="filter-btn" id="btn-filter-net-archived" onclick="setNetFilter('archived', this)">Archived</button>
       <button class="filter-btn" id="btn-filter-net-all" onclick="setNetFilter('all', this)">All</button>
     </div>
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+    <div id="net-sort-row" style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
       <label id="lbl-sort-by-net" style="font-size:12px;color:#888;white-space:nowrap">Sort by:</label>
       <select id="net-sort-select" onchange="renderNetworkList()" style="flex:1;font-size:12px;padding:5px 8px;border:1px solid #ddd;border-radius:8px">
         <option value="risk" id="opt-net-sort-risk">Risk level</option>

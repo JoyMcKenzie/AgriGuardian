@@ -13,6 +13,15 @@ changed — why / notes.
 
 ---
 
+## 2026-07-07 — Fixed: "+ Add network" button permanently disappearing after use
+- Joy reported: the button was there the first time she visited the Network tab, but after navigating to other tabs and back, it was gone for good.
+- Root cause, found and reproduced: `toggleNetAddForm()` located the sort-row to hide/show via a fragile selector — `document.querySelector('#screen-network div[style*="align-items:center"]')` — matching by inline style string rather than a real id. The title/button row directly above (which contains "+ Add network" itself) *also* has `align-items:center` in its own style, and comes first in the DOM, so `querySelector` grabbed that row instead of the intended sort row.
+- Practical effect: opening the "Add network" form even once set the *button's own row* to `display:none` instead of the sort row. Since the static page markup persists across tab switches (only the dynamic list content inside `#network-list` gets rebuilt), that hidden style stuck permanently — the button looked like it had vanished for good, not just while the form was open.
+- **Reproduced directly against the pre-fix code** before treating it as confirmed: a single open/close cycle of the add-form left the button's container at `display:none`, exactly matching the reported symptom.
+- Fixed at the source: gave the sort row a real id (`net-sort-row`) in `index.html`, and updated `toggleNetAddForm()` to target it directly instead of matching by style string.
+- Checked for the same fragile-selector pattern anywhere else in the codebase — this was the only instance.
+- Verified via jsdom: the button survives 5 repeated open/close cycles, survives navigating away with the form left open mid-edit, and the sort row itself still correctly hides while the form is open and reappears when closed. Plus a full 4-role regression sweep across dashboard/devices/networks/apps.
+
 ## 2026-07-07 — Audit fix pass: 2 criticals, 4 real bugs, 2 new-feature bugs, + cleanup
 Applied against the 3-state-observation build, from the audit in `AUDIT-FINDINGS.md` / `AUDIT-FINDINGS-v2.md`. Every fix verified by re-running the jsdom harness (full 5-role x all devices/networks/apps render sweep: zero errors) — see per-item checks below.
 
