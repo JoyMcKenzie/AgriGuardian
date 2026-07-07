@@ -263,9 +263,13 @@ function submitObservation(id) {
     date: localTimestamp()
   });
   // A fresh report always reopens the banner/dashboard-card, even if a
-  // previous observation on this same device had already been dismissed or
-  // sent to investigation — each new report is its own thing to look at.
+  // previous observation on this same device had already been dismissed,
+  // was under investigation, or had a confirmed-but-cleared operational
+  // issue — each new report starts the lifecycle over, since it's its own
+  // thing to look at, not a continuation of whatever happened last time.
   d.observationPending = true;
+  d.observationInvestigating = false;
+  d.knownOperationalIssue = false;
   logAction(t('handoffTypeObservation'), (d.label || d.type) + ' — ' + noteVal);
   const btn = document.getElementById('observation-box-' + id) ? document.getElementById('observation-box-' + id).querySelector('button') : null;
   if (noteEl) noteEl.value = '';
@@ -318,6 +322,78 @@ function investigateObservation(id) {
   if (noteEl && !noteEl.value) {
     noteEl.value = t('obsInvestigatePrefill').replace('{note}', lastObs ? lastObs.note : '');
   }
+}
+
+// ─── Closing out an investigation (2026-07-07) ──────────────────────────────
+// A real either/or, not a passive "reviewed" checkbox — closing an
+// investigation has to say whether an actual problem was found, since a
+// device's underlying getRisk() may have no way to reflect an operational
+// issue (a third-party outage, a connectivity problem) at all.
+function closeInvestigationNoIssue(id) {
+  if (!canClearEscalation()) return;
+  const d = devices.find(x => x.id === id);
+  if (!d) return;
+  d.observationInvestigating = false;
+  if (!Array.isArray(d.handoffLog)) d.handoffLog = [];
+  d.handoffLog.push({
+    type: 'investigationNoIssue',
+    from: currentUser.name || currentUser.role,
+    to: '',
+    note: '',
+    date: localTimestamp()
+  });
+  logAction('Investigation closed — no issue found', (d.label || d.type));
+  renderDashList();
+  renderDeviceList();
+  showDetail(id);
+}
+// A confirmed problem does NOT quietly revert to a calm banner — it becomes
+// its own persistent, amber "known operational issue" state, distinct from
+// both the urgent investigation banner and a plain green risk banner, and
+// stays visible until someone explicitly clears it once actually fixed.
+function closeInvestigationConfirmed(id) {
+  if (!canClearEscalation()) return;
+  const d = devices.find(x => x.id === id);
+  if (!d) return;
+  const noteEl = document.getElementById('op-issue-note-' + id);
+  const noteVal = noteEl ? noteEl.value.trim() : '';
+  if (!noteVal) { alert(t('handoffNoteRequired')); return; }
+  d.observationInvestigating = false;
+  d.knownOperationalIssue = true;
+  d.operationalIssueNote = noteVal;
+  d.operationalIssueBy = currentUser.name || currentUser.role;
+  d.operationalIssueDate = localTimestamp();
+  if (!Array.isArray(d.handoffLog)) d.handoffLog = [];
+  d.handoffLog.push({
+    type: 'investigationConfirmed',
+    from: currentUser.name || currentUser.role,
+    to: '',
+    note: noteVal,
+    date: localTimestamp()
+  });
+  logAction('Investigation closed — problem confirmed', (d.label || d.type) + ' — ' + noteVal);
+  renderDashList();
+  renderDeviceList();
+  showDetail(id);
+}
+function clearOperationalIssue(id) {
+  if (!canClearEscalation()) return;
+  const d = devices.find(x => x.id === id);
+  if (!d) return;
+  d.knownOperationalIssue = false;
+  d.operationalIssueNote = '';
+  if (!Array.isArray(d.handoffLog)) d.handoffLog = [];
+  d.handoffLog.push({
+    type: 'operationalIssueCleared',
+    from: currentUser.name || currentUser.role,
+    to: '',
+    note: '',
+    date: localTimestamp()
+  });
+  logAction('Operational issue cleared', (d.label || d.type));
+  renderDashList();
+  renderDeviceList();
+  showDetail(id);
 }
 
 function escalateIssue(id) {

@@ -130,8 +130,8 @@ function deviceTimelineHTML(d) {
 function handoffLogRowsHTML(d) {
   if (!Array.isArray(d.handoffLog) || d.handoffLog.length === 0) return '';
   return [...d.handoffLog].reverse().map(function(entry, i) {
-    const typeIcon = entry.type === 'escalate' ? '🚩' : entry.type === 'sendBack' ? '↩️' : entry.type === 'takeOwnership' ? '✋' : entry.type === 'partialFix' ? '⚡' : entry.type === 'resolved' ? '✅' : entry.type === 'observation' ? '👁' : entry.type === 'observationDismissed' ? '☑️' : '📋';
-    const typeLabel = entry.type === 'escalate' ? t('handoffTypeEscalate') : entry.type === 'sendBack' ? t('handoffTypeSendBack') : entry.type === 'takeOwnership' ? t('handoffTypeTakeOwnership') : entry.type === 'partialFix' ? t('handoffTypePartialFix') : entry.type === 'resolved' ? t('handoffTypeResolved') : entry.type === 'observation' ? t('handoffTypeObservation') : entry.type === 'observationDismissed' ? t('handoffTypeObservationDismissed') : t('handoffTypeAssign');
+    const typeIcon = entry.type === 'escalate' ? '🚩' : entry.type === 'sendBack' ? '↩️' : entry.type === 'takeOwnership' ? '✋' : entry.type === 'partialFix' ? '⚡' : entry.type === 'resolved' ? '✅' : entry.type === 'observation' ? '👁' : entry.type === 'observationDismissed' ? '☑️' : entry.type === 'investigationNoIssue' ? '✅' : entry.type === 'investigationConfirmed' ? '🔧' : entry.type === 'operationalIssueCleared' ? '☑️' : '📋';
+    const typeLabel = entry.type === 'escalate' ? t('handoffTypeEscalate') : entry.type === 'sendBack' ? t('handoffTypeSendBack') : entry.type === 'takeOwnership' ? t('handoffTypeTakeOwnership') : entry.type === 'partialFix' ? t('handoffTypePartialFix') : entry.type === 'resolved' ? t('handoffTypeResolved') : entry.type === 'observation' ? t('handoffTypeObservation') : entry.type === 'observationDismissed' ? t('handoffTypeObservationDismissed') : entry.type === 'investigationNoIssue' ? t('handoffTypeInvestigationNoIssue') : entry.type === 'investigationConfirmed' ? t('handoffTypeInvestigationConfirmed') : entry.type === 'operationalIssueCleared' ? t('handoffTypeOperationalIssueCleared') : t('handoffTypeAssign');
     return '<div style="padding:10px 12px;' + (i > 0 ? 'border-top:1px solid #f0f0f0;' : '') + 'background:#fafafa">' +
       '<div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px">' + typeIcon + ' ' + typeLabel + ' — ' + entry.date + '</div>' +
       '<div style="font-size:12px;color:#555;margin-bottom:2px">' + (entry.from || '?') + ' → ' + (entry.to || '?') + '</div>' +
@@ -263,6 +263,52 @@ function deviceDecisionSlotHTML(d) {
     '</div>';
   }
 
+  // Case: known operational issue, confirmed but not yet cleared (2026-07-07).
+  // Distinct from both "resolved" (a security fix) and "nothing wrong" (green)
+  // — this is for findings like Joy's satellite example: not a password/brand
+  // issue, genuinely still a problem, but outside what getRisk() models at
+  // all. Stays visible (amber, not green, not the urgent investigation blue)
+  // until someone explicitly clears it once actually fixed — never silently
+  // reverts to a calm banner while something confirmed is still wrong.
+  if (d.knownOperationalIssue && canClearEscalation()) {
+    return '<div style="background:#FAEEDA;border:2px solid #EF9F27;border-radius:10px;padding:12px 14px;margin-bottom:14px">' +
+      '<div style="font-weight:700;color:#854F0B;font-size:14px;margin-bottom:6px"><i class="ti ti-tool" style="font-size:15px;vertical-align:-2px" aria-hidden="true"></i> ' + t('opIssueTitle') + '</div>' +
+      '<div style="font-size:13px;color:#633806;line-height:1.5;margin-bottom:10px">' +
+        '<div><strong>' + t('opIssueConfirmedBy') + ':</strong> ' + (d.operationalIssueBy || '—') + (d.operationalIssueDate ? ' · ' + d.operationalIssueDate : '') + '</div>' +
+        '<div style="margin-top:4px;padding:8px 10px;background:#fff;border-radius:6px;border:1px solid #F5D799;font-style:italic">' + (d.operationalIssueNote || '') + '</div>' +
+      '</div>' +
+      '<button onclick="clearOperationalIssue(' + d.id + ')" style="width:100%;background:#fff;color:#854F0B;border:1px solid #EF9F27;border-radius:8px;padding:9px;font-size:13px;font-weight:600;cursor:pointer">' + t('opIssueClearBtn') + '</button>' +
+    '</div>';
+  }
+
+  // Case: assigned to investigate a reported observation (2026-07-07). Distinct
+  // from the plain "reported" banner below — this stays visible the whole
+  // time someone's actually looking into it, so an assignment can never make
+  // the report just silently vanish back to a calm-looking page. Closes with
+  // a real either/or, not a passive checkbox: did they find an actual
+  // problem, or was it nothing?
+  if (d.observationInvestigating && canClearEscalation()) {
+    const lastObs = Array.isArray(d.handoffLog) ? [...d.handoffLog].reverse().find(e => e.type === 'observation') : null;
+    return '<div style="background:#EAF1FB;border:2px dashed #5B8DB8;border-radius:10px;padding:12px 14px;margin-bottom:14px">' +
+      '<div style="font-weight:700;color:#185FA5;font-size:14px;margin-bottom:6px"><i class="ti ti-search" style="font-size:15px;vertical-align:-2px" aria-hidden="true"></i> ' + t('obsInvestigatingTitle') + '</div>' +
+      '<div style="font-size:13px;color:#3a3a3a;line-height:1.5;margin-bottom:10px">' +
+        '<div><strong>' + t('obsInvestigatingAssignedTo') + ':</strong> ' + (d.assignedTo || '—') + '</div>' +
+        '<div><strong>' + t('obsBannerBy') + ':</strong> ' + (lastObs ? lastObs.from : '—') + (lastObs ? ' · ' + lastObs.date : '') + '</div>' +
+        '<div style="margin-top:4px;padding:8px 10px;background:#fff;border-radius:6px;border:1px solid #BFD6EC;font-style:italic">' + (lastObs ? lastObs.note : '') + '</div>' +
+      '</div>' +
+      '<div style="font-size:11px;font-weight:600;color:#185FA5;margin-bottom:6px">' + t('obsCloseQuestion') + '</div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">' +
+        '<button onclick="closeInvestigationNoIssue(' + d.id + ')" style="flex:1;min-width:120px;background:#fff;color:#1F4D2E;border:1px solid #BBD8C2;border-radius:8px;padding:8px 10px;font-size:12.5px;font-weight:600;cursor:pointer">' + t('obsCloseNoIssueBtn') + '</button>' +
+        '<button onclick="document.getElementById(\'op-issue-form-' + d.id + '\').style.display=(document.getElementById(\'op-issue-form-' + d.id + '\').style.display===\'none\'?\'block\':\'none\')" style="flex:1;min-width:120px;background:#fff;color:#854F0B;border:1px solid #EF9F27;border-radius:8px;padding:8px 10px;font-size:12.5px;font-weight:600;cursor:pointer">' + t('obsCloseConfirmedBtn') + '</button>' +
+      '</div>' +
+      '<div id="op-issue-form-' + d.id + '" style="display:none;padding-top:10px;border-top:1px solid #BFD6EC">' +
+        '<label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px">' + t('opIssueNoteLabel') + ' <span style="color:#A32D2D;font-size:11px">*' + t('required') + '</span></label>' +
+        '<textarea id="op-issue-note-' + d.id + '" rows="2" placeholder="' + t('opIssueNotePlaceholder') + '" style="width:100%;font-size:13px;padding:8px 12px;border:1px solid #ddd;border-radius:8px;resize:none;font-family:inherit;margin-bottom:10px"></textarea>' +
+        '<button onclick="closeInvestigationConfirmed(' + d.id + ')" style="width:100%;background:#854F0B;color:#fff;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:600;cursor:pointer">' + t('opIssueConfirmBtn') + '</button>' +
+      '</div>' +
+    '</div>';
+  }
+
   // Case: an unaddressed observation was reported on this device (2026-07-07).
   // Shown to Owner/Manager only — Technician/Farm Hand don't act on this
   // banner. Deliberately renders regardless of the underlying risk color —
@@ -368,6 +414,14 @@ function showDetail(id, keepScreen) {
     (!canSee && !d.resolved && risk !== 'green' ?
       '<div class="risk-detail" style="background:#F4F6F8;border:1px solid #d9dee3"><div class="risk-detail-title" style="color:#555"><i class="ti ti-lock"></i>Not assigned to you</div><p style="color:#555">Security details for this device are only shown to the team member it is assigned to, plus the Owner and Manager. This protects sensitive information by limiting who can see open issues.</p></div>' :
     !canDetail ? '' :
+    // Suppress the green "Looking good"/resolved banner specifically when an
+    // observation-related state is active (pending, under investigation, or
+    // a confirmed operational issue) — showing calm-green right next to "an
+    // issue was reported" is a direct contradiction a person has to mentally
+    // resolve themselves. Doesn't suppress red/yellow risk banners, since
+    // those aren't contradictory with an additional observation — both are
+    // legitimately "something's wrong," just different somethings.
+    ((d.resolved || risk === 'green') && (d.observationPending || d.observationInvestigating || d.knownOperationalIssue)) ? '' :
     d.resolved ?
       '<div class="risk-detail risk-detail-green"><div class="risk-detail-title t-green">' + t('lookingGood') + '</div><p>' + t('resolvedMsg') + (d.resolvedDate ? ' ' + d.resolvedDate : '') + '. ' + t('monitorMsg2') + '</p></div>' :
       '<div class="risk-detail risk-detail-' + risk + '"><div class="risk-detail-title t-' + risk + '"><i class="ti ' + iconMap[risk] + '"></i>' + getRiskLabel(risk, false) + '</div><p>' + why + '</p></div>'
@@ -632,12 +686,14 @@ function assignIssue(id) {
   const prev = d.assignedTo;
   d.assignedTo = name;
   d.farmHandStatus = fhStatusEl ? fhStatusEl.value : '';
-  // Any assignment on a device implicitly means it's now being handled — if
-  // there was a pending observation, this is the moment it stops sitting
-  // unaddressed. Clearing on commit (not on merely opening the form) means
-  // abandoning the Investigate form without actually assigning leaves the
-  // report correctly still pending.
-  d.observationPending = false;
+  // Any assignment on a device with a pending observation moves it forward
+  // to "under investigation" rather than just clearing it — the report
+  // stays visible (differently styled) the whole time someone's actually
+  // looking into it, instead of silently vanishing the moment it's assigned.
+  if (d.observationPending) {
+    d.observationPending = false;
+    d.observationInvestigating = true;
+  }
   if (!Array.isArray(d.handoffLog)) d.handoffLog = [];
   d.handoffLog.push({
     type: prev ? 'reassign' : 'assign',

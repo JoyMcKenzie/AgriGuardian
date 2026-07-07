@@ -5,7 +5,7 @@
 // gets seen instead of only existing if someone happens to open that exact
 // device's page or go looking in the audit log.
 function observedDevices() {
-  return devices.filter(d => !d.archived && d.observationPending === true);
+  return devices.filter(d => !d.archived && (d.observationPending === true || d.observationInvestigating === true || d.knownOperationalIssue === true));
 }
 
 function renderDashList() {
@@ -106,11 +106,20 @@ function renderDashList() {
     if (obsDevs.length > 0) {
       html += '<p style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin:14px 0 8px"><i class="ti ti-eye" style="font-size:12px;color:#1A3A6B;vertical-align:-1px" aria-hidden="true"></i> ' + t('obsDashLabel') + '</p>';
       html += obsDevs.map(function(d) {
-        const lastObs = [...d.handoffLog].reverse().find(e => e.type === 'observation');
-        return '<div style="background:#F0F6FF;border:1px solid #92B4E3;border-radius:8px;padding:10px 12px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px" onclick="showDetail(' + d.id + ')">' +
+        const lastObs = Array.isArray(d.handoffLog) ? [...d.handoffLog].reverse().find(e => e.type === 'observation') : null;
+        // Card content reflects the CURRENT state, not always the original
+        // report — otherwise a device under investigation or with a
+        // confirmed operational issue would look identical to a fresh,
+        // unaddressed one every time someone glances at the dashboard.
+        const card = d.knownOperationalIssue
+          ? { bg: '#FAEEDA', border: '#EF9F27', color: '#854F0B', text: t('opIssueTitle') + ' — ' + (d.operationalIssueNote || '') }
+          : d.observationInvestigating
+          ? { bg: '#EAF1FB', border: '#5B8DB8', color: '#185FA5', text: t('obsInvestigatingTitle') + ' — ' + (d.assignedTo || '') }
+          : { bg: '#F0F6FF', border: '#92B4E3', color: '#1A3A6B', text: (lastObs ? lastObs.from + ' — ' + lastObs.note : '') };
+        return '<div style="background:' + card.bg + ';border:1px solid ' + card.border + ';border-radius:8px;padding:10px 12px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px" onclick="showDetail(' + d.id + ')">' +
           '<div>' +
-            '<div style="font-size:13px;font-weight:600;color:#1A3A6B">' + (d.label || d.type) + '</div>' +
-            '<div style="font-size:12px;color:#1A3A6B">' + (lastObs ? lastObs.from + ' — ' + lastObs.note : '') + '</div>' +
+            '<div style="font-size:13px;font-weight:600;color:' + card.color + '">' + (d.label || d.type) + '</div>' +
+            '<div style="font-size:12px;color:' + card.color + '">' + card.text + '</div>' +
           '</div>' +
           '<i class="ti ti-chevron-right" style="color:#9a9a9a;font-size:16px;flex-shrink:0"></i>' +
         '</div>';
@@ -167,11 +176,16 @@ function renderDashList() {
     if (obsDevs.length > 0) {
       html += '<p style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin:14px 0 8px"><i class="ti ti-eye" style="font-size:12px;color:#1A3A6B;vertical-align:-1px" aria-hidden="true"></i> ' + t('obsDashLabel') + '</p>';
       html += obsDevs.map(function(d) {
-        const lastObs = [...d.handoffLog].reverse().find(e => e.type === 'observation');
-        return '<div style="background:#F0F6FF;border:1px solid #92B4E3;border-radius:8px;padding:10px 12px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px" onclick="showDetail(' + d.id + ')">' +
+        const lastObs = Array.isArray(d.handoffLog) ? [...d.handoffLog].reverse().find(e => e.type === 'observation') : null;
+        const card = d.knownOperationalIssue
+          ? { bg: '#FAEEDA', border: '#EF9F27', color: '#854F0B', text: t('opIssueTitle') + ' — ' + (d.operationalIssueNote || '') }
+          : d.observationInvestigating
+          ? { bg: '#EAF1FB', border: '#5B8DB8', color: '#185FA5', text: t('obsInvestigatingTitle') + ' — ' + (d.assignedTo || '') }
+          : { bg: '#F0F6FF', border: '#92B4E3', color: '#1A3A6B', text: (lastObs ? lastObs.from + ' — ' + lastObs.note : '') };
+        return '<div style="background:' + card.bg + ';border:1px solid ' + card.border + ';border-radius:8px;padding:10px 12px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px" onclick="showDetail(' + d.id + ')">' +
           '<div>' +
-            '<div style="font-size:13px;font-weight:600;color:#1A3A6B">' + (d.label || d.type) + '</div>' +
-            '<div style="font-size:12px;color:#1A3A6B">' + (lastObs ? lastObs.from + ' — ' + lastObs.note : '') + '</div>' +
+            '<div style="font-size:13px;font-weight:600;color:' + card.color + '">' + (d.label || d.type) + '</div>' +
+            '<div style="font-size:12px;color:' + card.color + '">' + card.text + '</div>' +
           '</div>' +
           '<i class="ti ti-chevron-right" style="color:#9a9a9a;font-size:16px;flex-shrink:0"></i>' +
         '</div>';

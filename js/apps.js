@@ -154,6 +154,56 @@ function getAppRecAction(a) {
   return t('appRecActionGood');
 }
 
+// ─── Animated accordion helper for the app detail screen ───────────────────
+// Same pattern as devices-detail.js's deviceAccSection()/networks.js's
+// netAccSection() — nested wrapper so max-height:0 fully collapses with no
+// residual padding gap, real scrollHeight measured at toggle time. Kept
+// app-scoped (distinct DOM id prefix) to avoid any cross-screen bleed.
+// All sections default collapsed — no actionability-based auto-open (that
+// pattern was tried on devices/networks earlier and caused multiple sections
+// to open simultaneously for roles who could act on almost everything;
+// removed there, never introduced here in the first place).
+function appAccSection(key, appId, iconClass, title, previewHTML, bodyHTML) {
+  var bodyId = 'app-acc-body-' + key + '-' + appId;
+  var btnId = 'app-acc-btn-' + key + '-' + appId;
+  var chevId = 'app-acc-chev-' + key + '-' + appId;
+  return '<div style="border:1px solid #ddd;border-radius:10px;margin-bottom:8px;overflow:hidden">' +
+    '<button type="button" id="' + btnId + '" onclick="toggleAppAcc(\'' + key + '\',' + appId + ')" aria-expanded="false" style="width:100%;display:flex;align-items:center;gap:8px;padding:13px 12px;background:#fff;border:none;text-align:left;cursor:pointer;min-height:44px;transition:background-color 0.2s ease;font-family:inherit">' +
+      '<i class="ti ' + iconClass + '" style="font-size:16px;color:#1F4D2E;flex-shrink:0"></i>' +
+      '<span style="font-size:13px;font-weight:500;color:#1a1a1a;flex-shrink:0">' + title + '</span>' +
+      '<span style="margin-left:auto;font-size:11px;color:#888;white-space:nowrap;flex-shrink:1;padding-left:6px;overflow:hidden;text-overflow:ellipsis;max-width:150px">' + (previewHTML||'') + '</span>' +
+      '<i id="' + chevId + '" class="ti ti-chevron-down" style="font-size:15px;color:#888;flex-shrink:0;display:inline-block;transform:rotate(0deg);transition:transform 0.25s ease"></i>' +
+    '</button>' +
+    '<div id="' + bodyId + '" data-open="false" style="overflow:hidden;transition:max-height 0.3s ease;max-height:0px">' +
+      '<div style="padding:0 14px 12px;border-top:1px solid #f0f0f0">' + bodyHTML + '</div>' +
+    '</div>' +
+  '</div>';
+}
+function initAppAccordionState(appId) {
+  document.querySelectorAll('[id^="app-acc-body-"][id$="-' + appId + '"]').forEach(function(wrap) {
+    wrap.style.maxHeight = '0px';
+  });
+}
+function toggleAppAcc(key, appId) {
+  var wrap = document.getElementById('app-acc-body-' + key + '-' + appId);
+  var btn = document.getElementById('app-acc-btn-' + key + '-' + appId);
+  var chev = document.getElementById('app-acc-chev-' + key + '-' + appId);
+  if (!wrap || !btn) return;
+  var inner = wrap.firstElementChild;
+  var isOpen = wrap.getAttribute('data-open') === 'true';
+  if (isOpen) {
+    wrap.style.maxHeight = '0px';
+    wrap.setAttribute('data-open', 'false');
+    btn.style.backgroundColor = '#fff';
+  } else {
+    wrap.style.maxHeight = (inner ? inner.scrollHeight : wrap.scrollHeight) + 'px';
+    wrap.setAttribute('data-open', 'true');
+    btn.style.backgroundColor = '#EAF3EC';
+  }
+  if (chev) chev.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+  btn.setAttribute('aria-expanded', String(!isOpen));
+}
+
 function showAppDetail(id, keepScreen) {
   if (!canSeeApps()) return;
   currentDetailView = { type: 'app', id: id };
@@ -172,24 +222,26 @@ function showAppDetail(id, keepScreen) {
 
     '<div class="risk-detail risk-detail-' + risk + '"><div class="risk-detail-title t-' + risk + '"><i class="ti ' + iconMap[risk] + '"></i>' + getAppRiskLabel(risk) + '</div><p>' + getAppRiskWhy(a) + '</p></div>' +
 
-    '<div class="action-box">' +
-      '<div class="action-label">' + t('recommendedAction') + '</div>' +
-      '<div class="action-text">' + getAppRecAction(a) + '</div>' +
-    '</div>' +
+    appAccSection('fix', a.id, 'ti-bulb', 'How to fix this', '',
+      '<div class="action-box" style="margin:10px 0 0">' +
+        '<div class="action-label">' + t('recommendedAction') + '</div>' +
+        '<div class="action-text">' + getAppRecAction(a) + '</div>' +
+      '</div>') +
 
-    '<p class="section-title">' + t('appDetailsTitle') + '</p>' +
-    '<div class="detail-row"><span class="detail-key">' + t('appPurposeLabel') + '</span><span class="detail-val">' + (a.purpose || '') + '</span></div>' +
-    (a.accountOwner ? '<div class="detail-row"><span class="detail-key">' + t('appAccountOwnerLabel') + '</span><span class="detail-val">' + a.accountOwner + '</span></div>' : '') +
-    '<div class="detail-row"><span class="detail-key">' + t('appMfaLabel') + '</span><span class="detail-val">' + (a.mfaEnabled === 'yes' ? t('pwYesVal') : t('pwNoVal')) + '</span></div>' +
-    '<div class="detail-row"><span class="detail-key">' + t('appPwManagerLabel') + '</span><span class="detail-val">' + (a.pwManagerUsed === 'yes' ? (a.pwManagerName ? a.pwManagerName : t('pwYesVal')) : t('pwNoVal')) + '</span></div>' +
-    '<div class="detail-row"><span class="detail-key">' + t('appReviewedLabel') + '</span><span class="detail-val">' + (a.reviewed === 'yes' ? t('pwYesVal') : t('pwNoVal')) + '</span></div>' +
-    (a.lastReviewedDate ? '<div class="detail-row"><span class="detail-key">' + t('appLastReviewedLabel') + '</span><span class="detail-val">' + a.lastReviewedDate + (isAppReviewStale(a) ? ' <span style="color:#C9A400">(' + t('staleVerifyBadge') + ')</span>' : '') + '</span></div>' : '') +
-    (a.renewal ? '<div class="detail-row"><span class="detail-key">' + t('appRenewalLabel') + '</span><span class="detail-val">' + a.renewal + '</span></div>' : '') +
+    appAccSection('details', a.id, 'ti-list-details', t('appDetailsTitle'), '',
+      '<div class="detail-row" style="margin-top:10px"><span class="detail-key">' + t('appPurposeLabel') + '</span><span class="detail-val">' + (a.purpose || '') + '</span></div>' +
+      (a.accountOwner ? '<div class="detail-row"><span class="detail-key">' + t('appAccountOwnerLabel') + '</span><span class="detail-val">' + a.accountOwner + '</span></div>' : '') +
+      '<div class="detail-row"><span class="detail-key">' + t('appMfaLabel') + '</span><span class="detail-val">' + (a.mfaEnabled === 'yes' ? t('pwYesVal') : t('pwNoVal')) + '</span></div>' +
+      '<div class="detail-row"><span class="detail-key">' + t('appPwManagerLabel') + '</span><span class="detail-val">' + (a.pwManagerUsed === 'yes' ? (a.pwManagerName ? a.pwManagerName : t('pwYesVal')) : t('pwNoVal')) + '</span></div>' +
+      '<div class="detail-row"><span class="detail-key">' + t('appReviewedLabel') + '</span><span class="detail-val">' + (a.reviewed === 'yes' ? t('pwYesVal') : t('pwNoVal')) + '</span></div>' +
+      (a.lastReviewedDate ? '<div class="detail-row"><span class="detail-key">' + t('appLastReviewedLabel') + '</span><span class="detail-val">' + a.lastReviewedDate + (isAppReviewStale(a) ? ' <span style="color:#C9A400">(' + t('staleVerifyBadge') + ')</span>' : '') + '</span></div>' : '') +
+      (a.renewal ? '<div class="detail-row"><span class="detail-key">' + t('appRenewalLabel') + '</span><span class="detail-val">' + a.renewal + '</span></div>' : '')) +
 
-    (a.notes ? '<div style="background:#f7f7f5;border-radius:8px;padding:10px 12px;margin:14px 0"><div style="font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">' + t('notes') + '</div><div style="font-size:13px;color:#333;white-space:pre-line">' + a.notes + '</div></div>' : '') +
+    (a.notes ? appAccSection('notes', a.id, 'ti-note', t('notes'), a.notes.split('\n')[0],
+      '<div style="font-size:13px;color:#333;white-space:pre-line;margin-top:10px">' + a.notes + '</div>') : '') +
 
-    '<div class="resolve-box">' +
-      '<div class="resolve-title">' + t('appReviewBoxTitle') + '</div>' +
+    appAccSection('review', a.id, 'ti-checklist', t('appReviewBoxTitle'), '',
+      '<div style="margin-top:10px">' +
       '<div class="form-group" style="margin-bottom:10px">' +
         '<label class="form-label">' + t('appAccountOwnerLabel') + '</label>' +
         '<input type="text" id="app-owner-' + id + '" value="' + (a.accountOwner || '').replace(/"/g,'&quot;') + '" placeholder="' + t('appAccountOwnerPlaceholder') + '" style="width:100%;font-size:14px;padding:9px 12px;border:1px solid #ddd;border-radius:8px">' +
@@ -231,13 +283,14 @@ function showAppDetail(id, keepScreen) {
         '<textarea id="app-note-' + id + '" rows="3" placeholder="' + t('appNotePlaceholder') + '" style="width:100%;font-size:13px;padding:8px 12px;border:1px solid #ddd;border-radius:8px;resize:none;font-family:inherit">' + (a.notes || '') + '</textarea>' +
       '</div>' +
       '<button class="resolve-btn" onclick="saveAppReview(' + id + ')" style="background:#1F4D2E;font-size:15px;padding:13px">' + t('saveBtn') + '</button>' +
-    '</div>';
+      '</div>');
 
   if (!keepScreen) {
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById('screen-app-detail').classList.add('active');
   }
+  initAppAccordionState(id);
 }
 
 function selectAppReviewed(el, val) {
