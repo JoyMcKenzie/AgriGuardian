@@ -25,7 +25,7 @@ function renderDeviceList() {
   let filtered = devices;
   if (deviceFilter === 'active') filtered = devices.filter(d => !d.archived);
   if (deviceFilter === 'archived') filtered = devices.filter(d => d.archived);
-  if (escalatedOnlyFilter) filtered = filtered.filter(d => d.needsOwnerAction && !d.resolved && !d.archived);
+  if (escalatedOnlyFilter) filtered = filtered.filter(d => d.needsOwnerAction && !d.resolved && !d.archived && !d.partiallyResolved);
   const sortBy = document.getElementById('sort-select') ? document.getElementById('sort-select').value : 'risk';
   const riskOrder = {red:0,yellow:1,green:2};
   filtered = [...filtered].sort((a,b) => {

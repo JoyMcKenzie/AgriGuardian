@@ -158,7 +158,12 @@ function renderDashList() {
   } else if (r === 'Manager') {
     html += card(t('dashDeviceProblems'), deviceProblems, navDevices);
     html += card(t('dashNetworkProblems'), networkProblems, navNetwork);
-    const escDevs = escalatedDevices();
+    // Excludes partially-resolved devices — those get their own dedicated
+    // purple "needs decision" section below (mgrPartialDevs), so counting
+    // them here too would show the same device twice, once as a bare number
+    // and once with full context. Matches the same exclusion already applied
+    // on the Owner dashboard branch above.
+    const escDevs = escalatedDevices().filter(d => !d.partiallyResolved);
     if (escDevs.length > 0) {
       html += card('<i class="ti ti-flag" style="font-size:13px;color:#3B0764;vertical-align:-1px" aria-hidden="true"></i> ' + t('escDashLabel'), escDevs.length, 'showEscalatedOnly()');
     }
