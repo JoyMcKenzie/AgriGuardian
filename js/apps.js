@@ -311,6 +311,7 @@ function selectAppPwManager(el, val, id) {
 }
 
 function saveAppReview(id) {
+  if (!canSeeApps()) return; // RBAC (W4): parity with archive/restore/delete
   const a = apps.find(x => x.id === id);
   if (!a) return;
   const panel = document.getElementById('app-detail-content');
@@ -383,6 +384,7 @@ function handleAppPickerSelect(sel) {
 }
 
 function addApp() {
+  if (!canSeeApps()) return; // RBAC (W4): Apps area is Owner-only
   const picker = document.getElementById('app-picker');
   let name = document.getElementById('app-name').value.trim();
   if (picker && picker.value && picker.value !== '__other_app__') name = picker.value;

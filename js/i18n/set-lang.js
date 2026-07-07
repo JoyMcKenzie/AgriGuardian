@@ -160,6 +160,7 @@ function setLang(lang, context) {
     safeSet('lbl-net-notes-label', t('netNotesLabel') + ' ');
     safeSet('lbl-net-notes-opt', t('optional'));
     safeSet('lbl-cred-warn', '⚠️ ' + t('credWarning'));
+    safeSet('lbl-cred-warn-net', '⚠️ ' + t('credWarning')); // CL3: network form warning (was dup id)
     safeSet('lbl-prod-sec-title', t('productionSecTitle'));
     safeSet('lbl-tz-note', t('tzNote'));
     safeSet('lbl-only-owner-tz', t('onlyOwnerTimezone'));

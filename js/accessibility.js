@@ -42,10 +42,6 @@ function toggleSettingsSection(id, btn) {
   btn.querySelector('.sec-arrow').textContent = isOpen ? '▸' : '▾';
 }
 
-function scrollToSection(id) {
-  const el = document.getElementById(id);
-  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
 
 function goToAccessibility() {
   showScreen('settings', document.querySelector('.nav-btn:last-child'));

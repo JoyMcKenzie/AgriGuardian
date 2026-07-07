@@ -403,7 +403,9 @@ function showDetail(id, keepScreen) {
   const canSee = canSeeIssue(d);
   const canDetail = canSeeDetailedRisk();
   const canAct = canResolveIssues(d) && canSee;
-  const canAssign = canAssignIssues() && !d.resolved && (risk !== 'green' || d.observationPending);
+  // N1: also assignable while an observation is under investigation (matters on
+  // green devices) so Owner/Manager can still reassign/unassign mid-investigation.
+  const canAssign = canAssignIssues() && !d.resolved && (risk !== 'green' || d.observationPending || d.observationInvestigating);
   const isViewOnlyNote = canSee && !canResolveIssues() && !canAssignIssues() && !d.resolved && risk !== 'green';
 
   document.getElementById('detail-content').setAttribute('data-device-id', id);
@@ -479,11 +481,12 @@ function showDetail(id, keepScreen) {
             const statusKey = farmHandNoteKey(d);
             const isCaution = d.farmHandStatus === 'use-caution' || d.farmHandStatus === 'do-not-use';
             const isFine = d.farmHandStatus === 'keep-using';
+            // R2: colors unified with dashboard/device-list Farm Hand pills.
             const fh = isCaution
               ? { icon: 'ti-alert-triangle', color: '#7A6514', bg: '#FBF6E9', border: '#F5E9B8' }
               : isFine
-              ? { icon: 'ti-thumb-up', color: '#1F4D2E', bg: '#EAF3EC', border: '#BBD8C2' }
-              : { icon: 'ti-info-circle', color: '#555', bg: '#F4F6F8', border: '#dde2e6' };
+              ? { icon: 'ti-thumb-up', color: '#14381F', bg: '#CFE8D6', border: '#8FC49F' }
+              : { icon: 'ti-info-circle', color: '#334155', bg: '#DCE3EA', border: '#B9C4CE' };
             return '<div style="background:' + fh.bg + ';border:1px solid ' + fh.border + ';border-radius:10px;padding:12px 14px;margin-top:10px">' +
               '<p style="font-size:13px;color:' + fh.color + ';margin:0;font-weight:600;display:flex;align-items:center;gap:8px"><i class="ti ' + fh.icon + '" style="font-size:16px" aria-hidden="true"></i> ' + t(statusKey) + '</p>' +
             '</div>';
@@ -754,6 +757,8 @@ function showScreen(name, btn) {
 }
 
 function showAddForm() {
+  // RBAC (C2): adding devices requires the addDevices permission.
+  if (!currentPerms().addDevices) return;
   const inline = document.getElementById('add-device-inline');
   const form = document.getElementById('screen-add');
   if (!inline || !form) return;
@@ -781,7 +786,7 @@ function showAddForm() {
   safeInline('[id="lbl-serial"]', t('serialLabel') + ' ');
   // MAC label has a child span so update its first text node in the cloned form
   (function(){ var el=inline.querySelector('[id="lbl-mac"]'); if(el&&el.childNodes[0]&&el.childNodes[0].nodeType===3) el.childNodes[0].textContent=t('macFieldLabel')+' '; })();
-  safeSet('lbl-mac-hint', t('macHint'));
+  safeInline('[id="lbl-mac-hint"]', t('macHint'));
   safeInline('[id="lbl-device-label"]', t('deviceNameLabel') + ' ');
   safeInline('[id="lbl-location"]', t('locationLabel'));
   safeInline('[id="lbl-conn-type"]', t('connectionLabel'));
@@ -846,12 +851,14 @@ function hideAddForm() {
   if (sortRow) sortRow.style.display = '';
 }
 
-function selectPw(el, val) {
+function selectPw(el) { // CL4: unused 2nd arg dropped
   document.querySelectorAll('.radio-opt').forEach(o => o.classList.remove('selected'));
   el.classList.add('selected');
 }
 
 function addDevice() {
+  // RBAC (C2): defense-in-depth — same gate as showAddForm().
+  if (!currentPerms().addDevices) return;
   // Read from inline form if open, otherwise from screen-add
   const inline = document.getElementById('add-device-inline');
   const fromInline = inline && inline.style.display === 'block';

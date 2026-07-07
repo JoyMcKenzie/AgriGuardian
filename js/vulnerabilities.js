@@ -6,15 +6,7 @@ function getRiskBadgeLabel(risk, resolved) {
   const r = resolved ? 'green' : risk;
   return (icons[r] || '') + label;
 }
-var nvdApiKey = '';
-
-function saveNvdKey() {
-  const keyEl = document.getElementById('nvd-api-key');
-  const statusEl = document.getElementById('nvd-key-status');
-  if (!keyEl || !keyEl.value.trim()) { if(statusEl) statusEl.textContent = 'Please enter a key.'; return; }
-  nvdApiKey = keyEl.value.trim();
-  if(statusEl) { statusEl.textContent = '✅ ' + t('keySaved'); statusEl.style.color = '#2E7A4E'; }
-}
+var nvdApiKey = ''; // read by checkNVD(); saveNvdKey() removed (CL1, dead)
 
 function checkVulnerabilities(deviceId) {
   const d = devices.find(x => x.id === deviceId);

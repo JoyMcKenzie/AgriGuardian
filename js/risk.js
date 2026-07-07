@@ -26,10 +26,6 @@ function getRisk(brand, pw, healthStatus) {
   return "green";
 }
 
-function translateLocation(loc) {
-  const m = {'North field':t('locationNorthField'),'South field':t('locationSouthField'),'East field':t('locationEastField'),'West field':t('locationWestField'),'Main house':t('locationMainHouse'),'Grain bins':t('locationGrainBins'),'Dairy barn':t('locationDairyBarn'),'Machine shed':t('locationMachineShed'),'Barn':t('locationBarn'),'Pasture':t('locationPasture')};
-  return m[loc] || loc;
-}
 function translateDeviceType(type) {
   const m = {'Irrigation controller':t('typeIrrigation'),'Livestock monitor':t('typeLivestock'),'Soil sensor':t('typeSoil'),'Feed system':t('typeFeed'),'Barn ventilation controller':t('typeBarnVent'),'Network gateway':t('typeNetGateway'),'GPS / guidance system':t('typeGPS'),'Automation controller':t('typeAutomation'),'Robotic milker':t('typeRoboticMilker'),'Weather station':t('typeWeather'),'Drone':t('typeDrone'),'Smartphone':t('typeSmartphone'),'Laptop':t('typeLaptop'),'Tablet':t('typeTablet')};
   return m[type] || type;

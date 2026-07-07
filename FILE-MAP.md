@@ -73,11 +73,11 @@ this doc is about *what things do*, that one is about *what loads first*.
 **Manager can now escalate too, mirroring Technician:** `shouldShowPartialResolveBox()` and `canEscalateIssue()` used to hard-exclude Manager (`if (r === 'Owner' || r === 'Manager') return false`) alongside Owner — but Manager has the same real gap Technician does: a self-assigned structural issue (e.g. hardware needing a replacement purchase) may need Owner's authority, not just Manager's. Both now only exclude Owner (nobody above the Owner to escalate to); Manager follows the identical assigned-to-self + structural-issue rule Technician already used. `escalationTarget()`/`escalationTargetName()` now exclude the current user from the Manager search, so a Manager escalating doesn't try to target themselves — falls through to Owner (or a different Manager, if a second one exists and is available). `sendBackToTech()` was hardcoded `if (currentUser.role !== 'Manager') return` even though its actual logic was already fully generic — changed to `canClearEscalation()` so Owner can send a Manager's escalation back too, not just take it over. The "Send Back" button/form visibility in the escalation-received banner had the identical hardcoded check and needed the same fix — otherwise Owner, newly reachable as primary actor via this feature, would only ever see "Take Ownership" with no way to hand it back. Verified the complete loop end-to-end: Carlos (Manager) self-assigns and gets both Resolve and Escalate; escalating correctly targets Owner, not himself; Angus becomes primary actor and gets both actions; Carlos revisiting his own escalation is correctly NOT shown as primary actor.
 **Fixed (found via direct code review, not a reported bug):** A Manager could previously invite or attempt to invite another Manager — a lateral privilege move `canActOnMember()` already blocked for editing/archiving, but the invite path (`team.js`'s `refreshRoleDropdowns()`/`inviteMember()`) had no equivalent guard. Fixed with both a UI filter (Manager option hidden from the dropdown unless the inviter is Owner) and a function-level check, matching the defense-in-depth pattern used elsewhere in this app.
 **Used by:** `devices-detail.js`, `devices-resolve.js`, `devices-list.js`, `apps.js`, `networks.js`, `team.js`, `settings.js`, `dashboard.js`, `auth-ui.js` (`defaultPermsForRole()` is shared by `inviteMember()` and `joinFarm()` so a role gets the same real permissions whether it was assigned by an Owner invite or accepted via the invite-code flow) — this is the RBAC gate; any "who can click this button" question starts here.
-**Known issue (from prior audit):** archive/delete/add-device actions in `devices-list.js`/`devices-detail.js` are not yet gated through this file — RBAC enforcement gap.
+**RBAC status (2026-07-07):** archive/delete for devices *and* networks ARE gated (`canArchiveDevices()` / `canHardDelete()` at the button and function level). Add-device is now gated too (audit C2): `add-device-btn` hidden by `renderDeviceList()` and `showAddForm()`/`addDevice()`/`addNetwork()` guarded by `currentPerms().addDevices`. (The old note here claimed archive/delete was ungated — that was stale; audit R1.)
 
 ### `risk.js` (66 lines)
 **Purpose:** Device risk scoring and messaging based on brand/password/health.
-**Key exports:** `getRiskData()`, `getRisk()`, `translateLocation()`, `translateDeviceType()`, `getRiskLabel()`, `getRiskWhy()`, `getRiskAction()`.
+**Key exports:** `getRiskData()`, `getRisk()`, `translateDeviceType()`, `getRiskLabel()`, `getRiskWhy()`, `getRiskAction()`. *(`translateLocation()` removed 2026-07-07 — dead code, audit CL1.)*
 **Depends on:** `t()`.
 **Used by:** `devices-list.js`, `devices-detail.js`, `dashboard.js`.
 **Notes:** Also holds the seed `devices` array. 2 devices (Tractor guidance unit, Office network router) are genuinely green at the brand/data level, so Farm Hand/Viewer see them on a fresh load with zero setup. The other 4 are genuinely unreviewed — no `farmHandStatus` is hardcoded in seed data on purpose, so a demo walkthrough has to actually exercise the real feature (Owner/Manager assigns a device and sets its status through `assignBoxHTML()`) rather than a pre-baked end state. `canFarmHandSeeDevice()` (`permissions.js`) is what a device needs to pass to appear in their list at all.
@@ -90,8 +90,7 @@ this doc is about *what things do*, that one is about *what loads first*.
 
 ### `hygiene.js` (97 lines)
 **Purpose:** Computes and (was intended to) render the overall farm hygiene score.
-**Key exports:** `computeHygiene()`, `renderHygieneScore()`.
-**Known issue (from prior audit):** `renderHygieneScore()` is disconnected/dead code — not currently wired into any screen. Check before assuming the hygiene score UI works end-to-end.
+**Key exports:** `computeHygiene()`. *(`renderHygieneScore()` removed 2026-07-07 — it was dead: no `#hygiene-score-card` element exists and nothing called it. `computeHygiene()` stays; it feeds `reports.js`/`report-viewers.js`. Audit CL1.)*
 
 ### `dashboard.js` (250 lines)
 **Purpose:** Renders the main dashboard screen — summary cards, alerts, nav shortcuts into other screens.
@@ -107,7 +106,7 @@ this doc is about *what things do*, that one is about *what loads first*.
 **Purpose:** Renders the device list screen; list-level actions (filter, archive, unarchive, delete).
 **Key exports:** `renderDeviceList()`, `deviceCardHTML()`, `setUserFilter()`, `archiveDevice()`, `unarchiveDevice()`, `deleteDevice()`.
 **Depends on:** `risk.js`, `permissions.js`.
-**Known issue:** archive/delete not yet RBAC-gated (see `permissions.js` note) — confirmed still open, not fixed by this session's other changes.
+**RBAC status (2026-07-07):** archive/delete ARE gated (`canArchiveDevices()`/`canHardDelete()`); add-device now gated too (audit C2). The prior "still open" note was stale (audit R1).
 **Notes:** Escalated-only filter notice and the escalated pill badge recolored to purple (were amber), matching the app-wide escalation color unification. Note: the escalated pill and the existing partially-resolved pill can now appear together on the same card looking near-identical (both purple) — distinguishable only by icon/text, not color, since both concepts now share the purple family. Farm Hand/Viewer least-privilege (superseded by the later "show everything, neutral notes" redesign — see `permissions.js`'s `farmHandNoteKey()`): `deviceCardHTML()`'s coarse indicator uses one icon (thumb-up / hand-stop / alert-triangle depending on status) in one consistent color, regardless of the underlying severity — was gray, now a distinct blue (`#1A3A6B`, reused from the existing Owner-FYI banner color rather than introducing a new one) per a "replace gray with a distinct color" request; the icon shape carries the meaning, the color doesn't vary by how serious the issue actually is. Archived/All filter buttons hidden for view-only roles too, same pattern as the team-members filter — device history/inventory management isn't relevant to them.
 
 ### `devices-detail.js` (~950 lines — largest UI file)
@@ -125,7 +124,7 @@ this doc is about *what things do*, that one is about *what loads first*.
 
 ### `devices-resolve.js` (238 lines)
 **Purpose:** Technician-facing resolve/escalate workflow and device verification.
-**Key exports:** `renderAddScreen()`, `verifyIsStale()`, `verifyBoxHTML()`, `markVerified()`, `saveAll()`, `promptReplacementDevice()`, `saveResolution()`.
+**Key exports:** `verifyIsStale()`, `verifyBoxHTML()`, `markVerified()`, `saveAll()`, `promptReplacementDevice()`. *(`renderAddScreen()` [no-op] and `saveResolution()` [superseded by `saveAll()`] removed 2026-07-07 — dead code, audit CL1.)*
 **Depends on:** `permissions.js` (`canResolveIssues`, `canEscalateIssue`), `devices-detail.js` (`showScreen`).
 **Relevant to locked spec:** this is the file for "technician resolve-vs-escalate workflow" and "technician escalation offered on any assigned issue."
 **Fixed — two real bugs in `saveAll()`, found from a "resolve sometimes doesn't work" report and confirmed by executing the actual function, not just reading it:** (A) With zero resolve-action checkboxes checked, the code set `d.resolved = false` silently — no warning, the form just reset as if something happened. Now requires at least one action, same as the already-required health-status field; simplified out the old "Device software updated alone doesn't count" special case in the process, since that checkbox itself was removed earlier this session and the distinction it existed for no longer applies. (B) Right before the final re-render, the code was wiping `d.resolveStatus`/`d.healthStatus`/`d.healthNote`/`d.healthDate` back to empty — *after* they'd already been correctly used to set `d.resolved` and write the audit log. That corrupted the permanent record: the resolved-badge would show "Marked resolved:" with nothing after it, and `getRisk()` would recompute using a blanked health status. Removed — the record now correctly persists.
@@ -147,7 +146,7 @@ this doc is about *what things do*, that one is about *what loads first*.
 
 ### `vulnerabilities.js` (140 lines)
 **Purpose:** CISA/NVD vulnerability lookups for devices (conceptual/demo data source, not live network calls).
-**Key exports:** `getRiskBadgeLabel()`, `saveNvdKey()`, `checkVulnerabilities()`, `checkCISA()`, `checkNVD()`, `renderVulnResults()`, `setDeviceFilter()`.
+**Key exports:** `getRiskBadgeLabel()`, `checkVulnerabilities()`, `checkCISA()`, `checkNVD()`, `renderVulnResults()`, `setDeviceFilter()`. *(`saveNvdKey()` removed 2026-07-07 — dead code; `nvdApiKey` var retained. Audit CL1.)*
 **Used by:** `networks.js` (`checkNetVulnerabilities`), `devices-detail.js`.
 
 ### `team.js` (197 lines)
@@ -166,7 +165,7 @@ this doc is about *what things do*, that one is about *what loads first*.
 
 ### `accessibility.js` (~165 lines)
 **Purpose:** Accessibility settings (text size, contrast, etc.), the collapsible-section toggle helper, and per-user default preferences (accessibility + language).
-**Key exports:** `toggleSettingsSection()`, `scrollToSection()`, `goToAccessibility()`, `toggleA11y()`, `applyA11yUI()`, `loadMyPreferences()`, `saveMyPreferences()`. **Key data:** `userPreferences` (accessibility + language, keyed by phone number, covers all five demo people including Owner).
+**Key exports:** `toggleSettingsSection()`, `goToAccessibility()`, `toggleA11y()`, `applyA11yUI()`, `loadMyPreferences()`, `saveMyPreferences()`. *(`scrollToSection()` removed 2026-07-07 — dead code, audit CL1.)* **Key data:** `userPreferences` (accessibility + language, keyed by phone number, covers all five demo people including Owner).
 **Used by:** `auth-ui.js` (`_enterApp()` calls `loadMyPreferences()` on every sign-in), `session.js` (`logOut()` resets to universal default).
 **Relevant to locked spec:** `toggleSettingsSection()` is the likely shared helper for "labeled collapsible sections across all screens" — check here before writing a new toggle function. Per-person accessibility/language preferences were previously a single global (`a11ySettings`/`currentLang` had no concept of "whose") — now loaded/reset on sign-in/sign-out, saved explicitly via a "Save as my default" button rather than a prompt-per-change.
 
@@ -178,7 +177,7 @@ this doc is about *what things do*, that one is about *what loads first*.
 
 ### `auth-ui.js` (~185 lines)
 **Purpose:** Sign-in screen flow — step navigation, invite code validation, demo persona sign-in. No account-creation UI (removed — see `auth-flow.js` note).
-**Key exports:** `togglePwVisibility()`, `copyDemoPassword()`, `saveHealth()`, `showStep()`, `validateInviteCode()`, `joinFarm()`, `signInAsDemoMember()`, `_enterApp()`.
+**Key exports:** `togglePwVisibility()`, `copyDemoPassword()`, `showStep()`, `validateInviteCode()`, `joinFarm()`, `signInAsDemoMember()`, `_enterApp()`. *(`saveHealth()` removed 2026-07-07 — dead code, audit CL1.)*
 **Depends on:** `auth-flow.js` (`resolveDemoAccount()`), `session.js`.
 **Notes:** `signInAsDemoMember()` pre-fills the real sign-in form with a demo account's credentials — it no longer bypasses MFA directly; the person still sends the code and verifies through the normal `sendCode()`/`verifyCode()` path. `joinFarm()` updates an existing pending ('Invited') `teamMembers` record in place if one exists (created by `inviteMember()` in `team.js`), rather than pushing a duplicate entry.
 

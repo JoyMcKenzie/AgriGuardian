@@ -306,10 +306,10 @@ function dismissObservation(id) {
   renderDeviceList();
   showDetail(id);
 }
-// Clears the pending flag (this report is now being handled, not sitting
-// unaddressed) and opens the existing Assignment section with a note already
-// referencing what was reported, so Owner/Manager can hand it to whoever
-// should look into it — same assign flow as any other issue, nothing new.
+// Opens the existing Assignment section pre-filled with a note referencing what
+// was reported. R3: deliberately does NOT clear observationPending — the report
+// only moves to "investigating" when an assignment commits (assignIssue()), so
+// abandoning this form without assigning leaves the report correctly pending.
 function investigateObservation(id) {
   if (!canClearEscalation()) return;
   const d = devices.find(x => x.id === id);
@@ -334,6 +334,9 @@ function closeInvestigationNoIssue(id) {
   const d = devices.find(x => x.id === id);
   if (!d) return;
   d.observationInvestigating = false;
+  // N2: nothing left to own — clear the assignment so the device stops showing
+  // on the assignee's / Manager's "assigned work" list. History is kept below.
+  d.assignedTo = '';
   if (!Array.isArray(d.handoffLog)) d.handoffLog = [];
   d.handoffLog.push({
     type: 'investigationNoIssue',
@@ -382,6 +385,9 @@ function clearOperationalIssue(id) {
   if (!d) return;
   d.knownOperationalIssue = false;
   d.operationalIssueNote = '';
+  // N2: terminal state (confirmed problem now fixed) — clear the assignment
+  // that was deliberately kept through the confirmed phase.
+  d.assignedTo = '';
   if (!Array.isArray(d.handoffLog)) d.handoffLog = [];
   d.handoffLog.push({
     type: 'operationalIssueCleared',
@@ -548,15 +554,6 @@ function sendBackToTech(id) {
 function showSendBackForm(id) {
   const form = document.getElementById('send-back-form-' + id);
   if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
-}
-
-function toggleHandoffLog(id) {
-  const log = document.getElementById('handoff-log-' + id);
-  const chevron = document.getElementById('handoff-chevron-' + id);
-  if (!log) return;
-  const isOpen = log.style.display !== 'none';
-  log.style.display = isOpen ? 'none' : 'block';
-  if (chevron) chevron.className = isOpen ? 'ti ti-chevron-down' : 'ti ti-chevron-up';
 }
 
 function showEscalatedOnly() {

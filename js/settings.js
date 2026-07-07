@@ -55,7 +55,7 @@ function renderSettings() {
       if (logContent) logContent.innerHTML = renderAuditLog();
     }
   }
-  if (roleEl) roleEl.textContent = (currentUser.name || currentUser.phone) + ' — ' + (currentUser.role ? t('ownerRole') === t('ownerRole') && currentUser.role : 'Owner');
+  if (roleEl) roleEl.textContent = (currentUser.name || currentUser.phone) + ' — ' + (currentUser.role || 'Owner'); // CL4: removed tautological t()===t() expr
 
   // Show/hide invite section based on role
   // Time Zone — per the User Guide, only the Owner can modify this setting.

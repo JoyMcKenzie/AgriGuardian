@@ -435,12 +435,12 @@ function saveNetwork(id) {
   showScreen('network', document.querySelectorAll('.nav-btn')[2]);
 }
 
-function selectNetPw(el, val) {
+function selectNetPw(el) { // CL4: unused 2nd arg dropped
   document.querySelectorAll('input[name="net-pw"]').forEach(r => r.closest('label').classList.remove('selected'));
   el.classList.add('selected');
 }
 
-function selectNetEnc(el, val) {
+function selectNetEnc(el) { // CL4: unused 2nd arg dropped
   document.querySelectorAll('input[name="net-enc"]').forEach(r => r.closest('label').classList.remove('selected'));
   el.classList.add('selected');
 }
@@ -507,6 +507,8 @@ function toggleNetAddForm() {
 }
 
 function addNetwork() {
+  // RBAC (C2): parity with addDevice() — needs the addDevices permission.
+  if (!currentPerms().addDevices) return;
   const type = document.getElementById('net-type').value;
   const label = document.getElementById('net-label').value.trim();
   const pw = document.querySelector('input[name="net-pw"]:checked')?.value;

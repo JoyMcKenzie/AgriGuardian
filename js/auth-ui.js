@@ -37,23 +37,6 @@ function copyDemoPassword(el, pwd) {
   }
 }
 
-function saveHealth(id, silent) {
-  const d = devices.find(x => x.id === id);
-  if (!d) return;
-  const sel = document.querySelector('input[name="health-' + id + '"]:checked');
-  if (!sel) { return false; }
-  const prev = d.healthStatus || '';
-  d.healthStatus = sel ? sel.value : '';
-  d.healthNote = d.resolveNote || '';
-  d.healthDate = localTimestamp();
-  if (!silent) {
-    if (prev !== d.healthStatus) {
-      logAction('Update health recorded', (d.label||d.type) + ' (' + d.brand + ') — ' + d.healthStatus);
-    }
-    renderDashList(); renderDeviceList(); showDetail(id);
-  }
-  return true;
-}
 
 function showStep(step) {
   ['choice','signin','code','invite','reset'].forEach(s => {
@@ -241,11 +224,10 @@ function _enterApp() {
   if (backupsNavBtn) backupsNavBtn.style.display = canSeeBackups() ? '' : 'none';
   var networkNavBtn = document.getElementById('nav-btn-network');
   if (networkNavBtn) networkNavBtn.style.display = canSeeNetworkIssue() ? '' : 'none';
-  // Hygiene Report and Activity Log are farm-wide security summaries — not
-  // appropriate for view-only roles, same reasoning as the risk-detail box
-  // and device timeline being gated behind canSeeDetailedRisk() elsewhere.
+  // W1: report buttons gated on export permission — same gate renderDashList()
+  // applies. (Was canSeeHygieneScore(), which renderDashList() then overrode.)
   var reportButtons = document.getElementById('report-buttons');
-  if (reportButtons) reportButtons.style.display = canSeeHygieneScore() ? 'flex' : 'none';
+  if (reportButtons) reportButtons.style.display = canExportReports() ? 'flex' : 'none';
   var appLangDd = document.getElementById('lang-dropdown');
   if (appLangDd) appLangDd.value = currentLang;
   setLang(currentLang, 'app');

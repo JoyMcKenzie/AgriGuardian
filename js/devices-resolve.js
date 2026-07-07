@@ -1,9 +1,4 @@
 /* AgriGuardian: verify, resolve, replacement */
-function renderAddScreen() {
-  // re-render add form labels in current language
-  const s = document.getElementById('screen-add');
-  if (!s) return;
-}
 
 // Returns true when a device's last verification is older than ~6 months (or never verified).
 function verifyIsStale(d) {
@@ -204,29 +199,4 @@ function promptReplacementDevice(oldDev) {
   }, 80);
 }
 
-function saveResolution(id, silent) {
-  const d = devices.find(x => x.id === id);
-  if (!d) return;
-  // Auto-resolve if any action is selected
-  const anyChecked = document.querySelectorAll('.resolve-action:checked').length > 0;
-  const otherChk = document.getElementById('resolve-other-check-' + id);
-  d.resolved = anyChecked || (otherChk && otherChk.checked);
-  const checked = document.querySelectorAll('.resolve-action:checked');
-  let statusParts = Array.from(checked).map(c => c.value);
-  const otherCheck = document.getElementById('resolve-other-check-' + id);
-  const otherText = document.getElementById('resolve-other-text-' + id);
-  if (otherCheck && otherCheck.checked && otherText && otherText.value.trim()) {
-    statusParts.push('Other: ' + otherText.value.trim());
-  }
-  d.resolveStatus = statusParts.join(', ');
-  d.resolveNote = document.getElementById('resolve-note').value.trim();
-  if (d.resolved) {
-    d.resolvedDate = localTimestamp();
-  } else {
-    d.resolvedDate = '';
-  }
-  renderDashList();
-  renderDeviceList();
-  showDetail(id);
-}
 

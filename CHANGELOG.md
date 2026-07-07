@@ -13,6 +13,36 @@ changed — why / notes.
 
 ---
 
+## 2026-07-07 — Audit fix pass: 2 criticals, 4 real bugs, 2 new-feature bugs, + cleanup
+Applied against the 3-state-observation build, from the audit in `AUDIT-FINDINGS.md` / `AUDIT-FINDINGS-v2.md`. Every fix verified by re-running the jsdom harness (full 5-role x all devices/networks/apps render sweep: zero errors) — see per-item checks below.
+
+**Critical**
+- **C1 — `showAddForm()` no longer crashes.** It called `safeSet(...)`, which only exists as a local inside `setLang()`; the ReferenceError aborted the Add-Device form mid-render and left the brand/type/location dropdown handlers unwired. Swapped to the in-scope `safeInline('[id="lbl-mac-hint"]', ...)`. Verified: form renders, `brandSel.onchange` now WIRED.
+- **C2 — Farm Hand / Viewer can no longer add devices.** The `+ Add device` button was ungated and `showAddForm()`/`addDevice()` had no permission check. Now: button hidden by `renderDeviceList()` when `!currentPerms().addDevices`, and function-level guards on `showAddForm()`, `addDevice()`, and (for parity) `addNetwork()`. Verified: Farm Hand button `display:none`, `addDevice()` no longer mutates the device list.
+
+**Real bugs**
+- **R1 — `FILE-MAP.md` corrected.** It described archive/delete as "not yet RBAC-gated / still open" when the code gates it; updated both notes (and recorded that add-device is now gated too).
+- **R2 — Farm Hand pill colors unified.** The darker Fine/Known-issue colors existed only on the dashboard; `deviceCardHTML()` (device list) and the device-detail view-only note still used the old lighter set. All three now share the dashboard palette.
+- **R3 — `investigateObservation()` comment corrected** to match its (correct) behavior: it does not clear `observationPending`; only a committed assignment does.
+- **R4 — Spanish `inviteBtn` fixed.** It was defined twice in the ES block; the stray `"Tengo una invitación"` won over `"Enviar invitación"`. Removed the duplicate. Verified: `t('inviteBtn')` in ES = "Enviar invitación". Also de-duplicated `selectType` (EN+ES).
+
+**New-feature bugs (from the 3-state observation work)**
+- **N1 — green device keeps its Assignment controls while under investigation.** `canAssign` only special-cased `observationPending`, so a green device lost the Assignment section the moment it moved to "investigating." Added `|| d.observationInvestigating`. Verified: assign-select present on a green+investigating device.
+- **N2 — closing an investigation no longer leaves a phantom assignment.** Per decision: "no issue found" clears `assignedTo` (nothing left to own); "confirmed problem" keeps it (someone owns the fix) until `clearOperationalIssue()`, which then clears it. Verified all three paths, and that a no-issue device drops off the Manager "assigned work" list.
+
+**Conflicting logic / cleanup**
+- **W1 — `#report-buttons` single-gated.** `_enterApp()` used `canSeeHygieneScore()` while `renderDashList()` used `canExportReports()` (which always won). `_enterApp()` now uses `canExportReports()` too.
+- **W4 — `addApp()` / `saveAppReview()`** gained the `canSeeApps()` guard their archive/restore/delete siblings already had.
+- **CL1 — removed 8 orphaned functions** (0 callers, grep-verified): `renderHygieneScore`, `saveResolution`, `renderAddScreen`, `saveHealth`, `saveNvdKey`, `scrollToSection`, `toggleHandoffLog`, `translateLocation`. `computeHygiene()` and `nvdApiKey` kept (still used).
+- **CL2 — removed 9 unused CSS classes**: `.add-btn`, `.alert-banner`, `.lang-btn`, `.lang-toggle`, `.login-screen`, `.resolve-select`, `.summary-grid`, `.risk-detail-purple`, `.t-purple`. (Dynamically-built `.badge-*`/`.dot-*` left intact.)
+- **CL3 — duplicate id `lbl-cred-warn`** (device + network forms) — network one renamed to `lbl-cred-warn-net` and given its own `setLang()` line (it previously never translated, since `getElementById` only hit the first).
+- **CL4 — dead params / expression**: dropped the unused 2nd arg on `selectPw`/`selectNetPw`/`selectNetEnc`; removed the tautological `t('ownerRole') === t('ownerRole')` in `settings.js`.
+
+**Deliberately NOT changed (needs a product decision, flagged not guessed):**
+- **N3** — a Technician assigned to investigate still sees no banner on a green device; per your call, left as-is (Owner/Manager triage).
+- **W2** — the add-device brand dropdown offers ~13 brands with no `getRiskData()` entry (all fall back to "Other"). Not fixed here: populating real support/CVE data can't be fabricated, and trimming the list is a product call.
+
+
 ## 2026-07-07 — Apps tab converted to the same animated accordion, collapsed by default
 - `showAppDetail()` was a flat page — plain risk banner, a non-collapsible "App details" block, and a review/edit form that was always fully visible with no way to collapse it. Converted to the same accordion pattern used on devices/networks: How to fix this → App details → Notes → Update review status.
 - All sections default collapsed, no exceptions — this was built correctly the first time, since the "actionability-based auto-open" mistake (sections opening themselves whenever something was actionable, causing multiple sections to expand simultaneously) had already been caught and removed from devices/networks earlier the same night. Never introduced here.

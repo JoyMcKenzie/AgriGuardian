@@ -8,6 +8,9 @@ function renderDeviceList() {
   const allBtn = document.getElementById('filter-all');
   if (archivedBtn) archivedBtn.style.display = canSeeDetailedRisk() ? '' : 'none';
   if (allBtn) allBtn.style.display = canSeeDetailedRisk() ? '' : 'none';
+  // RBAC (C2): only roles with addDevices see the "+ Add device" button.
+  const addBtn = document.getElementById('add-device-btn');
+  if (addBtn) addBtn.style.display = currentPerms().addDevices ? '' : 'none';
   if (!canSeeDetailedRisk() && deviceFilter !== 'active') {
     deviceFilter = 'active';
     const activeBtn = document.getElementById('filter-active');
@@ -65,11 +68,12 @@ function deviceCardHTML(d, showActions) {
   // "nothing's happening here" while still not signaling crisis severity.
   const fhCaution = d.farmHandStatus === 'use-caution' || d.farmHandStatus === 'do-not-use';
   const fhFine = d.farmHandStatus === 'keep-using' || (realRisk === 'green' && !d.farmHandStatus);
+  // R2: pill colors match the Farm Hand dashboard exactly (were lighter here).
   const fh = fhCaution
     ? { label: t('fhBadgeCaution'), icon: 'ti-alert-triangle', color: '#7A6514', bg: '#FBF6E9', border: '#F5E9B8' }
     : fhFine
-    ? { label: t('fhBadgeFine'), icon: 'ti-thumb-up', color: '#1F4D2E', bg: '#EAF3EC', border: '#BBD8C2' }
-    : { label: t('fhBadgeKnownIssue'), icon: 'ti-info-circle', color: '#555', bg: '#F4F6F8', border: '#dde2e6' };
+    ? { label: t('fhBadgeFine'), icon: 'ti-thumb-up', color: '#14381F', bg: '#CFE8D6', border: '#8FC49F' }
+    : { label: t('fhBadgeKnownIssue'), icon: 'ti-info-circle', color: '#334155', bg: '#DCE3EA', border: '#B9C4CE' };
   const risk = !canSee ? 'gray' : isPartial ? 'purple' : (coarse ? 'gray' : realRisk);
   const resolvedFull = d.resolved && canSee && !coarse && !d.archived;
   const badgeClass = resolvedFull ? 'badge-green' : 'badge-' + risk;
