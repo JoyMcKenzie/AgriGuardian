@@ -368,7 +368,7 @@ function showDetail(id, keepScreen) {
           : '') +
           ((d.pw === 'no' && !d.resolved) ? findDefaultLoginHTML(d) : '') +
           ((d.pw === 'no' && !d.resolved) ? pwManagerCardHTML() : ''),
-          true) : '') +
+          false) : '') +
 
       // Assignment — assign/reassign box for assigners, plain status for everyone else
       ((canAssign || (canSee && !canAssign && risk !== 'green' && !d.resolved)) ?
@@ -380,7 +380,7 @@ function showDetail(id, keepScreen) {
                 ? '<div><i class="ti ti-user-check" style="color:#1F4D2E"></i> <strong>' + t('assignedToLabel') + ':</strong> ' + d.assignedTo + '</div>'
                 : '<div><i class="ti ti-user-question" style="color:#7A6514"></i> ' + t('unassignedLabel') + '</div>')
             + '</div>'
-          ), (canAssign && !d.assignedTo)) : '') +
+          ), false) : '') +
 
       // Remediation checklist — the actual action area: verify-box (green/secure),
       // the resolve/escalate toggle (open issue), or the view-only status note.
@@ -390,7 +390,7 @@ function showDetail(id, keepScreen) {
         deviceAccSection('remediate', d.id, 'ti-checklist', t('whatWasDone'), '',
           (risk === 'green' && !d.resolved ? verifyBoxHTML(d) : addressIssueBoxHTML(d)) +
           (d.resolved ? '<div class="resolved-badge" style="margin-top:14px">✅ Marked resolved: ' + d.resolveStatus + (d.resolveNote ? ' — ' + d.resolveNote : '') + (d.resolvedDate ? '<span style="font-weight:400;margin-left:8px;color:#555">(' + d.resolvedDate + ')</span>' : '') + '</div>' : ''),
-          true)
+          false)
       : isViewOnlyNote ?
         deviceAccSection('remediate', d.id, 'ti-checklist', t('whatWasDone'), '',
           (function() {
@@ -406,7 +406,7 @@ function showDetail(id, keepScreen) {
               '<p style="font-size:13px;color:' + fh.color + ';margin:0;font-weight:600;display:flex;align-items:center;gap:8px"><i class="ti ' + fh.icon + '" style="font-size:16px" aria-hidden="true"></i> ' + t(statusKey) + '</p>' +
             '</div>';
           })(),
-          true)
+          false)
       : '') +
 
       // Device details — unchanged content, same collapsible
@@ -443,10 +443,12 @@ function showDetail(id, keepScreen) {
     // of current status, since reporting is their one real action.
     (!canDetail && canSee ?
       deviceAccSection('observe', d.id, 'ti-eye', t('observationTitle'), '',
+        '<div id="observation-box-' + d.id + '">' +
         '<p style="font-size:12px;color:#777;margin:10px 0 8px">' + t('observationDesc') + '</p>' +
         '<textarea id="observation-note-' + d.id + '" rows="2" placeholder="' + t('observationPlaceholder') + '" style="width:100%;font-size:13px;padding:8px 12px;border:1px solid #ddd;border-radius:8px;resize:none;font-family:inherit;margin-bottom:10px"></textarea>' +
-        '<button onclick="submitObservation(' + d.id + ')" style="width:100%;background:#1F4D2E;color:#fff;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:600;cursor:pointer">' + t('observationBtn') + '</button>',
-        true) : '');
+        '<button onclick="submitObservation(' + d.id + ')" style="width:100%;background:#1F4D2E;color:#fff;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:600;cursor:pointer">' + t('observationBtn') + '</button>' +
+        '</div>',
+        false) : '');
 
   if (!keepScreen) {
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));

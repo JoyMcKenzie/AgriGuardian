@@ -202,7 +202,7 @@ function showNetDetail(id, keepScreen) {
 
     (canSee ? (
 
-      netAccSection('fix', n.id, 'ti-bulb', 'How to fix this', '', '<p style="font-size:12.5px;color:#333;line-height:1.6;margin:10px 0 0">' + getNetRecAction(n) + '</p>', (!n.resolved && risk !== 'green')) +
+      netAccSection('fix', n.id, 'ti-bulb', 'How to fix this', '', '<p style="font-size:12.5px;color:#333;line-height:1.6;margin:10px 0 0">' + getNetRecAction(n) + '</p>', false) +
 
       // Assignment section — visible to whoever can assign (Manager/Owner) or
       // to the current assignee viewing their own assignment.
@@ -256,7 +256,7 @@ function showNetDetail(id, keepScreen) {
           '<button onclick="saveNetwork(' + id + ')" style="flex:1;background:#1F4D2E;color:#fff;border:none;border-radius:8px;padding:11px;font-size:13px;font-weight:500">' + t('saveBtn') + '</button>' +
           (canReturn ? '<button onclick="returnNetIssue(' + id + ')" style="flex:0 0 auto;background:#fff;color:#5B21B6;border:1px solid #C4B5FD;border-radius:8px;padding:11px 14px;font-size:13px;font-weight:500">' + t('netReturnBtn') + ' ' + (n.assignedBy || 'assigner') + '</button>' : '') +
         '</div>',
-        true) : '') +
+        false) : '') +
 
     ((canSee && !canAct && !n.resolved && risk !== 'green') ?
       '<div class="resolve-box" style="background:#F4F6F8;border:1px solid #d9dee3">' +

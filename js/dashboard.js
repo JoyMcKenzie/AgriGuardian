@@ -237,7 +237,7 @@ function renderDashList() {
     // by severity (red if >0), the same leak the per-device notes below are
     // built to avoid. The device list itself, with neutral per-device notes,
     // is the complete picture; a count on top of it adds a cue, not information.
-    html += '<p style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 8px">' + t('dashYourDevices') + '</p>';
+    html += '<p style="font-size:14px;font-weight:700;color:#111;margin:0 0 10px">' + t('dashYourDevices') + '</p>';
     if (activeDevices.length === 0) {
       html += '<p style="font-size:13px;color:#888;font-style:italic">' + t('noDevicesFound') + '</p>';
     } else {
@@ -252,8 +252,8 @@ function renderDashList() {
         const fh = isCaution
           ? { label: t('fhBadgeCaution'), icon: 'ti-alert-triangle', color: '#7A6514', bg: '#FBF6E9', border: '#F5E9B8' }
           : isFine
-          ? { label: t('fhBadgeFine'), icon: 'ti-thumb-up', color: '#1F4D2E', bg: '#EAF3EC', border: '#BBD8C2' }
-          : { label: t('fhBadgeKnownIssue'), icon: 'ti-info-circle', color: '#555', bg: '#F4F6F8', border: '#dde2e6' };
+          ? { label: t('fhBadgeFine'), icon: 'ti-thumb-up', color: '#14381F', bg: '#CFE8D6', border: '#8FC49F' }
+          : { label: t('fhBadgeKnownIssue'), icon: 'ti-info-circle', color: '#334155', bg: '#DCE3EA', border: '#B9C4CE' };
         return '<div style="background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:10px 12px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px" onclick="showDetail(' + d.id + ')">' +
           '<span style="font-size:13px;color:#333">' + (d.label || d.type) + '</span>' +
           '<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:' + fh.color + ';background:' + fh.bg + ';border:1px solid ' + fh.border + ';border-radius:20px;padding:3px 10px"><i class="ti ' + fh.icon + '" style="font-size:12px" aria-hidden="true"></i> ' + fh.label + '</span>' +
