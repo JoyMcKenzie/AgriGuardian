@@ -130,8 +130,8 @@ function deviceTimelineHTML(d) {
 function handoffLogRowsHTML(d) {
   if (!Array.isArray(d.handoffLog) || d.handoffLog.length === 0) return '';
   return [...d.handoffLog].reverse().map(function(entry, i) {
-    const typeIcon = entry.type === 'escalate' ? '🚩' : entry.type === 'sendBack' ? '↩️' : entry.type === 'takeOwnership' ? '✋' : entry.type === 'partialFix' ? '⚡' : entry.type === 'resolved' ? '✅' : entry.type === 'observation' ? '👁' : '📋';
-    const typeLabel = entry.type === 'escalate' ? t('handoffTypeEscalate') : entry.type === 'sendBack' ? t('handoffTypeSendBack') : entry.type === 'takeOwnership' ? t('handoffTypeTakeOwnership') : entry.type === 'partialFix' ? t('handoffTypePartialFix') : entry.type === 'resolved' ? t('handoffTypeResolved') : entry.type === 'observation' ? t('handoffTypeObservation') : t('handoffTypeAssign');
+    const typeIcon = entry.type === 'escalate' ? '🚩' : entry.type === 'sendBack' ? '↩️' : entry.type === 'takeOwnership' ? '✋' : entry.type === 'partialFix' ? '⚡' : entry.type === 'resolved' ? '✅' : entry.type === 'observation' ? '👁' : entry.type === 'observationDismissed' ? '☑️' : '📋';
+    const typeLabel = entry.type === 'escalate' ? t('handoffTypeEscalate') : entry.type === 'sendBack' ? t('handoffTypeSendBack') : entry.type === 'takeOwnership' ? t('handoffTypeTakeOwnership') : entry.type === 'partialFix' ? t('handoffTypePartialFix') : entry.type === 'resolved' ? t('handoffTypeResolved') : entry.type === 'observation' ? t('handoffTypeObservation') : entry.type === 'observationDismissed' ? t('handoffTypeObservationDismissed') : t('handoffTypeAssign');
     return '<div style="padding:10px 12px;' + (i > 0 ? 'border-top:1px solid #f0f0f0;' : '') + 'background:#fafafa">' +
       '<div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px">' + typeIcon + ' ' + typeLabel + ' — ' + entry.date + '</div>' +
       '<div style="font-size:12px;color:#555;margin-bottom:2px">' + (entry.from || '?') + ' → ' + (entry.to || '?') + '</div>' +
@@ -150,10 +150,10 @@ function handoffLogRowsHTML(d) {
 // ever one thing to return, not several independently-gated blocks that can
 // coexist by accident.
 function deviceDecisionSlotHTML(d) {
-  if (!canSeeIssue(d) || d.resolved || d.archived) return '';
+  if (!canSeeIssue(d) || d.archived) return '';
 
   // Case: sent back down for rework (amber) — distinct concept from escalation
-  if (d.returnedToTech) {
+  if (d.returnedToTech && !d.resolved) {
     return '<div style="background:#FFF3E0;border:2px solid #E6823A;border-radius:10px;padding:12px 14px;margin-bottom:14px">' +
       '<div style="font-weight:700;color:#7A3200;font-size:14px;margin-bottom:6px">↩️ ' + t('returnedBannerTitle') + '</div>' +
       '<div style="font-size:13px;color:#3a3a3a;line-height:1.5;margin-bottom:8px">' +
@@ -165,7 +165,7 @@ function deviceDecisionSlotHTML(d) {
   }
 
   // Case: currently escalated upward — needs someone's decision or is FYI/read-only
-  if (d.needsOwnerAction && canSeeDetailedRisk()) {
+  if (d.needsOwnerAction && !d.resolved && canSeeDetailedRisk()) {
     if (canSeeEscalationBanner(d)) {
       // A: partially-resolved + escalated — Owner sees one purple banner
       if (d.partiallyResolved && currentUser.role === 'Owner') {
@@ -263,6 +263,34 @@ function deviceDecisionSlotHTML(d) {
     '</div>';
   }
 
+  // Case: an unaddressed observation was reported on this device (2026-07-07).
+  // Shown to Owner/Manager only — Technician/Farm Hand don't act on this
+  // banner. Deliberately renders regardless of the underlying risk color —
+  // this is the fix for a real gap: a device could show a plain green
+  // "Looking good" banner while a Farm Hand had reported something wrong
+  // that the risk model (brand/password-based) has no way to reflect. Lowest
+  // priority of all decision-slot cases — an observation is "worth a look,"
+  // not an active decision blocking everything else.
+  if (d.observationPending && canClearEscalation()) {
+    const lastObs = Array.isArray(d.handoffLog) ? [...d.handoffLog].reverse().find(e => e.type === 'observation') : null;
+    return '<div style="background:#F0F6FF;border:2px solid #92B4E3;border-radius:10px;padding:12px 14px;margin-bottom:14px">' +
+      '<div style="font-weight:700;color:#1A3A6B;font-size:14px;margin-bottom:6px"><i class="ti ti-eye" style="font-size:15px;vertical-align:-2px" aria-hidden="true"></i> ' + t('obsBannerTitle') + '</div>' +
+      '<div style="font-size:13px;color:#3a3a3a;line-height:1.5;margin-bottom:10px">' +
+        '<div><strong>' + t('obsBannerBy') + ':</strong> ' + (lastObs ? lastObs.from : '—') + (lastObs ? ' · ' + lastObs.date : '') + '</div>' +
+        '<div style="margin-top:4px;padding:8px 10px;background:#fff;border-radius:6px;border:1px solid #BDD3EE;font-style:italic">' + (lastObs ? lastObs.note : '') + '</div>' +
+      '</div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">' +
+        '<button onclick="document.getElementById(\'obs-dismiss-form-' + d.id + '\').style.display=(document.getElementById(\'obs-dismiss-form-' + d.id + '\').style.display===\'none\'?\'block\':\'none\')" style="flex:1;min-width:120px;background:#fff;color:#1A3A6B;border:1px solid #92B4E3;border-radius:8px;padding:9px 12px;font-size:13px;font-weight:600;cursor:pointer">' + t('obsDismissBtn') + '</button>' +
+        '<button onclick="investigateObservation(' + d.id + ')" style="flex:1;min-width:120px;background:#1A3A6B;color:#fff;border:none;border-radius:8px;padding:9px 12px;font-size:13px;font-weight:600;cursor:pointer">' + t('obsInvestigateBtn') + '</button>' +
+      '</div>' +
+      '<div id="obs-dismiss-form-' + d.id + '" style="display:none;padding-top:10px;border-top:1px solid #BDD3EE">' +
+        '<label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px">' + t('obsDismissNoteLabel') + ' <span style="color:#aaa;font-weight:400">' + t('optional') + '</span></label>' +
+        '<textarea id="obs-dismiss-note-' + d.id + '" rows="2" placeholder="' + t('obsDismissNotePlaceholder') + '" style="width:100%;font-size:13px;padding:8px 12px;border:1px solid #ddd;border-radius:8px;resize:none;font-family:inherit;margin-bottom:10px"></textarea>' +
+        '<button onclick="dismissObservation(' + d.id + ')" style="width:100%;background:#fff;color:#1A3A6B;border:1px solid #92B4E3;border-radius:8px;padding:9px;font-size:13px;font-weight:600;cursor:pointer">' + t('obsDismissConfirmBtn') + '</button>' +
+      '</div>' +
+    '</div>';
+  }
+
   return '';
 }
 
@@ -329,7 +357,7 @@ function showDetail(id, keepScreen) {
   const canSee = canSeeIssue(d);
   const canDetail = canSeeDetailedRisk();
   const canAct = canResolveIssues(d) && canSee;
-  const canAssign = canAssignIssues() && !d.resolved && risk !== 'green';
+  const canAssign = canAssignIssues() && !d.resolved && (risk !== 'green' || d.observationPending);
   const isViewOnlyNote = canSee && !canResolveIssues() && !canAssignIssues() && !d.resolved && risk !== 'green';
 
   document.getElementById('detail-content').setAttribute('data-device-id', id);
@@ -604,6 +632,12 @@ function assignIssue(id) {
   const prev = d.assignedTo;
   d.assignedTo = name;
   d.farmHandStatus = fhStatusEl ? fhStatusEl.value : '';
+  // Any assignment on a device implicitly means it's now being handled — if
+  // there was a pending observation, this is the moment it stops sitting
+  // unaddressed. Clearing on commit (not on merely opening the form) means
+  // abandoning the Investigate form without actually assigning leaves the
+  // report correctly still pending.
+  d.observationPending = false;
   if (!Array.isArray(d.handoffLog)) d.handoffLog = [];
   d.handoffLog.push({
     type: prev ? 'reassign' : 'assign',

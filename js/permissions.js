@@ -262,6 +262,10 @@ function submitObservation(id) {
     note: noteVal,
     date: localTimestamp()
   });
+  // A fresh report always reopens the banner/dashboard-card, even if a
+  // previous observation on this same device had already been dismissed or
+  // sent to investigation — each new report is its own thing to look at.
+  d.observationPending = true;
   logAction(t('handoffTypeObservation'), (d.label || d.type) + ' — ' + noteVal);
   const btn = document.getElementById('observation-box-' + id) ? document.getElementById('observation-box-' + id).querySelector('button') : null;
   if (noteEl) noteEl.value = '';
@@ -269,6 +273,50 @@ function submitObservation(id) {
     const orig = btn.textContent;
     btn.textContent = t('observationSentConfirm');
     setTimeout(function() { btn.textContent = orig; }, 1800);
+  }
+}
+
+// ─── Observation banner actions (2026-07-07) ────────────────────────────────
+// Two real paths, not a passive "reviewed" checkbox — see the workflow
+// discussion in CHANGELOG.md. Dismiss closes it out lightweight when there's
+// genuinely nothing to act on. Investigate hands it off through the exact
+// same assignment/resolve/escalate pipeline every other issue already uses —
+// no new status types, no new permission model, just reusing what exists.
+function dismissObservation(id) {
+  if (!canClearEscalation()) return;
+  const d = devices.find(x => x.id === id);
+  if (!d) return;
+  const noteEl = document.getElementById('obs-dismiss-note-' + id);
+  const noteVal = noteEl ? noteEl.value.trim() : '';
+  d.observationPending = false;
+  if (!Array.isArray(d.handoffLog)) d.handoffLog = [];
+  d.handoffLog.push({
+    type: 'observationDismissed',
+    from: currentUser.name || currentUser.role,
+    to: '',
+    note: noteVal || t('obsDismissedNoNote'),
+    date: localTimestamp()
+  });
+  logAction('Observation dismissed', (d.label || d.type) + (noteVal ? ' — ' + noteVal : ''));
+  renderDashList();
+  renderDeviceList();
+  showDetail(id);
+}
+// Clears the pending flag (this report is now being handled, not sitting
+// unaddressed) and opens the existing Assignment section with a note already
+// referencing what was reported, so Owner/Manager can hand it to whoever
+// should look into it — same assign flow as any other issue, nothing new.
+function investigateObservation(id) {
+  if (!canClearEscalation()) return;
+  const d = devices.find(x => x.id === id);
+  if (!d) return;
+  const lastObs = Array.isArray(d.handoffLog) ? [...d.handoffLog].reverse().find(e => e.type === 'observation') : null;
+  showDetail(id, true);
+  const body = document.getElementById('dev-acc-body-assign-' + id);
+  if (body && body.getAttribute('data-open') !== 'true') toggleDeviceAcc('assign', id);
+  const noteEl = document.getElementById('assign-note-' + id);
+  if (noteEl && !noteEl.value) {
+    noteEl.value = t('obsInvestigatePrefill').replace('{note}', lastObs ? lastObs.note : '');
   }
 }
 
