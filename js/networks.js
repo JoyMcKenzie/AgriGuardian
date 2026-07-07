@@ -68,13 +68,7 @@ function netTimelineHTML(n) {
         '</div>' +
       '</div>';
   }).join('');
-  return '<button onclick="toggleSettingsSection(\'network-history-' + n.id + '\', this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 0;background:none;border:none;border-top:1px solid #eee;cursor:pointer;text-align:left;margin-top:6px">' +
-      '<span class="section-title" style="margin:0">Network history</span>' +
-      '<span class="sec-arrow" style="font-size:14px;color:#888">▸</span>' +
-    '</button>' +
-    '<div id="sec-network-history-' + n.id + '" style="display:none">' +
-    '<div style="padding:4px 2px">' + rows + '</div>' +
-    '</div>';
+  return rows;
 }
 
 function getNetRecAction(n) {
