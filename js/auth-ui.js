@@ -101,7 +101,7 @@ function showStep(step) {
     safePh('invite-code-input', t('inviteCodePlaceholder'));
     // Demo hint body has a hardcoded code badge — rebuild it
     const hintEl = document.getElementById('lbl-invite-demo-hint');
-    if (hintEl) hintEl.innerHTML = t('inviteDemoHint').replace('987654', '<strong style="background:#fff;padding:2px 8px;border-radius:6px;border:1px solid #C8E6C9;letter-spacing:2px">987654</strong>');
+    if (hintEl) hintEl.innerHTML = t('inviteDemoHint').replace('987654', '<strong style="background:#F3F8F2;padding:2px 8px;border-radius:6px;border:1px solid #E2EFE8;letter-spacing:2px">987654</strong>');
   }
   if (step === 'code') {
     safeLogin('lbl-code-label', t('loginCode'));

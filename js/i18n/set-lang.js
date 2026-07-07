@@ -11,13 +11,13 @@ function setLang(lang, context) {
         '<p style="font-size:10px;color:#aaa;text-align:right;margin-bottom:8px"><span id="lbl-last-updated">' + t('loginLastUpdated') + '</span> <span id="build-timestamp">' + existingTs + '</span></p>' +
         '<p id="lbl-demo-title" style="font-size:12px;font-weight:600;color:#1F4D2E;margin-bottom:8px">ⓘ ' + t('loginDemoTitle') + '</p>' +
         '<p id="lbl-demo-subtitle" style="font-size:12px;color:#444;margin-bottom:8px"><strong>' + t('loginDemoSubTitle') + '</strong></p>' +
-        '<div style="background:#fff;border:1px solid #C8E6C9;border-radius:8px;padding:8px 10px;margin-bottom:6px">' +
+        '<div style="background:#F3F8F2;border:1px solid #E2EFE8;border-radius:8px;padding:8px 10px;margin-bottom:6px">' +
           '<p id="lbl-demo-card1-title" style="font-size:12px;color:#1F4D2E;font-weight:600;margin-bottom:3px">' + t('loginDemoCard1Title') + '</p>' +
-          '<p id="lbl-demo-card1-desc" style="font-size:11px;color:#555;margin:0">' + t('loginDemoCard1Desc') + '</p>' +
+          '<p id="lbl-demo-card1-desc" style="font-size:11px;color:#5F7266;margin:0">' + t('loginDemoCard1Desc') + '</p>' +
         '</div>' +
-        '<div style="background:#fff;border:1px solid #C8E6C9;border-radius:8px;padding:8px 10px;margin-bottom:0">' +
+        '<div style="background:#F3F8F2;border:1px solid #E2EFE8;border-radius:8px;padding:8px 10px;margin-bottom:0">' +
           '<p id="lbl-demo-card2-title" style="font-size:12px;color:#1F4D2E;font-weight:600;margin-bottom:3px">' + t('loginDemoCard2Title') + '</p>' +
-          '<p id="lbl-demo-card2-desc" style="font-size:11px;color:#555;margin:0">' + t('loginDemoCard2Desc') + '</p>' +
+          '<p id="lbl-demo-card2-desc" style="font-size:11px;color:#5F7266;margin:0">' + t('loginDemoCard2Desc') + '</p>' +
         '</div>';
       applyBuildTimestamp();
     }
@@ -102,7 +102,7 @@ function setLang(lang, context) {
     safe('lbl-invite-demo-hint-title', t('inviteDemoHintTitle'));
     safe('btn-back-invite', t('inviteBackBtn'));
     const invHint2 = document.getElementById('lbl-invite-demo-hint');
-    if (invHint2) invHint2.innerHTML = t('inviteDemoHint').replace('987654','<strong style="background:#fff;padding:2px 8px;border-radius:6px;border:1px solid #C8E6C9;letter-spacing:2px">987654</strong>');
+    if (invHint2) invHint2.innerHTML = t('inviteDemoHint').replace('987654','<strong style="background:#F3F8F2;padding:2px 8px;border-radius:6px;border:1px solid #E2EFE8;letter-spacing:2px">987654</strong>');
     const setPh2 = (id,val) => { const el=document.getElementById(id); if(el) el.placeholder=val; };
     setPh2('invite-code-input', t('inviteCodePlaceholder'));
     setPh2('invite-name', t('loginNamePlaceholder'));

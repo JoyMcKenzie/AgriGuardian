@@ -13,7 +13,7 @@ function verifyIsStale(d) {
 function verifyBoxHTML(d) {
   var stale = verifyIsStale(d);
   if (d.verifiedDate && !stale) {
-    return '<div class="resolve-box" style="background:#F4F8F5;border:1px solid #DDEAE0;display:flex;align-items:center;justify-content:space-between;gap:10px">' +
+    return '<div class="resolve-box" style="background:#F3F8F2;border:1px solid #E2EFE8;display:flex;align-items:center;justify-content:space-between;gap:10px">' +
       '<span style="font-size:13px;color:#1F4D2E;display:inline-flex;align-items:center;gap:6px"><i class="ti ti-circle-check" style="font-size:16px"></i>' + t('verifiedOn') + ' ' + d.verifiedDate + '</span>' +
       '<a href="#" onclick="markVerified(' + d.id + ');return false;" style="font-size:12px;color:#1F4D2E;text-decoration:underline;white-space:nowrap">' + t('verifyAgain') + '</a>' +
     '</div>';
@@ -178,7 +178,7 @@ function promptReplacementDevice(oldDev) {
       if (!inline.querySelector('.replacement-banner')) {
         var banner = document.createElement('div');
         banner.className = 'replacement-banner';
-        banner.style.cssText = 'background:#E8F1FB;border:1px solid #B6D4F2;color:#1A4A7A;border-radius:6px;padding:10px 12px;margin-bottom:12px;font-size:13px;font-weight:600;';
+        banner.style.cssText = 'background:#E6F0FA;border:1px solid #92B4E3;color:#1A5FA8;border-radius:6px;padding:10px 12px;margin-bottom:12px;font-size:13px;font-weight:600;';
         banner.textContent = 'Replacement for: ' + oldDev.label + ' (archived)';
         inline.insertBefore(banner, inline.firstChild);
       }

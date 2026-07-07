@@ -14,7 +14,7 @@ function checkVulnerabilities(deviceId) {
   const resultsEl = document.getElementById('vuln-results-' + deviceId);
   if (!resultsEl) return;
 
-  resultsEl.innerHTML = '<div style="padding:10px;font-size:13px;color:#888;text-align:center">🔍 Checking databases...</div>';
+  resultsEl.innerHTML = '<div style="padding:10px;font-size:13px;color:#7A8F80;text-align:center">🔍 Checking databases...</div>';
 
   const brand = (d.brand || '').toLowerCase().replace(/[^a-z0-9]/g, ' ').trim();
   const model = (d.model || '').toLowerCase().replace(/[^a-z0-9]/g, ' ').trim();
@@ -74,45 +74,45 @@ function checkNVD(brand, model) {
 }
 
 function renderVulnResults(el, cisa, nvd, d) {
-  let html = '<div style="border:1px solid #e0e0e0;border-radius:10px;overflow:hidden;margin-bottom:8px">';
+  let html = '<div style="border:1px solid #D7E4D7;border-radius:10px;overflow:hidden;margin-bottom:8px">';
 
   // CISA results
-  html += '<div style="background:#f7f7f5;padding:8px 12px;font-size:12px;font-weight:600;color:#555;border-bottom:1px solid #e0e0e0">CISA Known Exploited Vulnerabilities</div>';
+  html += '<div style="background:#F3F8F2;padding:8px 12px;font-size:12px;font-weight:600;color:#5F7266;border-bottom:1px solid #D7E4D7">CISA Known Exploited Vulnerabilities</div>';
   if (cisa && cisa.error) {
-    html += '<div style="padding:10px 12px;font-size:13px;color:#713F12">⚠️ ' + cisa.error + '</div>';
+    html += '<div style="padding:10px 12px;font-size:13px;color:#7A6514">⚠️ ' + cisa.error + '</div>';
   } else if (!cisa || cisa.length === 0) {
     html += '<div style="padding:10px 12px;font-size:13px;color:#2E7A4E">✅ No known exploited vulnerabilities found for ' + d.brand + '.</div>';
   } else {
     html += '<div style="padding:8px 12px;font-size:12px;color:#A32D2D;font-weight:500">⚠️ ' + cisa.length + ' known exploited vulnerabilit' + (cisa.length>1?'ies':'y') + ' found</div>';
     cisa.slice(0, 3).forEach(function(v) {
-      html += '<div style="padding:8px 12px;border-top:1px solid #f0f0f0">' +
-        '<div style="font-size:12px;font-weight:600;color:#333">' + v.cveID + '</div>' +
-        '<div style="font-size:12px;color:#555;margin-top:2px">' + (v.vulnerabilityName || v.shortDescription || '') + '</div>' +
-        '<div style="font-size:11px;color:#888;margin-top:2px">Due: ' + (v.dueDate || 'N/A') + ' &middot; ' + (v.product || '') + '</div>' +
+      html += '<div style="padding:8px 12px;border-top:1px solid #E4EEE4">' +
+        '<div style="font-size:12px;font-weight:600;color:#22372A">' + v.cveID + '</div>' +
+        '<div style="font-size:12px;color:#5F7266;margin-top:2px">' + (v.vulnerabilityName || v.shortDescription || '') + '</div>' +
+        '<div style="font-size:11px;color:#7A8F80;margin-top:2px">Due: ' + (v.dueDate || 'N/A') + ' &middot; ' + (v.product || '') + '</div>' +
       '</div>';
     });
-    if (cisa.length > 3) html += '<div style="padding:6px 12px;font-size:11px;color:#888;font-style:italic">+ ' + (cisa.length-3) + ' more. Visit cisa.gov/known-exploited-vulnerabilities-catalog for full list.</div>';
+    if (cisa.length > 3) html += '<div style="padding:6px 12px;font-size:11px;color:#7A8F80;font-style:italic">+ ' + (cisa.length-3) + ' more. Visit cisa.gov/known-exploited-vulnerabilities-catalog for full list.</div>';
   }
 
   // NVD results
-  html += '<div style="background:#f7f7f5;padding:8px 12px;font-size:12px;font-weight:600;color:#555;border-top:1px solid #e0e0e0;border-bottom:1px solid #e0e0e0">NVD — National Vulnerability Database</div>';
+  html += '<div style="background:#F3F8F2;padding:8px 12px;font-size:12px;font-weight:600;color:#5F7266;border-top:1px solid #D7E4D7;border-bottom:1px solid #D7E4D7">NVD — National Vulnerability Database</div>';
   if (nvd === null) {
-    html += '<div style="padding:10px 12px;font-size:13px;color:#555">' +
+    html += '<div style="padding:10px 12px;font-size:13px;color:#5F7266">' +
       '<div style="font-weight:500;margin-bottom:4px">🔑 NVD API key not configured</div>' +
-      '<div style="font-size:12px;color:#888;line-height:1.5">The NVD database provides detailed CVE records searchable by model number. A free API key is required to protect the credential server-side. ' +
+      '<div style="font-size:12px;color:#7A8F80;line-height:1.5">The NVD database provides detailed CVE records searchable by model number. A free API key is required to protect the credential server-side. ' +
       'Get one at <strong>nvd.nist.gov/developers/request-an-api-key</strong> and add it in Settings.</div>' +
     '</div>';
   } else if (!nvd || nvd.length === 0) {
     html += '<div style="padding:10px 12px;font-size:13px;color:#2E7A4E">✅ No CVEs found for this model.</div>';
   } else {
-    html += '<div style="padding:8px 12px;font-size:12px;color:#713F12;font-weight:500">' + nvd.length + ' CVE' + (nvd.length>1?'s':'') + ' found</div>';
+    html += '<div style="padding:8px 12px;font-size:12px;color:#7A6514;font-weight:500">' + nvd.length + ' CVE' + (nvd.length>1?'s':'') + ' found</div>';
     nvd.slice(0, 3).forEach(function(item) {
       const cve = item.cve || {};
       const desc = (cve.descriptions || []).find(d => d.lang === 'en');
       const metrics = cve.metrics?.cvssMetricV31?.[0]?.cvssData || cve.metrics?.cvssMetricV2?.[0]?.cvssData || {};
-      html += '<div style="padding:8px 12px;border-top:1px solid #f0f0f0">' +
-        '<div style="font-size:12px;font-weight:600;color:#333">' + (cve.id || '') + (metrics.baseScore ? ' <span style="background:#FEFCE8;color:#3D2B00;padding:1px 6px;border-radius:10px;font-size:10px">CVSS ' + metrics.baseScore + '</span>' : '') + '</div>' +
-        '<div style="font-size:12px;color:#555;margin-top:2px">' + (desc ? desc.value.substring(0,120) + (desc.value.length>120?'...':'') : '') + '</div>' +
+      html += '<div style="padding:8px 12px;border-top:1px solid #E4EEE4">' +
+        '<div style="font-size:12px;font-weight:600;color:#22372A">' + (cve.id || '') + (metrics.baseScore ? ' <span style="background:#FBF6E9;color:#3D2B00;padding:1px 6px;border-radius:10px;font-size:10px">CVSS ' + metrics.baseScore + '</span>' : '') + '</div>' +
+        '<div style="font-size:12px;color:#5F7266;margin-top:2px">' + (desc ? desc.value.substring(0,120) + (desc.value.length>120?'...':'') : '') + '</div>' +
       '</div>';
     });
   }

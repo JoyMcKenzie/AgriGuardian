@@ -42,9 +42,12 @@ this doc is about *what things do*, that one is about *what loads first*.
 | In-app report viewer modal | `report-viewers.js` |
 | Translations / adding a language string | `lang-data.js` (strings), `set-lang.js` (apply-on-switch logic), `core.js` (`t()` lookup) |
 | Screen navigation (`showScreen`) | defined in `devices-detail.js`, called everywhere |
+| Navigation slide-out (drawer open/drag/close) | `js/nav-drawer.js` |
 | Build timestamp | `core.js` |
 | HTML structure / screen containers / forms | `index.html` |
 | Visual styling | `styles.css` |
+| Canonical colour palette (one shade per role) | `PALETTE.md` |
+| Visual style guide (swatches, type, components) | `style-guide.html` |
 | PDF library (third-party, do not edit) | `jspdf_min.js` |
 
 ---
@@ -99,6 +102,9 @@ this doc is about *what things do*, that one is about *what loads first*.
 **Used by:** entry screen after login (`auth-ui.js` routes here on successful sign-in).
 **Notes:** Escalated-devices card recolored to purple (was amber) — escalation now uses one consistent color across the app; "returned to tech" stays its own amber/orange, a distinct concept (Manager sending work back, not escalating). Farm Hand/Viewer: the "Network problems" card is removed entirely (no network access at all now, matching `nav-btn-network` being hidden in `auth-ui.js`) — showing a clickable card that just bounces them back was worse than not showing it. `deviceProblems` count now matches what actually appears in the device list for every role, no separate/inconsistent filtering. Added a "Your devices" list to their dashboard branch — previously they only saw a problem count and an "all good" message, with no way to see their actual visible devices without navigating to the Devices tab.
 **Fixed (2026-07-07):** Manager's Observations card used the generic count-card component (`card()`, bare number, links to the general device list) while Owner's used named, specific cards linking straight to `showDetail(d.id)` — real asymmetry, found live by Joy. Manager's now matches Owner's exactly. `observedDevices()` also simplified to check `d.observationPending` directly (a real state flag now, set/cleared by `submitObservation()`/`dismissObservation()`/`investigateObservation()` in `permissions.js`) instead of scanning `handoffLog` for any past observation ever — the old check never actually cleared once a device had been observed once, short of the whole device becoming resolved/archived.
+
+**Redesign stage 1 (2026-07-07):** `tabCard()` no longer tints its background by risk (the old red `#FCEBEB` etc. are gone) — cards are white with a hairline border. It now takes `(label, redCount, yellowCount, navFn)` and renders a split critical/to-review count (red + yellow dots, or a green dot + no-issues when clear). Color-blind mode swaps the dots for triangle/circle shapes in a blue/orange safe palette. Owner-only, so no severity colour reaches Farm Hand/Viewer.
+**Dashboard balance (2026-07-07):** Owner branch folds escalated/decision/returned/observation into one calm "Needs your attention" list (two accents: purple actions, blue observations; icon+sublabel per type). Farm Hand branch recoloured to soft green / soft blue / slate (no amber, still colour-safe) on the shared card layout. New lang key `needsAttentionLabel`.
 **Extended (2026-07-07):** `observedDevices()` now also surfaces devices in the `observationInvestigating` and `knownOperationalIssue` states, not just freshly-`observationPending` ones — otherwise a device would silently drop off the dashboard the moment someone started investigating it, the same "vanishes into a black hole" problem the original feature was built to prevent, just moved one step later in the lifecycle. Both Owner's and Manager's card rendering also made state-aware (three distinct visual treatments: blue for freshly reported, dashed blue for under investigation with the assignee's name, amber for a confirmed operational issue) instead of always showing the original report text regardless of current state.
 **Fixed (2026-07-06, this session — CORRECTING A PRIOR DOC/CODE MISMATCH):** the note directly above (previously in this file) claimed `canFarmHandSeeDevice()` had already been renamed to `farmHandNoteKey()` and the crash fixed — but the actual code in this file, verified by execution (not just reading), showed `redDevices`/`yellowDevices` used only `canSeeIssue(d)` with no severity gate at all. That's not a crash, but it does leak a colored red/yellow count to Farm Hand, contradicting this file's own documented design intent (see the "DEFAULT (Farm Hand, Viewer)" render branch comment: no count card, because it "would color its number by severity"). Fixed directly: both filters now also require `canSeeDetailedRisk()`, which is already `false` for Farm Hand/Viewer — no new function needed. Verified via jsdom: Farm Hand's dashboard renders with zero `badge-red`/`badge-yellow` classes present. **Lesson repeated from earlier today: a confident claim in this file that something was "fixed" must not be trusted without independent execution verification — this file itself is proof that claim and code can drift apart even within a single delivered zip.**
 
@@ -217,9 +223,18 @@ this doc is about *what things do*, that one is about *what loads first*.
 ### `index.html` (983 lines)
 **Purpose:** All screen markup/containers (`screen-dashboard`, `screen-devices`, `screen-detail`, `screen-add`, `screen-network`, `screen-net-detail`, `screen-apps`, `screen-app-detail`, `screen-backups`, `screen-settings`), plus static forms that get cloned by JS.
 **Notes:** known prior defects — duplicate element IDs, malformed div nesting in the Settings section. Verify structure with a linter/grep before assuming a given `id` is unique.
+**Redesign stage 2 (2026-07-07):** the nav is no longer a top bar — the `.nav` list is wrapped in `#nav-panel` (right-side slide-out) with `#nav-handle` and `#nav-scrim`, controlled by `js/nav-drawer.js`. The six `.nav-btn` buttons themselves are unchanged (class/order/ids/onclick), so every `showScreen`/index-based reference still resolves. **Stage 2b:** the `#report-buttons` block (Hygiene Report / Activity Log actions) now lives inside the drawer under the tabs, not on the dashboard screen — same ids, so `dashboard.js` gating is unchanged.
+
+### `nav-drawer.js`
+**Purpose:** Controller for the right-side navigation slide-out (redesign stage 2). Wires the peek handle's tap/drag to open/close the `#nav-panel`, the scrim to close, and close-on-select via event delegation on `.nav`. Pure `addEventListener` (no inline handlers, no new globals) so it needs no `validate-split` handler wiring.
+**Key exports:** none (IIFE).
+**Depends on:** DOM ids `nav-panel` / `nav-handle` / `nav-handle-icon` / `nav-scrim` in `index.html`; the `.nav-btn` buttons it closes on. Does not touch `showScreen` — navigation itself is still those buttons' own `onclick`.
+**Notes:** load order is last; it only reads the DOM after `DOMContentLoaded`, so position is not critical.
 
 ### `styles.css` (125 lines)
+**Icon audit batch 1 (2026-07-07):** added `.sr-only` (visually-hidden but screen-reader-readable) and compact icon styling for `.device-action-btn`; drawer nav tabs gained leading icons; device/network/app card actions are icon-only with `.sr-only` labels + `title` tooltips.
 **Purpose:** All visual styling — brand colors (forest green `#1F4D2E`, risk red/yellow/green variants, off-white `#f5f5f0`), layout, component styles.
+**Redesign stage 1 (2026-07-07):** the post-login app surface (`.app`) is tinted light sage `#EAF3EA` (was `#fff`) with a softer `#cfe0cf` border, so the whitespace reads as one theme with the green header; cards stay white. Body page bg (`#f5f5f0`) and the login screen are unchanged.
 
 ### `module-load-order.json`
 **Purpose:** Defines the script tag load order in `index.html`. Not a functional/purpose map — see this file only when load-order/dependency-timing bugs are suspected.

@@ -13,6 +13,96 @@ changed — why / notes.
 
 ---
 
+## 2026-07-07 — Page canvas back to neutral so the app doesn't bleed into the background
+- The outer page `body` had been turned sage (`#E7F0E7`) too, so the app card — whose own surface is also sage — dissolved into the background. Reverted the page canvas to a neutral `#EEEEEA`; the app's interior surface stays `#E7F0E7`, so the app reads as a contained frame again. Added the canvas value to `PALETTE.md`. `BUILD_TIMESTAMP` bumped.
+
+## 2026-07-07 — Slide-out drawer switched to the light theme
+- The expanded drawer read as too dark a slab against the now-light app. Reskinned it to a light panel using the canonical palette: body `#F3F8F2`, labels `#22372A`, icons `#5F7266`, active tab `#E2EFE8` with a `#1F4D2E` accent bar (and `#1F4D2E` label/icon), hover `#E7F0E7`, divider `#D7E4D7`. Added a soft left shadow (`-4px 0 16px rgba(0,0,0,0.12)`) so the light panel still reads as elevated over the content.
+- Report block in the drawer flipped to light too: green section headers (`#1F6E43`), ghost green View/Download icons (`#1F4D2E`) with `#E4EEE4` dividers, and the Email button kept solid green (`#2E7A4E`).
+- The dark-green pull tab (`#1F4D2E`, white chevron) is kept as the grab affordance — a small brand anchor against the light panel. High-contrast mode still forces white-bg/black-text as before.
+- Verified: `validate-split.py` passes. `BUILD_TIMESTAMP` bumped.
+
+## 2026-07-07 — Colour standardisation pass + palette reference + visual style guide
+- Ran the approved colour audit and standardised the whole app to one shade per role (see `PALETTE.md`). Drift outside the high-contrast file is now zero.
+- **Role-aware, property-scoped** (never blind find/replace): text via `color:` (primary `#22372A`, secondary `#5F7266`, muted `#7A8F80`); borders via `solid #…` (card `#D7E4D7`, divider `#E4EEE4`, field `#CBD8CB`); card/box surfaces via `background:#…` -> `#F3F8F2` (form-field white kept). Single-role hexes unified: info blues -> `#1A5FA8` (+ tint `#E6F0FA`, border `#92B4E3`), escalation -> `#5B21B6` (+ tint `#EFEAF7`), success tint -> `#E2EFE8`, review tint -> `#FBF6E9`, stray dots `#C0392B`->`#E24B4A` / `#C9A400`->`#D4C000`.
+- **High-contrast palette left exactly as-is** (`accessibility.js`: `#CC0000`, `#006600`, `#005577`, etc.) — deliberately a separate set.
+- Added `PALETTE.md` (canonical values + drift map) and `style-guide.html` (visual swatch board with hexes, typography, and live component examples) to the repo docs.
+- Verified: `node --check` on every edited module; `validate-split.py` passes; HC values confirmed untouched; zero residual drift. `BUILD_TIMESTAMP` bumped.
+
+## 2026-07-07 — Manager dashboard unified with Owner; security tips shown to every role
+- **Manager top summary** now uses the same calm FARM STATUS tab cards as the Owner (severity split, soft weight) instead of the big bold red "Device problems / 5" count cards Joy flagged as too high-contrast. The Manager keeps its own unassigned/assigned-work triage lists below — that's its distinct job, which the Owner doesn't have.
+- **Security tips for everyone:** the rotating tip card now renders on every role's dashboard (Owner, Manager, Technician, Farm Hand/Viewer), not just the Owner — general, non-sensitive, and most useful for the Farm Hand.
+- Refactored to two small closures in `renderDashList()` — `farmStatusCards()` (Owner + Manager) and `securityTipsCard()` (called once after the role branch, so all roles get it with no duplication and a single `#dash-tip-text`). No behaviour change to the work lists or navigation.
+- Verified: `node --check` + `validate-split.py`; `farmStatusCards()` used twice, `securityTipsCard()` once, no `dashDeviceProblems` count card left. `BUILD_TIMESTAMP` bumped.
+- Note: the Manager's conditional escalated *count* card (`card()`, shown only when escalations exist) still uses the bold style; can be calmed to the "Needs your attention" pattern on request.
+
+## 2026-07-07 — Rotating security-tip ticker fills the Owner dashboard
+- Replaced the Recent Activity fill with a rotating **security tip** card (Joy's idea — turns dead space into something educational, fitting the "make security routine" mission). Short, glanceable, one tip at a time, auto-advancing every ~6.5s with a fade; respects reduced-motion (no auto-rotate when that's on).
+- Local default tip set of 8 (bilingual EN/ES `securityTips` array + `securityTipLabel`), each a single plain-language action ("Turn on MFA for every account that offers it", "Change any device still using its factory password", etc.).
+- **Aligned to the backend plan Joy shared:** the ticker is the prototype stand-in for the vendor-side Third-Party Risk Monitoring / Alert Relay (`BACKEND-ARCHITECTURE-PLANNING.md` §12.3) feeding farm-specific findings as SecurityAlerts (§6) — fixed plain-language templates, one recommended step each. Code comment points at those sections; the array is swappable for that feed without changing the render/ticker.
+- New ticker helpers in `dashboard.js` (`currentSecurityTips()`, `startTipTicker()`, guarded single interval, cleared when the element leaves the DOM). Owner dashboard only for now.
+- Verified: `node --check` + `validate-split.py`; `securityTips` parses (array), label present in both language blocks. `BUILD_TIMESTAMP` bumped.
+
+## 2026-07-07 — Softer cards, sage everywhere, Recent Activity fills the Owner dashboard
+- Joy found the pure-white cards too stark against the sage background, and the Owner dashboard too empty below the status cards.
+- **Softer cards:** card fills moved from `#fff` to a warm off-white-green `#F3F8F2` with a gentler `#D7E4D7` border (dashboard cards, `alertRow`, `.device-card`) so they lift from the background without glaring.
+- **Sage everywhere:** the page `body` (`#f5f5f0`) and the app surface (`#EAF3EA`) both move to `#E7F0E7`, so there's no stark off-white left; only the cards stay lighter.
+- **Recent Activity** peek added to the Owner dashboard (last 4 audit-log entries — action, actor, time), filling the space the reports left when they moved to the drawer. Built from the existing `auditLog`; new bilingual key `recentActivityLabel`. Dropped the earlier "Farm health" idea — "health" reads as animal/crop health to a farmer.
+- Verified: `node --check` + `validate-split.py`; `recentActivityLabel` present in both language blocks and referenced. `BUILD_TIMESTAMP` bumped.
+- Note: several detail-screen cards in other files still use `#fff` inline; a full sweep to the soft tone can follow.
+
+## 2026-07-07 — Owner FARM STATUS cards toned to match the calm (non-read-only) style
+- Joy compared the Technician dashboard (calm) with the Owner FARM STATUS cards (too high-contrast). The difference was type weight: Technician device rows render at `font-weight:400` / `#333`, while the Owner tab cards were `600` / `#22372A`.
+- Brought the Owner tab-card labels down to `font-weight:500` / `#333`, and aligned the severity dot colours to the shared `alertRow` palette (`#E24B4A` red, `#D4C000` yellow) so every severity-seeing role matches. Read-only (Farm Hand/Viewer) keeps its own colour-safe treatment, unchanged.
+- Verified: `node --check` + `validate-split.py`. `BUILD_TIMESTAMP` bumped.
+- Note for a follow-up: the Manager dashboard uses a different bold "big number" count card (`card()`, 28px/800) — left as-is here; can be calmed the same way on request.
+
+## 2026-07-07 — Dashboard balance: calmer Owner, clearer Farm Hand (no amber)
+- Addressing the two extremes Joy flagged — the Owner dashboard read as very high-contrast/busy, the Farm Hand one as almost too muted. Mocked and approved before coding.
+- **Owner:** the four separate colour-coded sections (escalated=purple, observations=blue/amber, returned=orange, partial=purple) are folded into one calm "Needs your attention" list. Two accents only now: purple for action items (escalated / decision-needed / returned), blue for observations — the icon (`ti-flag` / `ti-bolt` / `ti-arrow-back-up` / `ti-eye`) and a sublabel carry the type. Cards are white with a small tinted icon and normal-weight text instead of bold colour on saturated tints. All click targets (`showDetail(id)`) and the 3-state observation logic are preserved. New bilingual key `needsAttentionLabel` (EN "Needs your attention" / ES "Requiere tu atención").
+- **Farm Hand:** kept colour-safe (still no red/yellow severity, per least-privilege) but made the three states legible and consistent with the Owner card layout — Fine = soft green + thumb-up, Known issue = soft blue + info, Use with caution = slate + alert-triangle. **Amber removed** (it sat too close to the severity yellow); the triangle icon now carries "caution", not colour. Added a leading device-icon tile so it reads as the same app, not a stripped-down list.
+- Verified: `node --check js/dashboard.js`; `validate-split.py` passes; `needsAttentionLabel` present in both language blocks and referenced once. `BUILD_TIMESTAMP` bumped.
+
+## 2026-07-07 — Icon pass batch 1: nav-tab icons + icon-only card row-actions
+- From the app-wide icon audit; the two lowest-risk, highest-payoff batches.
+- **Nav tabs (icon + label):** drawer tabs now lead with icons — Dashboard `ti-home`, Devices `ti-device-desktop`, Network `ti-wifi`, Apps `ti-apps`, Backups `ti-cloud`, Settings `ti-settings`. Labels kept (still translated via their spans); icons `aria-hidden`.
+- **Card row-actions (icon-only):** Archive `ti-archive`, Restore `ti-arrow-back-up`, Delete `ti-trash` on device, network and app cards. Text replaced by icons but preserved as a `.sr-only` label + a `title` tooltip, so screen readers and hover still get the word, and the EN/ES `t()` values still drive both. Networks/apps gained the `title` tooltips they previously lacked.
+- Added a `.sr-only` utility and made `.device-action-btn` a compact inline-flex icon button.
+- Verified: `node --check` on all three edited modules; `validate-split.py` passes. `BUILD_TIMESTAMP` bumped.
+- Deferred to a later batch (per the audit): the icon+label actions (Assign/Escalate/Verify/Invite/Run backup, etc.) and team-member row actions.
+
+## 2026-07-07 — Drawer reports: icon-only actions (fixes clipped Email button)
+- Joy found the Email action missing from the drawer's Hygiene Report / Activity Log rows. Cause: flexbox overflow — the long "Download" label kept the three buttons from shrinking, so they overran the 212px drawer and the card's `overflow:hidden` clipped the third (Email) button.
+- Fixed by making the drawer report actions icon-only: `min-width:0` on the buttons plus a screen-reader-only treatment on the label `<span>`s (visually hidden, still announced). Icons (eye / download / envelope) stay; the accessible names are preserved for screen readers and accessibility mode. `BUILD_TIMESTAMP` bumped.
+
+## 2026-07-07 — Drawer polish: wider content gutter so the pull tab clears the content
+- Joy noticed the slide-out handle rested on top of the screen content because the content ran to the app's right edge. Widened `.screen` padding to `18px 40px 18px 18px` (extra right gutter) so the resting handle sits in empty space beside the content, not over it. `BUILD_TIMESTAMP` bumped.
+
+## 2026-07-07 — Redesign stage 2b: report actions moved into the slide-out drawer
+- The Hygiene Report and Activity Log button block (`#report-buttons`) moved from the dashboard screen into the navigation drawer, below the tabs — the dashboard is now just the farm status.
+- Kept the same element ids (`report-buttons`, `btn-view/download/email-report`, `btn-view/download/email-activity`), so `dashboard.js`'s visibility gating (`canExportReports()` -> show/hide) and every `onclick` still resolve with no JS change. Moved by div-depth extraction; verified the ids stay unique.
+- `styles.css`: added `.nav-panel #report-buttons` overrides so the block reads on the dark-green drawer (transparent card headers with mint labels, translucent View/Download buttons, green Email button).
+- Verified: `validate-split.py` passes (98 handlers resolve); structural check confirms the block is in the drawer, gone from the dashboard, all six report-button ids present and unique. `BUILD_TIMESTAMP` bumped.
+
+## 2026-07-07 — Redesign stage 2: top tab bar converted to a right-side slide-out drawer
+- The horizontal `.nav` tab bar is now a right-anchored slide-out panel (`#nav-panel`) with a peek handle (`#nav-handle`) on the right edge and a dim scrim (`#nav-scrim`). Tap the handle to open, drag it (pointer events) to open/close, tap the scrim or pick a tab to close.
+- **Deliberately conservative:** the six `.nav-btn` buttons are unchanged — same class, order, ids (`nav-btn-network/apps/backups`), and `onclick="showScreen(...)"`. Only their container moved and was restyled. This keeps every existing reference working: `showScreen`'s `.active` toggling, the index-based back-refs (`querySelectorAll('.nav-btn')[1]`/`[2]`), `:last-child` (Settings), `querySelector('.nav-btn')` (Dashboard fallback), and the role-gating in `auth-ui.js` that hides Network/Apps/Backups by id.
+- New self-contained module `js/nav-drawer.js` (registered in `index.html` and `module-load-order.json`) wires the handle via `addEventListener` — no new inline handlers. Close-on-select is event-delegated on `.nav`, so no button markup changed.
+- **Accessibility:** high-contrast mode already forces the nav white with black text; added matching `#main-app .nav-panel` (white) / `#main-app .nav-handle` (black) overrides so the drawer stays readable, and reduced-motion disables the slide transition.
+- `styles.css`: `.app` made `position:relative`; `.nav` restyled from a white horizontal bar to a full-height green vertical list; `.nav-btn` to left-aligned white rows with a mint active bar; added `.nav-scrim` / `.nav-panel` / `.nav-handle`.
+- Verified: `validate-split.py` passes (parse, no dup decls, all 98 handlers resolve); `node --check js/nav-drawer.js` clean; a structural DOM check confirms the drawer wrappers, the handle, and the six tabs in unchanged order. `BUILD_TIMESTAMP` bumped.
+- Not in this change (next sub-step): moving the Hygiene Report / Activity Log actions into the drawer; they remain on the dashboard for now.
+
+## 2026-07-07 — Redesign stage 1: dashboard status cards de-reddened, sage background, severity split
+- First stage of the approved UI redesign (full spec in the decisions doc). Kept deliberately small and self-contained so it could be verified before the larger navigation work.
+- **Removed the tinted backgrounds on the Owner dashboard FARM STATUS cards** (`tabCard` in `js/dashboard.js`) — the pink `#FCEBEB` fill that made every category read as urgent is gone; cards are now plain white with a hairline border.
+- **Split each card's issue count into a critical (red dot) and to-review (yellow dot) count** instead of one lumped "N issues", reusing the red/yellow counts `renderDashList()` already computes (`redDevices`/`yellowDevices`, `netRed`/`netYellow`, plus new per-risk app/backup counts). A category with none shows a green dot + `t('noIssues')`.
+- **Color-blind mode:** when `a11ySettings.colorBlind` is on, the dots become distinct shapes (triangle = critical, circle = to-review) in a blue/orange safe palette, so severity never depends on colour alone. High-contrast keeps its heavier border.
+- **RBAC respected:** `tabCard` is Owner-only; Farm Hand/Viewer never reach it (they keep the neutral "Your devices" list), so no severity colour leaks to view-only roles. Signature changed `(label, risk, count, navFn)` -> `(label, redCount, yellowCount, navFn)`; the now-unused `devRisk`/`netRisk2` locals removed.
+- **`styles.css`:** `.app` background tinted from `#fff` to a light sage `#EAF3EA`, border softened to `#cfe0cf`; cards stay white so they still lift. Login screen unaffected (it lives in `#login-wrapper`, outside `.app`).
+- Verified: `python3 validate-split.py` passes all checks (parse, no duplicate decls, all 98 handlers resolve); `node --check js/dashboard.js` clean. `BUILD_TIMESTAMP` bumped.
+- Still to come in later stages (not in this change): the right-side slide-out nav with drag handle, moving reports into the slide-out, Settings preferences (handle side, pinned landing, live-apply, reset), and Help/FAQ.
+
 ## 2026-07-07 — Fixed: "+ Add network" button permanently disappearing after use
 - Joy reported: the button was there the first time she visited the Network tab, but after navigating to other tabs and back, it was gone for good.
 - Root cause, found and reproduced: `toggleNetAddForm()` located the sort-row to hide/show via a fragile selector — `document.querySelector('#screen-network div[style*="align-items:center"]')` — matching by inline style string rather than a real id. The title/button row directly above (which contains "+ Add network" itself) *also* has `align-items:center` in its own style, and comes first in the DOM, so `querySelector` grabbed that row instead of the intended sort row.

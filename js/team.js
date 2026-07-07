@@ -104,7 +104,7 @@ function inviteMember() {
   const btn = document.getElementById('btn-invite');
   btn.textContent = t('sending');
   btn.disabled = true;
-  btn.style.background = '#888';
+  btn.style.background = '#7A8F80';
 
   setTimeout(function() {
     teamMembers.push({ name: name, phone: phone, role: role, status: 'Invited', archived: false, perms: { addDevices: false, archiveDelete: false, resolveIssues: false, assignIssues: false, exportReports: false, viewOnly: true } });

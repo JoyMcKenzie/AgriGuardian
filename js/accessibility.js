@@ -111,6 +111,8 @@ function applyA11yUI() {
       #main-app .nav { border-top: 3px solid #000 !important; background: #fff !important; }
       #main-app .nav-btn { border-bottom: 3px solid transparent !important; color: #000 !important; font-weight: 600 !important; }
       #main-app .nav-btn.active { border-bottom: 3px solid #000 !important; color: #000 !important; }
+      #main-app .nav-panel { background: #fff !important; }
+      #main-app .nav-handle { background: #000 !important; color: #fff !important; }
       #main-app .section-title { color: #000 !important; font-weight: 700 !important; }
       #main-app .device-name { color: #000 !important; font-weight: 700 !important; }
       #main-app .device-brand { color: #333 !important; }

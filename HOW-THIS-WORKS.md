@@ -16,7 +16,7 @@ js/
   risk.js  reports.js  hygiene.js  dashboard.js  devices-list.js  audit.js
   permissions.js  accessibility.js  vulnerabilities.js  devices-detail.js
   settings.js  networks-data.js  networks.js  apps.js  team.js  auth-ui.js
-  report-viewers.js  auth-flow.js  session.js  devices-resolve.js
+  report-viewers.js  auth-flow.js  session.js  devices-resolve.js  nav-drawer.js
   i18n/
     lang-data.js        ← all EN/ES translation strings (the LANG object)
     core.js             ← translation helpers + build timestamp
@@ -50,6 +50,7 @@ js/
 | `auth-flow.js` | Registration + MFA send |
 | `session.js` | Session timeout + verify |
 | `devices-resolve.js` | Verify / resolve / replacement flow |
+| `nav-drawer.js` | Right-side navigation slide-out (open / drag / close) |
 
 ---
 

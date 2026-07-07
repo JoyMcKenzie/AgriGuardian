@@ -60,7 +60,7 @@ function sendCode() {
   const btn = document.getElementById('send-btn');
   btn.textContent = t('sending');
   btn.disabled = true;
-  btn.style.background = '#888';
+  btn.style.background = '#7A8F80';
   setTimeout(function() {
     btn.textContent = t('loginSend');
     btn.disabled = false;

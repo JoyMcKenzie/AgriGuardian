@@ -3,7 +3,7 @@ function renderNetworkList() {
   const list = document.getElementById('network-list');
   if (!list) return;
   if (networks.length === 0) {
-    list.innerHTML = '<p style="font-size:13px;color:#888;font-style:italic;padding:8px 0">No network connections added yet.</p>';
+    list.innerHTML = '<p style="font-size:13px;color:#7A8F80;font-style:italic;padding:8px 0">No network connections added yet.</p>';
     return;
   }
   let filtered = networks;
@@ -31,9 +31,9 @@ function renderNetworkList() {
         (a11ySettings.colorBlind ? '<span class="risk-badge badge-' + displayRisk + '" style="margin-right:2px">' + ({red:'⛔',yellow:'⚠️',green:'✅'}[displayRisk]||'') + '</span>' : '') +
         (canArchiveDevices() ? (
           (n.archived
-            ? '<button class="device-action-btn" onclick="unarchiveNetwork(' + n.id + ')">Restore</button>'
-            : '<button class="device-action-btn" onclick="archiveNetwork(' + n.id + ')">'+t('archive')+'</button>') +
-          (canHardDelete() ? '<button class="device-action-btn danger" onclick="deleteNetwork(' + n.id + ')">'+t('delete')+'</button>' : '')
+            ? '<button class="device-action-btn" onclick="unarchiveNetwork(' + n.id + ')" title="'+t('restore')+'"><i class="ti ti-arrow-back-up" aria-hidden="true"></i><span class="sr-only">'+t('restore')+'</span></button>'
+            : '<button class="device-action-btn" onclick="archiveNetwork(' + n.id + ')" title="'+t('archive')+'"><i class="ti ti-archive" aria-hidden="true"></i><span class="sr-only">'+t('archive')+'</span></button>') +
+          (canHardDelete() ? '<button class="device-action-btn danger" onclick="deleteNetwork(' + n.id + ')" title="'+t('delete')+'"><i class="ti ti-trash" aria-hidden="true"></i><span class="sr-only">'+t('delete')+'</span></button>' : '')
         ) : '') +
       '</div>' +
     '</div>';
@@ -43,11 +43,11 @@ function renderNetworkList() {
 
 function netTimelineHTML(n) {
   var events = [];
-  if (n.addedDate) events.push({ date: n.addedDate, icon: 'ti-plus', color: '#5B8DB8', label: 'Network added' });
+  if (n.addedDate) events.push({ date: n.addedDate, icon: 'ti-plus', color: '#1A5FA8', label: 'Network added' });
   var risk = getNetRisk(n);
   if (!n.resolved && risk !== 'green') {
     events.push({ date: n.flaggedDate || '', icon: 'ti-alert-triangle',
-      color: (risk === 'red' ? '#C0392B' : '#C9A400'),
+      color: (risk === 'red' ? '#E24B4A' : '#D4C000'),
       label: (risk === 'red' ? 'Flagged: high risk' : 'Flagged: needs attention') });
   }
   if (n.resolved) {
@@ -63,8 +63,8 @@ function netTimelineHTML(n) {
           (isLast ? '' : '<div style="width:2px;flex:1;background:#e0e0e0;margin:2px 0"></div>') +
         '</div>' +
         '<div style="padding-bottom:' + (isLast ? '0' : '14px') + ';flex:1;min-width:0">' +
-          '<div style="font-size:13px;color:#333">' + e.label + '</div>' +
-          (e.date ? '<div style="font-size:11px;color:#999">' + e.date + '</div>' : '') +
+          '<div style="font-size:13px;color:#22372A">' + e.label + '</div>' +
+          (e.date ? '<div style="font-size:11px;color:#7A8F80">' + e.date + '</div>' : '') +
         '</div>' +
       '</div>';
   }).join('');
@@ -91,15 +91,15 @@ function netAccSection(key, netId, iconClass, title, previewHTML, bodyHTML, star
   var bodyId = 'net-acc-body-' + key + '-' + netId;
   var btnId = 'net-acc-btn-' + key + '-' + netId;
   var chevId = 'net-acc-chev-' + key + '-' + netId;
-  return '<div style="border:1px solid #ddd;border-radius:10px;margin-bottom:8px;overflow:hidden">' +
-    '<button type="button" id="' + btnId + '" onclick="toggleNetAcc(\'' + key + '\',' + netId + ')" aria-expanded="' + (startOpen?'true':'false') + '" style="width:100%;display:flex;align-items:center;gap:8px;padding:13px 12px;background:' + (startOpen?'#EAF3EC':'#fff') + ';border:none;text-align:left;cursor:pointer;min-height:44px;transition:background-color 0.2s ease;font-family:inherit">' +
+  return '<div style="border:1px solid #CBD8CB;border-radius:10px;margin-bottom:8px;overflow:hidden">' +
+    '<button type="button" id="' + btnId + '" onclick="toggleNetAcc(\'' + key + '\',' + netId + ')" aria-expanded="' + (startOpen?'true':'false') + '" style="width:100%;display:flex;align-items:center;gap:8px;padding:13px 12px;background:' + (startOpen?'#E2EFE8':'#fff') + ';border:none;text-align:left;cursor:pointer;min-height:44px;transition:background-color 0.2s ease;font-family:inherit">' +
       '<i class="ti ' + iconClass + '" style="font-size:16px;color:#1F4D2E;flex-shrink:0"></i>' +
-      '<span style="font-size:13px;font-weight:500;color:#1a1a1a;flex-shrink:0">' + title + '</span>' +
-      '<span style="margin-left:auto;font-size:11px;color:#888;white-space:nowrap;flex-shrink:1;padding-left:6px;overflow:hidden;text-overflow:ellipsis;max-width:150px">' + (previewHTML||'') + '</span>' +
-      '<i id="' + chevId + '" class="ti ti-chevron-down" style="font-size:15px;color:#888;flex-shrink:0;display:inline-block;transform:rotate(' + (startOpen?'180deg':'0deg') + ');transition:transform 0.25s ease"></i>' +
+      '<span style="font-size:13px;font-weight:500;color:#22372A;flex-shrink:0">' + title + '</span>' +
+      '<span style="margin-left:auto;font-size:11px;color:#7A8F80;white-space:nowrap;flex-shrink:1;padding-left:6px;overflow:hidden;text-overflow:ellipsis;max-width:150px">' + (previewHTML||'') + '</span>' +
+      '<i id="' + chevId + '" class="ti ti-chevron-down" style="font-size:15px;color:#7A8F80;flex-shrink:0;display:inline-block;transform:rotate(' + (startOpen?'180deg':'0deg') + ');transition:transform 0.25s ease"></i>' +
     '</button>' +
     '<div id="' + bodyId + '" data-open="' + (startOpen?'true':'false') + '" style="overflow:hidden;transition:max-height 0.3s ease;max-height:0px">' +
-      '<div style="padding:0 14px 12px;border-top:1px solid #f0f0f0">' + bodyHTML + '</div>' +
+      '<div style="padding:0 14px 12px;border-top:1px solid #E4EEE4">' + bodyHTML + '</div>' +
     '</div>' +
   '</div>';
 }
@@ -127,7 +127,7 @@ function toggleNetAcc(key, netId) {
   } else {
     wrap.style.maxHeight = (inner ? inner.scrollHeight : wrap.scrollHeight) + 'px';
     wrap.setAttribute('data-open', 'true');
-    btn.style.backgroundColor = '#EAF3EC';
+    btn.style.backgroundColor = '#E2EFE8';
   }
   if (chev) chev.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
   btn.setAttribute('aria-expanded', String(!isOpen));
@@ -149,13 +149,13 @@ function netAssignBoxHTML(n) {
     }).join('');
   const primaryLabel = n.assignedTo ? t('reassignBtn') : t('assignBtn');
   const isReassign = !!n.assignedTo;
-  return '<p style="font-size:11px;color:#888;margin:0 0 8px">' + t('assignDesc') + '</p>' +
-    '<select id="net-assign-select-' + n.id + '" style="width:100%;font-size:13px;padding:9px 10px;border:1px solid #ddd;border-radius:8px;background:#fff;font-family:inherit;margin-bottom:8px">' + options + '</select>' +
-    '<label style="font-size:11px;font-weight:600;color:#555;display:block;margin-bottom:4px">' + t('assignNoteLabel') + ' <span style="color:#A32D2D">*' + t('required') + '</span></label>' +
-    '<textarea id="net-assign-note-' + n.id + '" rows="2" placeholder="' + t('assignNotePlaceholder') + '" style="width:100%;font-size:12.5px;padding:8px 10px;border:1px solid #ddd;border-radius:8px;resize:none;font-family:inherit;margin-bottom:8px"></textarea>' +
+  return '<p style="font-size:11px;color:#7A8F80;margin:0 0 8px">' + t('assignDesc') + '</p>' +
+    '<select id="net-assign-select-' + n.id + '" style="width:100%;font-size:13px;padding:9px 10px;border:1px solid #CBD8CB;border-radius:8px;background:#F3F8F2;font-family:inherit;margin-bottom:8px">' + options + '</select>' +
+    '<label style="font-size:11px;font-weight:600;color:#5F7266;display:block;margin-bottom:4px">' + t('assignNoteLabel') + ' <span style="color:#A32D2D">*' + t('required') + '</span></label>' +
+    '<textarea id="net-assign-note-' + n.id + '" rows="2" placeholder="' + t('assignNotePlaceholder') + '" style="width:100%;font-size:12.5px;padding:8px 10px;border:1px solid #CBD8CB;border-radius:8px;resize:none;font-family:inherit;margin-bottom:8px"></textarea>' +
     '<div style="display:flex;gap:8px">' +
       '<button onclick="assignNetIssue(' + n.id + ')" style="flex:1;background:#1F4D2E;color:#fff;border:none;border-radius:8px;padding:9px;font-size:12.5px;font-weight:500">' + primaryLabel + '</button>' +
-      (isReassign ? '<button onclick="unassignNetIssue(' + n.id + ')" style="flex:0 0 auto;background:#fff;color:#A32D2D;border:1px solid #E0B4B4;border-radius:8px;padding:9px 14px;font-size:12.5px;font-weight:500">' + t('unassignBtn') + '</button>' : '') +
+      (isReassign ? '<button onclick="unassignNetIssue(' + n.id + ')" style="flex:0 0 auto;background:#F3F8F2;color:#A32D2D;border:1px solid #E0B4B4;border-radius:8px;padding:9px 14px;font-size:12.5px;font-weight:500">' + t('unassignBtn') + '</button>' : '') +
     '</div>';
 }
 
@@ -182,7 +182,7 @@ function showNetDetail(id, keepScreen) {
     '<div class="device-sub">' + n.type + '</div>' +
 
     (!canSee && !n.resolved && risk !== 'green' ?
-      '<div class="risk-detail" style="background:#F4F6F8;border:1px solid #d9dee3"><div class="risk-detail-title" style="color:#555"><i class="ti ti-lock"></i>Restricted</div><p style="color:#555">Security details for this network connection are only shown to Owners, Managers, and Technicians.</p></div>' :
+      '<div class="risk-detail" style="background:#F3F8F2;border:1px solid #d9dee3"><div class="risk-detail-title" style="color:#5F7266"><i class="ti ti-lock"></i>Restricted</div><p style="color:#5F7266">Security details for this network connection are only shown to Owners, Managers, and Technicians.</p></div>' :
       n.resolved ?
         '<div class="risk-detail risk-detail-green"><div class="risk-detail-title t-green"><i class="ti ti-circle-check"></i>' + t('lookingGood') + '</div><p>' + (n.savedDate ? 'Marked resolved ' + n.savedDate + '. ' : '') + 'Continue monitoring this connection.</p></div>' :
         '<div class="risk-detail risk-detail-' + risk + '"><div class="risk-detail-title t-' + risk + '"><i class="ti ' + iconMap[risk] + '"></i>' + getNetRiskLabel(risk) + '</div><p>' + getNetRiskWhy(n) + '</p></div>'
@@ -192,17 +192,17 @@ function showNetDetail(id, keepScreen) {
     // banner, but targeted at the specific person who made the assignment
     // rather than a farm-wide Manager/Owner tier.
     ((n.needsOwnerAction && canActOnReturn) ?
-      '<div style="background:#F3EEFF;border:1px solid #C4B5FD;border-radius:10px;padding:12px 14px;margin-bottom:14px">' +
+      '<div style="background:#EFEAF7;border:1px solid #C4B5FD;border-radius:10px;padding:12px 14px;margin-bottom:14px">' +
         '<div style="font-weight:700;color:#5B21B6;font-size:13px;margin-bottom:6px"><i class="ti ti-corner-up-left"></i> ' + t('netReturnedTitle') + '</div>' +
         '<div style="font-size:13px;color:#3B0764;line-height:1.5">' +
           '<div><strong>' + (n.assignedTo || 'They') + '</strong> ' + t('netReturnSentNote') + '</div>' +
-          '<div style="margin-top:4px;padding:8px 10px;background:#fff;border-radius:6px;border:1px solid #C4B5FD;font-style:italic">' + (n.returnNote || '') + '</div>' +
+          '<div style="margin-top:4px;padding:8px 10px;background:#F3F8F2;border-radius:6px;border:1px solid #C4B5FD;font-style:italic">' + (n.returnNote || '') + '</div>' +
         '</div>' +
       '</div>' : '') +
 
     (canSee ? (
 
-      netAccSection('fix', n.id, 'ti-bulb', 'How to fix this', '', '<p style="font-size:12.5px;color:#333;line-height:1.6;margin:10px 0 0">' + getNetRecAction(n) + '</p>', false) +
+      netAccSection('fix', n.id, 'ti-bulb', 'How to fix this', '', '<p style="font-size:12.5px;color:#22372A;line-height:1.6;margin:10px 0 0">' + getNetRecAction(n) + '</p>', false) +
 
       // Assignment section — visible to whoever can assign (Manager/Owner) or
       // to the current assignee viewing their own assignment.
@@ -210,23 +210,23 @@ function showNetDetail(id, keepScreen) {
         netAccSection('assign', n.id, 'ti-user-question', 'Assignment',
           n.assignedTo ? n.assignedTo : t('unassignedLabel'),
           (canAssign ? netAssignBoxHTML(n) :
-            '<div style="font-size:12.5px;color:#333;line-height:1.6;margin-top:10px">' +
+            '<div style="font-size:12.5px;color:#22372A;line-height:1.6;margin-top:10px">' +
               '<div style="margin-bottom:6px"><strong>' + t('assignedToLabel') + ':</strong> ' + (n.assignedTo || '—') + '</div>' +
             '</div>'
           ), false) : '') +
 
       netAccSection('details', n.id, 'ti-list-details', 'Network details',
         (n.pw === 'yes' ? '' : 'No pw') + (n.pw !== 'yes' && n.encrypted !== 'yes' ? ' · ' : '') + (n.encrypted === 'yes' ? '' : 'Not encrypted'),
-        '<div class="detail-row" style="border-bottom:1px solid #f0f0f0;padding:8px 0"><span class="detail-key">Connection type</span><span class="detail-val">' + n.type + '</span></div>' +
-        (n.hwBrand ? '<div class="detail-row" style="border-bottom:1px solid #f0f0f0;padding:8px 0"><span class="detail-key">' + t('hardwareBrand') + '</span><span class="detail-val">' + n.hwBrand + '</span></div>' : '') +
-        (n.hwModel ? '<div class="detail-row" style="border-bottom:1px solid #f0f0f0;padding:8px 0"><span class="detail-key">' + t('hardwareModel') + '</span><span class="detail-val">' + n.hwModel + '</span></div>' : '') +
-        '<div class="detail-row" style="border-bottom:1px solid #f0f0f0;padding:8px 0"><span class="detail-key">Default password changed</span><span class="detail-val">' + (n.pw === 'yes' ? 'Yes' : 'No / not sure') + '</span></div>' +
+        '<div class="detail-row" style="border-bottom:1px solid #E4EEE4;padding:8px 0"><span class="detail-key">Connection type</span><span class="detail-val">' + n.type + '</span></div>' +
+        (n.hwBrand ? '<div class="detail-row" style="border-bottom:1px solid #E4EEE4;padding:8px 0"><span class="detail-key">' + t('hardwareBrand') + '</span><span class="detail-val">' + n.hwBrand + '</span></div>' : '') +
+        (n.hwModel ? '<div class="detail-row" style="border-bottom:1px solid #E4EEE4;padding:8px 0"><span class="detail-key">' + t('hardwareModel') + '</span><span class="detail-val">' + n.hwModel + '</span></div>' : '') +
+        '<div class="detail-row" style="border-bottom:1px solid #E4EEE4;padding:8px 0"><span class="detail-key">Default password changed</span><span class="detail-val">' + (n.pw === 'yes' ? 'Yes' : 'No / not sure') + '</span></div>' +
         '<div class="detail-row" style="padding:8px 0"><span class="detail-key">Encrypted</span><span class="detail-val">' + (n.encrypted === 'yes' ? 'Yes' : 'No / not sure') + '</span></div>' +
         ((canAct && (n.hwBrand || n.hwModel)) ? '<div style="margin-top:10px"><button onclick="checkNetVulnerabilities(' + n.id + ')" style="width:100%;background:#1F4D2E;color:#fff;border:none;border-radius:8px;padding:8px;font-size:12.5px;cursor:pointer;font-weight:500">' + t('hwVulnCheck') + '</button></div>' : '') +
         '<div id="net-vuln-results-' + n.id + '" style="margin-top:8px"></div>',
         false) +
 
-      (n.notes ? netAccSection('notes', n.id, 'ti-note', t('notes'), n.notes.split('\n')[0], '<div style="font-size:12.5px;color:#333;line-height:1.5;white-space:pre-line;margin-top:10px">' + n.notes + '</div>', false) : '') +
+      (n.notes ? netAccSection('notes', n.id, 'ti-note', t('notes'), n.notes.split('\n')[0], '<div style="font-size:12.5px;color:#22372A;line-height:1.5;white-space:pre-line;margin-top:10px">' + n.notes + '</div>', false) : '') +
 
       (function(){
         var hist = netTimelineHTML(n);
@@ -235,32 +235,32 @@ function showNetDetail(id, keepScreen) {
 
     ) : '') +
 
-    (n.resolved ? '<div class="resolved-badge" style="margin-top:14px">✅ Marked resolved: ' + n.resolveStatus + (n.note ? ' — ' + n.note : '') + (n.savedDate ? '<span style="font-weight:400;margin-left:8px;color:#555">(' + n.savedDate + ')</span>' : '') + '</div>' : '') +
+    (n.resolved ? '<div class="resolved-badge" style="margin-top:14px">✅ Marked resolved: ' + n.resolveStatus + (n.note ? ' — ' + n.note : '') + (n.savedDate ? '<span style="font-weight:400;margin-left:8px;color:#5F7266">(' + n.savedDate + ')</span>' : '') + '</div>' : '') +
 
     (canAct ?
       netAccSection('resolve', n.id, 'ti-checklist', t('netRemediationChecklist'), '',
         '<div style="display:flex;flex-direction:column;gap:6px;margin:10px 0 12px">' +
         (Array.isArray(t('netActions')) ? t('netActions') : []).map(function(opt) {
           const checked = n.resolveStatus && n.resolveStatus.includes(opt);
-          return '<label style="display:flex;align-items:center;gap:8px;font-size:12.5px;padding:6px 10px;border:1px solid #ddd;border-radius:8px;cursor:pointer;background:' + (checked?'#f0f9f3':'#fff') + '">' +
+          return '<label style="display:flex;align-items:center;gap:8px;font-size:12.5px;padding:6px 10px;border:1px solid #CBD8CB;border-radius:8px;cursor:pointer;background:' + (checked?'#E2EFE8':'#fff') + '">' +
             '<input type="checkbox" value="' + opt + '" class="net-action" ' + (checked?'checked':'') + ' style="width:auto;accent-color:#1F4D2E"> ' + opt +
           '</label>';
         }).join('') +
         '</div>' +
         '<div style="margin-bottom:12px">' +
-          '<label style="font-size:11px;font-weight:600;color:#555;display:block;margin-bottom:6px">' + t('additionalNotes') + ' <span style="color:#aaa;font-weight:400">' + t('optional') + '</span></label>' +
+          '<label style="font-size:11px;font-weight:600;color:#5F7266;display:block;margin-bottom:6px">' + t('additionalNotes') + ' <span style="color:#aaa;font-weight:400">' + t('optional') + '</span></label>' +
           '<p style="font-size:11px;color:#A32D2D;background:#FCEBEB;border-radius:6px;padding:6px 10px;margin-bottom:6px">⚠️ ' + t('credWarning') + '</p>' +
-          '<textarea id="net-note-' + id + '" rows="3" placeholder="' + t('netNotePlaceholder') + '" style="width:100%;font-size:12.5px;padding:8px 10px;border:1px solid #ddd;border-radius:8px;resize:none;font-family:inherit">' + (n.note || '') + '</textarea>' +
+          '<textarea id="net-note-' + id + '" rows="3" placeholder="' + t('netNotePlaceholder') + '" style="width:100%;font-size:12.5px;padding:8px 10px;border:1px solid #CBD8CB;border-radius:8px;resize:none;font-family:inherit">' + (n.note || '') + '</textarea>' +
         '</div>' +
         '<div style="display:flex;gap:8px">' +
           '<button onclick="saveNetwork(' + id + ')" style="flex:1;background:#1F4D2E;color:#fff;border:none;border-radius:8px;padding:11px;font-size:13px;font-weight:500">' + t('saveBtn') + '</button>' +
-          (canReturn ? '<button onclick="returnNetIssue(' + id + ')" style="flex:0 0 auto;background:#fff;color:#5B21B6;border:1px solid #C4B5FD;border-radius:8px;padding:11px 14px;font-size:13px;font-weight:500">' + t('netReturnBtn') + ' ' + (n.assignedBy || 'assigner') + '</button>' : '') +
+          (canReturn ? '<button onclick="returnNetIssue(' + id + ')" style="flex:0 0 auto;background:#F3F8F2;color:#5B21B6;border:1px solid #C4B5FD;border-radius:8px;padding:11px 14px;font-size:13px;font-weight:500">' + t('netReturnBtn') + ' ' + (n.assignedBy || 'assigner') + '</button>' : '') +
         '</div>',
         false) : '') +
 
     ((canSee && !canAct && !n.resolved && risk !== 'green') ?
-      '<div class="resolve-box" style="background:#F4F6F8;border:1px solid #d9dee3">' +
-        '<p style="font-size:13px;color:#555;margin:0">🔒 ' + t('viewOnlyIssueNote') + '</p>' +
+      '<div class="resolve-box" style="background:#F3F8F2;border:1px solid #d9dee3">' +
+        '<p style="font-size:13px;color:#5F7266;margin:0">🔒 ' + t('viewOnlyIssueNote') + '</p>' +
       '</div>' : '');
 
   if (!keepScreen) {
@@ -349,7 +349,7 @@ function checkNetVulnerabilities(netId) {
   if (!n) return;
   const resultsEl = document.getElementById('net-vuln-results-' + netId);
   if (!resultsEl) return;
-  resultsEl.innerHTML = '<div style="padding:8px;font-size:12px;color:#888;text-align:center">🔍 Checking databases...</div>';
+  resultsEl.innerHTML = '<div style="padding:8px;font-size:12px;color:#7A8F80;text-align:center">🔍 Checking databases...</div>';
   const brand = (n.hwBrand || '').toLowerCase().replace(/[^a-z0-9]/g, ' ').trim();
   const model = (n.hwModel || '').toLowerCase().replace(/[^a-z0-9]/g, ' ').trim();
   Promise.all([

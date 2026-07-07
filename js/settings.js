@@ -43,10 +43,10 @@ function renderSettings() {
     if (!auditSection.nextElementSibling || !auditSection.nextElementSibling.id?.startsWith('audit-box')) {
       const auditBox = document.createElement('div');
       auditBox.id = 'audit-box';
-      auditBox.style.cssText = 'border:1px solid #e0e0e0;border-radius:10px;overflow:hidden;margin-bottom:12px';
-      auditBox.innerHTML = '<button onclick="toggleSettingsSection(\'settings-audit\', this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#f7f7f5;border:none;cursor:pointer;text-align:left">' +
+      auditBox.style.cssText = 'border:1px solid #D7E4D7;border-radius:10px;overflow:hidden;margin-bottom:12px';
+      auditBox.innerHTML = '<button onclick="toggleSettingsSection(\'settings-audit\', this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#F3F8F2;border:none;cursor:pointer;text-align:left">' +
         '<span id="sec-hdr-audit" style="font-size:13px;font-weight:600;color:#1F4D2E;text-transform:uppercase;letter-spacing:0.5px">' + t('auditLogTitle') + '</span>' +
-        '<span class="sec-arrow" style="font-size:14px;color:#888">▸</span></button>' +
+        '<span class="sec-arrow" style="font-size:14px;color:#7A8F80">▸</span></button>' +
         '<div id="sec-settings-audit" style="display:none;padding:12px 14px">' +
         renderAuditLog() + '</div></div>';
       auditSection.parentNode.insertBefore(auditBox, auditSection.nextSibling);
@@ -116,7 +116,7 @@ function renderSettings() {
   if (userFilter === 'archived') filteredMembers = filteredMembers.filter(m => m.archived);
 
   if (filteredMembers.length === 0) {
-    list.innerHTML = '<p style="font-size:13px;color:#888;font-style:italic;padding:8px 0">No ' + (userFilter === 'archived' ? 'archived' : '') + ' team members found.</p>';
+    list.innerHTML = '<p style="font-size:13px;color:#7A8F80;font-style:italic;padding:8px 0">No ' + (userFilter === 'archived' ? 'archived' : '') + ' team members found.</p>';
     return;
   }
 
@@ -134,7 +134,7 @@ function renderSettings() {
     const first = parts.slice(0, -1).join(' ');
     return last + ', ' + first;
   };
-  const dropdown = '<select id="member-select" onchange="showMemberDetail(this.value)" style="width:100%;font-size:14px;padding:9px 12px;border:1px solid #ddd;border-radius:8px;margin-bottom:12px">' +
+  const dropdown = '<select id="member-select" onchange="showMemberDetail(this.value)" style="width:100%;font-size:14px;padding:9px 12px;border:1px solid #CBD8CB;border-radius:8px;margin-bottom:12px">' +
     '<option value="">' + t('selectTeamMember') + '</option>' +
     sortedMembers.map(function(m) {
       const label = formatName(m.name || m.phone) + ' — ' + m.role + (m.archived ? ' (Archived)' : '');
@@ -153,9 +153,9 @@ function showMemberDetail(phone) {
   // contact info so anyone needing to reach the Owner by phone can. No edit
   // controls, no permission checkboxes: nothing here to safely act on.
   if (phone === '(555) 123-4567') {
-    panel.innerHTML = '<div style="background:#f7f7f5;border-radius:10px;padding:12px 14px">' +
-      '<div style="font-size:14px;font-weight:600;color:#111">Angus MacDonald</div>' +
-      '<div style="font-size:12px;color:#888;margin-top:3px">' + phone + ' &middot; Owner</div>' +
+    panel.innerHTML = '<div style="background:#F3F8F2;border-radius:10px;padding:12px 14px">' +
+      '<div style="font-size:14px;font-weight:600;color:#22372A">Angus MacDonald</div>' +
+      '<div style="font-size:12px;color:#7A8F80;margin-top:3px">' + phone + ' &middot; Owner</div>' +
     '</div>';
     return;
   }
@@ -164,25 +164,25 @@ function showMemberDetail(phone) {
   const realIdx = teamMembers.indexOf(m);
   const isOwner = currentUser.role === 'Owner';
   const canMng = canManage();
-  const statusColor = m.archived ? '#888' : (m.status === 'Invited' ? '#854F0B' : '#2E7A4E');
+  const statusColor = m.archived ? '#7A8F80' : (m.status === 'Invited' ? '#854F0B' : '#2E7A4E');
 
-  const header = '<div style="background:#f7f7f5;border-radius:10px;padding:12px 14px;margin-bottom:10px">' +
-    '<div style="font-size:14px;font-weight:600;color:' + (m.archived?'#999':'#111') + '">' + (m.name||m.phone) + (m.archived?' <span style="font-size:10px;background:#e0e0e0;color:#666;padding:2px 6px;border-radius:10px">Archived</span>':'') + '</div>' +
-    (canMng && !m.archived ? '<div style="margin-top:10px;padding-top:10px;border-top:1px solid #e0e0e0">' +
-      '<div style="font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">' + t('editMemberTitle') + '</div>' +
-      '<div style="margin-bottom:8px"><label style="font-size:12px;color:#555;display:block;margin-bottom:3px">Full name</label>' +
-      '<input id="edit-member-name" type="text" value="' + (m.name||'') + '" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid #ddd;border-radius:6px;font-family:inherit"></div>' +
-      '<div style="margin-bottom:10px"><label style="font-size:12px;color:#555;display:block;margin-bottom:3px">Phone number</label>' +
-      '<input id="edit-member-phone" type="tel" value="' + m.phone + '" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid #ddd;border-radius:6px;font-family:inherit"></div>' +
+  const header = '<div style="background:#F3F8F2;border-radius:10px;padding:12px 14px;margin-bottom:10px">' +
+    '<div style="font-size:14px;font-weight:600;color:' + (m.archived?'#999':'#111') + '">' + (m.name||m.phone) + (m.archived?' <span style="font-size:10px;background:#e0e0e0;color:#5F7266;padding:2px 6px;border-radius:10px">Archived</span>':'') + '</div>' +
+    (canMng && !m.archived ? '<div style="margin-top:10px;padding-top:10px;border-top:1px solid #D7E4D7">' +
+      '<div style="font-size:11px;font-weight:600;color:#7A8F80;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">' + t('editMemberTitle') + '</div>' +
+      '<div style="margin-bottom:8px"><label style="font-size:12px;color:#5F7266;display:block;margin-bottom:3px">Full name</label>' +
+      '<input id="edit-member-name" type="text" value="' + (m.name||'') + '" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid #CBD8CB;border-radius:6px;font-family:inherit"></div>' +
+      '<div style="margin-bottom:10px"><label style="font-size:12px;color:#5F7266;display:block;margin-bottom:3px">Phone number</label>' +
+      '<input id="edit-member-phone" type="tel" value="' + m.phone + '" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid #CBD8CB;border-radius:6px;font-family:inherit"></div>' +
       '<button onclick="saveMemberEdits(\'' + m.phone + '\')" style="background:#1F4D2E;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;width:100%">Save changes</button>' +
     '</div>' : '') +
-    '<div style="font-size:12px;color:#888;margin-top:3px">' + m.phone + ' &middot; ' + m.role + ' &middot; <span style="color:' + statusColor + '">' + m.status + '</span></div>' +
+    '<div style="font-size:12px;color:#7A8F80;margin-top:3px">' + m.phone + ' &middot; ' + m.role + ' &middot; <span style="color:' + statusColor + '">' + m.status + '</span></div>' +
     (m.archiveNote ? '<div style="font-size:11px;color:#A32D2D;margin-top:4px;font-style:italic">Archived ' + (m.archivedDate||'') + ': ' + m.archiveNote + '</div>' : '') +
   '</div>';
 
   const permsBlock = canMng ? (
     '<div style="margin-bottom:10px">' +
-      '<div style="font-size:12px;font-weight:600;color:#555;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">' + t('permissions') + '</div>' +
+      '<div style="font-size:12px;font-weight:600;color:#5F7266;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">' + t('permissions') + '</div>' +
       '<div style="display:flex;flex-direction:column;gap:6px">' +
         permCheckbox(realIdx, 'addDevices', t('permAdd'), m.perms.addDevices) +
         permCheckbox(realIdx, 'archiveDelete', t('permArchive'), m.perms.archiveDelete) +
@@ -192,7 +192,7 @@ function showMemberDetail(phone) {
         permCheckbox(realIdx, 'viewOnly', t('permView'), m.perms.viewOnly) +
       '</div>' +
     '</div>'
-  ) : '<div style="font-size:13px;color:#666;margin-bottom:10px">' + permSummary(m.perms) + '</div>';
+  ) : '<div style="font-size:13px;color:#5F7266;margin-bottom:10px">' + permSummary(m.perms) + '</div>';
 
   const actions = canMng ? (
     '<div style="display:flex;gap:8px">' +
@@ -206,7 +206,7 @@ function showMemberDetail(phone) {
 }
 
 function permCheckbox(idx, key, label, checked) {
-  return '<label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#333;cursor:pointer">' +
+  return '<label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#22372A;cursor:pointer">' +
     '<input type="checkbox" ' + (checked ? 'checked' : '') + ' onchange="togglePermission(' + idx + ', \'' + key + '\', this.checked)" style="width:auto;accent-color:#1F4D2E"> ' + label +
   '</label>';
 }

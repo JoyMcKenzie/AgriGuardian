@@ -46,10 +46,10 @@ function renderDeviceList() {
   const list = document.getElementById('device-list');
   let notice = '';
   if (escalatedOnlyFilter) {
-    notice = '<div style="background:#FAF5FF;border:1px solid #C4B5FD;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:13px;color:#5B21B6;display:flex;align-items:center;justify-content:space-between;gap:10px"><span><i class="ti ti-flag" style="font-size:14px;vertical-align:-2px" aria-hidden="true"></i> ' + t('escFilterNotice') + '</span><button onclick="clearEscalatedFilter()" style="background:#fff;border:1px solid #C4B5FD;color:#5B21B6;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer">' + t('escClearFilter') + '</button></div>';
+    notice = '<div style="background:#EFEAF7;border:1px solid #C4B5FD;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:13px;color:#5B21B6;display:flex;align-items:center;justify-content:space-between;gap:10px"><span><i class="ti ti-flag" style="font-size:14px;vertical-align:-2px" aria-hidden="true"></i> ' + t('escFilterNotice') + '</span><button onclick="clearEscalatedFilter()" style="background:#F3F8F2;border:1px solid #C4B5FD;color:#5B21B6;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer">' + t('escClearFilter') + '</button></div>';
   }
   if (filtered.length === 0) {
-    list.innerHTML = notice + '<p style="font-size:13px;color:#888;font-style:italic;padding:12px 0">No devices ' + (deviceFilter === 'archived' ? 'archived' : 'found') + '.</p>';
+    list.innerHTML = notice + '<p style="font-size:13px;color:#7A8F80;font-style:italic;padding:12px 0">No devices ' + (deviceFilter === 'archived' ? 'archived' : 'found') + '.</p>';
   } else {
     list.innerHTML = notice + filtered.map(d => deviceCardHTML(d, true)).join('');
   }
@@ -86,17 +86,17 @@ function deviceCardHTML(d, showActions) {
   const dotTitle = !canSee ? 'Not assigned to you' : isPartial ? t('partiallyResolvedBadge') : (coarse ? fh.label : '');
   const archivedTag = d.archived ? '<span class="archived-tag">Archived</span>' : '';
   const escalatedTag = (d.needsOwnerAction && !d.resolved && canSee && canSeeDetailedRisk())
-    ? '<span style="margin-left:6px;display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:#5B21B6;background:#F3EEFF;border:1px solid #C4B5FD;border-radius:10px;padding:1px 7px;vertical-align:middle"><i class="ti ti-flag" style="font-size:10px" aria-hidden="true"></i> ' + t('escPill') + '</span>'
+    ? '<span style="margin-left:6px;display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:#5B21B6;background:#EFEAF7;border:1px solid #C4B5FD;border-radius:10px;padding:1px 7px;vertical-align:middle"><i class="ti ti-flag" style="font-size:10px" aria-hidden="true"></i> ' + t('escPill') + '</span>'
     : '';
   const partialTag = (isPartial && canSee && canSeeDetailedRisk())
-    ? '<span style="margin-left:6px;display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:#5B21B6;background:#F3EEFF;border:1px solid #C4B5FD;border-radius:10px;padding:1px 7px;vertical-align:middle">⚡ ' + t('partiallyResolvedBadge') + '</span>'
+    ? '<span style="margin-left:6px;display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:#5B21B6;background:#EFEAF7;border:1px solid #C4B5FD;border-radius:10px;padding:1px 7px;vertical-align:middle">⚡ ' + t('partiallyResolvedBadge') + '</span>'
     : '';
   const actions = (showActions && canArchiveDevices()) ? (
     '<div class="device-actions" onclick="event.stopPropagation()">' +
       (d.archived
-        ? '<button class="device-action-btn" onclick="unarchiveDevice(' + d.id + ')" title="Restore">Restore</button>'
-        : '<button class="device-action-btn" onclick="archiveDevice(' + d.id + ')" title="Archive">'+t('archive')+'</button>') +
-      '<button class="device-action-btn danger" onclick="deleteDevice(' + d.id + ')" title="Delete">'+t('delete')+'</button>' +
+        ? '<button class="device-action-btn" onclick="unarchiveDevice(' + d.id + ')" title="'+t('restore')+'"><i class="ti ti-arrow-back-up" aria-hidden="true"></i><span class="sr-only">'+t('restore')+'</span></button>'
+        : '<button class="device-action-btn" onclick="archiveDevice(' + d.id + ')" title="'+t('archive')+'"><i class="ti ti-archive" aria-hidden="true"></i><span class="sr-only">'+t('archive')+'</span></button>') +
+      '<button class="device-action-btn danger" onclick="deleteDevice(' + d.id + ')" title="'+t('delete')+'"><i class="ti ti-trash" aria-hidden="true"></i><span class="sr-only">'+t('delete')+'</span></button>' +
     '</div>'
   ) : '';
   return '<div class="device-card" onclick="showDetail(' + d.id + ')" style="' + (d.archived ? 'opacity:0.6' : '') + '">' +
@@ -107,7 +107,7 @@ function deviceCardHTML(d, showActions) {
       '<div class="device-name">' + (d.label || d.type) + archivedTag + partialTag + escalatedTag + '</div>' +
       '<div class="device-brand">' + d.brand + ' &middot; ' + translateDeviceType(d.type) + '</div>' +
       ((canSee && !coarse && d.assignedTo && !d.resolved && realRisk !== 'green')
-        ? '<div style="display:inline-flex;align-items:center;gap:4px;margin-top:4px;font-size:11px;color:#1F4D2E;background:#EAF3EC;border:1px solid #BBD8C2;border-radius:10px;padding:1px 8px"><i class="ti ti-user-check" style="font-size:12px"></i>' + d.assignedTo + '</div>'
+        ? '<div style="display:inline-flex;align-items:center;gap:4px;margin-top:4px;font-size:11px;color:#1F4D2E;background:#E2EFE8;border:1px solid #BBD8C2;border-radius:10px;padding:1px 8px"><i class="ti ti-user-check" style="font-size:12px"></i>' + d.assignedTo + '</div>'
         : '') +
     '</div>' +
     (showActions
