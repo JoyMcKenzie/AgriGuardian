@@ -13,6 +13,14 @@ changed — why / notes.
 
 ---
 
+## 2026-07-08 03:30 UTC — README: added a condensed Timeline section
+- Added a "Timeline" section to `README.md`, six high-level dated milestones (redesign, localization rebuild, favicon/OG work, etc.), each sourced from real entries already in this file. Placed before the closing "Work in progress" note.
+- Deliberately condensed, not a mirror of this file: `CHANGELOG.md` is 280+ lines of granular per-fix detail; pasting all of it into the README would bury the first-impression document under engineering detail meant for a different audience. The README section links back to this file for full detail.
+- Earliest entry in this file is 2026-07-06 (evening); the README timeline starts there too. No earlier project history was available to reflect further back.
+- No code changed; no `BUILD_TIMESTAMP` bump (docs-only).
+
+---
+
 ## 2026-07-08 03:03 UTC — Favicon and Open Graph/Twitter share-card tags added (v18)
 - Live demo link had no favicon and no link-preview support: sharing `https://joymckenzie.github.io/AgriGuardian/` on LinkedIn/Slack/iMessage showed a bare URL with no title, description, or image.
 - Generated `favicon.ico`, `favicon-16.png`, `favicon-32.png`, and `apple-touch-icon.png` from the existing white LGD logo artwork (already embedded as base64 in `index.html`), cropped to its content bounds and placed on a forest green (`#1F4D2E`) square so the mark reads clearly at small sizes.
