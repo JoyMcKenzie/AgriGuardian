@@ -13,6 +13,13 @@ changed — why / notes.
 
 ---
 
+## 2026-07-08 03:38 UTC — README: badges added
+- Added four badges under the `# AgriGuardian` title, above the legal notice: Live Demo (links to the Pages site), Pages Deploy (GitHub's own live workflow status badge, pulls real pass/fail from Actions automatically), Status: prototype (matches the existing disclaimer text elsewhere in the README), and License: all rights reserved (matches the actual `LICENSE`, not a generic open-source shield).
+- Deliberately did not add a standard OSS license badge or a "contributions welcome" badge, since neither would be true for an all-rights-reserved student project; badges that misrepresent the license tend to cost more credibility than they gain.
+- No code changed; no `BUILD_TIMESTAMP` bump (docs-only).
+
+---
+
 ## 2026-07-08 03:30 UTC — README: added a condensed Timeline section
 - Added a "Timeline" section to `README.md`, six high-level dated milestones (redesign, localization rebuild, favicon/OG work, etc.), each sourced from real entries already in this file. Placed before the closing "Work in progress" note.
 - Deliberately condensed, not a mirror of this file: `CHANGELOG.md` is 280+ lines of granular per-fix detail; pasting all of it into the README would bury the first-impression document under engineering detail meant for a different audience. The README section links back to this file for full detail.

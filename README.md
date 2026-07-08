@@ -1,5 +1,10 @@
 # AgriGuardian
 
+[![Live Demo](https://img.shields.io/badge/demo-live-1F4D2E)](https://joymckenzie.github.io/AgriGuardian/)
+[![Pages Deploy](https://github.com/JoyMcKenzie/AgriGuardian/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/JoyMcKenzie/AgriGuardian/actions)
+[![Status](https://img.shields.io/badge/status-prototype-yellow)]()
+[![License](https://img.shields.io/badge/license-all%20rights%20reserved-lightgrey)](./LICENSE)
+
 ## Project Status & Legal Notice
 
 This is an individual student project developed by Joy McKenzie for academic and portfolio purposes. All Rights Reserved. See the [LICENSE](./LICENSE) file for full terms.
