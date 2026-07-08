@@ -1,8 +1,8 @@
 /* AgriGuardian: network and app risk data */
 var networks = [
-  { id: 1, archived: false, type: 'Wi-Fi', label: 'Farm Wi-Fi', pw: 'yes', encrypted: 'yes', hwBrand: 'Netgear', hwModel: 'Nighthawk R7000', notes: 'ISP: Rural Telecom — 800-555-1200\nContract renewal: March 2027\nRouter located in main office closet' },
-  { id: 2, archived: false, type: 'Cellular (LTE/5G)', label: 'Field sensor network', pw: 'yes', encrypted: 'yes', hwBrand: 'Cisco', hwModel: 'RV340', notes: 'Carrier: AgriConnect LTE — 888-247-3344\nSIM card in barn equipment panel\nData plan: 20GB/month' },
-  { id: 3, archived: false, type: 'Bluetooth', label: 'Barn controller link', pw: 'no', encrypted: 'no', hwBrand: 'TP-Link', hwModel: 'TL-WR940N', notes: 'Connects barn ventilation controller to monitoring tablet\nNo password set — needs immediate attention' }
+  { id: 1, archived: false, type: 'Wi-Fi', label: 'Farm Wi-Fi', pw: 'yes', encrypted: 'yes', hwBrand: 'Netgear', hwModel: 'Nighthawk R7000', notes: 'ISP: Rural Telecom — 800-555-1200\nContract renewal: March 2027\nRouter located in main office closet', assignedTo: '', assignedBy: '', needsOwnerAction: false, returnedToAssigner: false, returnNote: '' },
+  { id: 2, archived: false, type: 'Cellular (LTE/5G)', label: 'Field sensor network', pw: 'yes', encrypted: 'yes', hwBrand: 'Cisco', hwModel: 'RV340', notes: 'Carrier: AgriConnect LTE — 888-247-3344\nSIM card in barn equipment panel\nData plan: 20GB/month', assignedTo: '', assignedBy: '', needsOwnerAction: false, returnedToAssigner: false, returnNote: '' },
+  { id: 3, archived: false, type: 'Bluetooth', label: 'Barn controller link', pw: 'no', encrypted: 'no', hwBrand: 'TP-Link', hwModel: 'TL-WR940N', notes: 'Connects barn ventilation controller to monitoring tablet\nNo password set — needs immediate attention', assignedTo: '', assignedBy: '', needsOwnerAction: false, returnedToAssigner: false, returnNote: '' }
 ];
 var nextNetId = 4;
 
@@ -103,10 +103,10 @@ var nextAppId = 4;
 // the brand/type picker pattern used for devices and networks. "Other" falls
 // back to a free-text field.
 var APP_CATALOG = [
-  { group: 'Accounting & payroll', items: ['QuickBooks Online', 'FreshBooks', 'Gusto', 'ADP'] },
-  { group: 'Equipment & dealer portals', items: ['John Deere Operations Center', 'Case IH AFS Connect', 'AGCO Connect', 'CNH Industrial Portal'] },
-  { group: 'Crop & field management', items: ['Climate FieldView', 'Granular', 'Trimble Ag Software', 'AgLeader SMS'] },
-  { group: 'Livestock management', items: ['DeLaval DelPro', 'Allflex', 'CattleMax', 'Herdwatch'] }
+  { group: 'Accounting & payroll', groupKey: 'appGroupAccounting', items: ['QuickBooks Online', 'FreshBooks', 'Gusto', 'ADP'] },
+  { group: 'Equipment & dealer portals', groupKey: 'appGroupEquipment', items: ['John Deere Operations Center', 'Case IH AFS Connect', 'AGCO Connect', 'CNH Industrial Portal'] },
+  { group: 'Crop & field management', groupKey: 'appGroupCrop', items: ['Climate FieldView', 'Granular', 'Trimble Ag Software', 'AgLeader SMS'] },
+  { group: 'Livestock management', groupKey: 'appGroupLivestock', items: ['DeLaval DelPro', 'Allflex', 'CattleMax', 'Herdwatch'] }
 ];
 
 // Apps risk mirrors network risk in shape (red/yellow/green) but is driven by
@@ -142,4 +142,3 @@ function getAppRiskWhy(a) {
   if (isAppReviewStale(a)) return t('appRiskWhyStale');
   return t('appRiskWhyGood');
 }
-

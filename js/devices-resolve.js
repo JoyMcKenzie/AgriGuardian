@@ -1,9 +1,4 @@
 /* AgriGuardian: verify, resolve, replacement */
-function renderAddScreen() {
-  // re-render add form labels in current language
-  const s = document.getElementById('screen-add');
-  if (!s) return;
-}
 
 // Returns true when a device's last verification is older than ~6 months (or never verified).
 function verifyIsStale(d) {
@@ -18,7 +13,7 @@ function verifyIsStale(d) {
 function verifyBoxHTML(d) {
   var stale = verifyIsStale(d);
   if (d.verifiedDate && !stale) {
-    return '<div class="resolve-box" style="background:#F4F8F5;border:1px solid #DDEAE0;display:flex;align-items:center;justify-content:space-between;gap:10px">' +
+    return '<div class="resolve-box" style="background:#F3F8F2;border:1px solid #E2EFE8;display:flex;align-items:center;justify-content:space-between;gap:10px">' +
       '<span style="font-size:13px;color:#1F4D2E;display:inline-flex;align-items:center;gap:6px"><i class="ti ti-circle-check" style="font-size:16px"></i>' + t('verifiedOn') + ' ' + d.verifiedDate + '</span>' +
       '<a href="#" onclick="markVerified(' + d.id + ');return false;" style="font-size:12px;color:#1F4D2E;text-decoration:underline;white-space:nowrap">' + t('verifyAgain') + '</a>' +
     '</div>';
@@ -35,7 +30,7 @@ function markVerified(id, silent) {
   if (!d) return;
   d.verifiedDate = localTimestamp();
   if (!silent) {
-    logAction('Device verified', (d.label||d.type) + ' (' + d.brand + ')');
+    logAction('logDeviceVerified', {raw: (d.label||d.type) + ' (' + d.brand + ')'});
     renderDashList(); renderDeviceList(); showDetail(id);
   }
 }
@@ -56,7 +51,7 @@ function saveAll(id) {
   const sel = ctx.querySelector('input[name="health-' + id + '"]:checked');
   const warningEl = document.getElementById('health-warning-' + id);
   if (!sel) {
-    if (warningEl) { warningEl.textContent = '⚠️ Please select a device software update status before saving.'; warningEl.style.display = 'flex'; warningEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+    if (warningEl) { warningEl.textContent = t('healthWarnSelectStatus'); warningEl.style.display = 'flex'; warningEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
     return;
   }
   if (warningEl) warningEl.style.display = 'none';
@@ -71,24 +66,23 @@ function saveAll(id) {
   const otherChk = ctx.querySelector('#resolve-other-check-' + id);
   const otherTxt = ctx.querySelector('#resolve-other-text-' + id);
   if (otherChk && otherChk.checked && otherTxt && otherTxt.value.trim()) {
-    statusParts.push('Other: ' + otherTxt.value.trim());
+    statusParts.push(t('otherPrefix') + otherTxt.value.trim());
   }
-  // "Device software updated" is good hygiene but is not by itself proof that
-  // the underlying issue was addressed (e.g. weak password, no MFA, replaced
-  // hardware). Require at least one other action before marking resolved.
-  var softwareOnlyLabels = ['Device software updated','Software del dispositivo actualizado'];
-  var nonSoftwareParts = statusParts.filter(function(s){ return softwareOnlyLabels.indexOf(s) === -1; });
-  if (statusParts.length > 0 && nonSoftwareParts.length === 0) {
+  // Real bug found via user report: with no requirement here, clicking "Mark
+  // as resolved" with zero boxes checked used to silently set d.resolved =
+  // false and reset the form anyway — looking like success while doing
+  // nothing. At least one action is now required, same as health-status.
+  if (statusParts.length === 0) {
     if (warningEl) {
-      warningEl.textContent = '⚠️ "Device software updated" alone cannot resolve this issue. Select at least one other action that addresses the underlying problem.';
+      warningEl.textContent = t('resolveSelectAction');
       warningEl.style.display = 'flex';
       warningEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } else {
-      alert('"Device software updated" alone cannot resolve this issue. Select at least one other action that addresses the underlying problem.');
+      alert(t('resolveSelectActionAlert'));
     }
     return;
   }
-  d.resolved = nonSoftwareParts.length > 0;
+  d.resolved = true;
   d.resolveStatus = statusParts.join(', ');
   if (d.resolved && !d.resolvedDate) d.resolvedDate = localTimestamp();
   if (!d.resolved) d.resolvedDate = '';
@@ -130,7 +124,7 @@ function saveAll(id) {
   if (d.resolveStatus) auditDetail += ' | Actions taken: ' + d.resolveStatus;
   if (d.resolveNote) auditDetail += ' | Note: ' + d.resolveNote;
   if (d.healthStatus) auditDetail += ' | Update status: ' + d.healthStatus;
-  logAction(d.resolved ? 'Issue addressed' : 'Device updated', auditDetail);
+  logAction(d.resolved ? 'logIssueAddressed' : 'logDeviceUpdated', {raw: auditDetail});
 
   // ── Device replaced → archive the old device & prompt for replacement ──
   // Lifecycle hygiene: a decommissioned device shouldn't keep counting toward
@@ -140,7 +134,7 @@ function saveAll(id) {
   if (wasReplaced) {
     d.archived = true;
     d.archiveReason = 'Replaced with new device';
-    logAction('Device replaced — archived', (d.label||d.type) + ' (' + d.brand + ') archived; awaiting replacement entry');
+    logAction('logDeviceReplaced', {raw: (d.label||d.type) + ' (' + d.brand + ') archived; awaiting replacement entry'});
   }
 
   // Reset form fields to blank — ready for next use.
@@ -153,11 +147,6 @@ function saveAll(id) {
   // Clear health radio so it prompts fresh (Fix 1)
   const healthSelReset = ctx.querySelector('input[name="health-' + id + '"]:checked');
   if (healthSelReset) healthSelReset.checked = false;
-  // Clear form-state on the device record so it re-renders blank
-  d.resolveStatus = '';
-  d.resolveNote = '';
-  d.healthStatus = '';
-  d.healthDate = '';
 
   renderDashList();
   renderDeviceList();
@@ -174,7 +163,7 @@ function saveAll(id) {
 // Open Add Device form pre-filled as a replacement for an archived device.
 // Demo-only: the link between old and new device lives in audit + contactNotes.
 function promptReplacementDevice(oldDev) {
-  var msg = 'The old device "' + oldDev.label + '" has been archived.\n\nAdd the replacement device now?';
+  var msg = t('replacementConfirm', {label: oldDev.label});
   var addNow = window.confirm(msg);
   if (!addNow) {
     showScreen('devices', document.querySelectorAll('.nav-btn')[1]);
@@ -189,13 +178,13 @@ function promptReplacementDevice(oldDev) {
       if (!inline.querySelector('.replacement-banner')) {
         var banner = document.createElement('div');
         banner.className = 'replacement-banner';
-        banner.style.cssText = 'background:#E8F1FB;border:1px solid #B6D4F2;color:#1A4A7A;border-radius:6px;padding:10px 12px;margin-bottom:12px;font-size:13px;font-weight:600;';
-        banner.textContent = 'Replacement for: ' + oldDev.label + ' (archived)';
+        banner.style.cssText = 'background:#E6F0FA;border:1px solid #92B4E3;color:#1A5FA8;border-radius:6px;padding:10px 12px;margin-bottom:12px;font-size:13px;font-weight:600;';
+        banner.textContent = t('replacementForBanner', {label: oldDev.label});
         inline.insertBefore(banner, inline.firstChild);
       }
       var notes = inline.querySelector('#device-contact-notes');
       if (notes && !notes.value) {
-        notes.value = 'Replaces: ' + oldDev.label + ' (' + oldDev.brand + ')';
+        notes.value = t('replacesPrefill', {label: oldDev.label, brand: oldDev.brand});
       }
       var locSel = inline.querySelector('#location-select');
       if (locSel && oldDev.location) {
@@ -210,29 +199,4 @@ function promptReplacementDevice(oldDev) {
   }, 80);
 }
 
-function saveResolution(id, silent) {
-  const d = devices.find(x => x.id === id);
-  if (!d) return;
-  // Auto-resolve if any action is selected
-  const anyChecked = document.querySelectorAll('.resolve-action:checked').length > 0;
-  const otherChk = document.getElementById('resolve-other-check-' + id);
-  d.resolved = anyChecked || (otherChk && otherChk.checked);
-  const checked = document.querySelectorAll('.resolve-action:checked');
-  let statusParts = Array.from(checked).map(c => c.value);
-  const otherCheck = document.getElementById('resolve-other-check-' + id);
-  const otherText = document.getElementById('resolve-other-text-' + id);
-  if (otherCheck && otherCheck.checked && otherText && otherText.value.trim()) {
-    statusParts.push('Other: ' + otherText.value.trim());
-  }
-  d.resolveStatus = statusParts.join(', ');
-  d.resolveNote = document.getElementById('resolve-note').value.trim();
-  if (d.resolved) {
-    d.resolvedDate = localTimestamp();
-  } else {
-    d.resolvedDate = '';
-  }
-  renderDashList();
-  renderDeviceList();
-  showDetail(id);
-}
 

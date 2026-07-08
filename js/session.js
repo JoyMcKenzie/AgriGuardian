@@ -33,10 +33,21 @@ function resetTimeout() {
 }
 
 function logOut(timedOut) {
-  if (currentUser.loggedIn) logAction('Signed out', timedOut ? 'Session timeout' : 'Manual sign out');
+  if (currentUser.loggedIn) logAction('logSignedOut', { key: timedOut ? 'logSessionTimeout' : 'logManualSignOut' });
   clearTimeout(timeoutTimer);
   clearInterval(countdownTimer);
   currentUser = { phone: '', role: '', farm: '', name: '', loggedIn: false };
+  pendingLogin = null;
+  // Reset accessibility + language to universal default — these are
+  // per-user preferences (see accessibility.js), not global session state,
+  // so nothing from the last person's session should carry into the next.
+  // (Just reset the state here; the next sign-in's loadMyPreferences() will
+  // apply whatever's correct for whoever signs in next. No need to re-render
+  // main-app here — it's about to be hidden anyway.)
+  a11ySettings = { largeText: false, xlText: false, highContrast: false, colorBlind: false, reducedMotion: false };
+  currentLang = 'en';
+  document.body.classList.remove('reduced-motion', 'colorblind-mode');
+  setLang(currentLang, 'login');
   document.getElementById('main-app').style.display = 'none';
   document.getElementById('login-wrapper').style.display = 'block';
   const hRole = document.getElementById('header-role');
@@ -44,7 +55,7 @@ function logOut(timedOut) {
   const tb = document.getElementById('timeout-banner');
   if (tb) tb.style.display = 'none';
   // Always go back to welcome choice screen
-  ['choice','register','signin','code'].forEach(s => {
+  ['choice','signin','code','invite','reset'].forEach(s => {
     const el = document.getElementById('step-' + s);
     if (el) el.style.display = 'none';
   });
@@ -77,18 +88,23 @@ function logOut(timedOut) {
 
 function sendResetCode() {
   const phone = document.getElementById('reset-phone').value.trim();
-  if (!phone) { alert('Please enter your phone number.'); return; }
+  if (!phone) { alert(t('alertEnterPhone')); return; }
   // Demo: simulate sending code
   document.getElementById('step-reset-code').style.display = 'block';
-  alert('Demo: A reset code has been sent to ' + phone + '. Use code: 123456');
+  alert(t('alertResetSent', { phone: phone }));
 }
 function confirmReset() {
+  const phone = document.getElementById('reset-phone').value.trim();
   const code = document.getElementById('reset-code-input').value.trim();
   const newPass = document.getElementById('reset-new-pass').value.trim();
-  if (!code || !newPass) { alert('Please fill in all fields.'); return; }
-  if (code !== '123456') { alert('Incorrect code. For this demo use: 123456'); return; }
-  if (newPass.length < 8) { alert('Password must be at least 8 characters.'); return; }
-  alert('Password updated successfully! Please sign in with your new password.');
+  if (!code || !newPass) { alert(t('alertFillAllFields')); return; }
+  if (code !== '123456') { alert(t('alertIncorrectCode')); return; }
+  if (newPass.length < 8) { alert(t('alertPwMin8')); return; }
+  const normalized = normalizePhone(phone);
+  const matchedPhone = Object.keys(DEMO_CREDENTIALS).find(function(p) { return normalizePhone(p) === normalized; });
+  if (!matchedPhone) { alert(t('alertPhoneNotOnFile')); return; }
+  DEMO_CREDENTIALS[matchedPhone] = newPass;
+  alert(t('alertPwUpdated'));
   document.getElementById('step-reset-code').style.display = 'none';
   document.getElementById('reset-phone').value = '';
   document.getElementById('reset-code-input').value = '';
@@ -134,7 +150,13 @@ function verifyCode() {
     return;
   }
   failedAttempts = 0;
-  currentUser.loggedIn = true;
-  logAction('Login', 'Signed in successfully');
+  if (!pendingLogin) {
+    alert(t('alertSessionExpired'));
+    showStep('signin');
+    return;
+  }
+  currentUser = { phone: pendingLogin.phone, name: pendingLogin.name, role: pendingLogin.role, farm: pendingLogin.farm, email: pendingLogin.email, loggedIn: true };
+  pendingLogin = null;
+  logAction('logLogin', { key: 'logSignedInSuccess' });
   _enterApp();
 }

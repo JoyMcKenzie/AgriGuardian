@@ -22,5 +22,6 @@
     "js/auth-flow.js",
     "js/session.js",
     "js/i18n/set-lang.js",
-    "js/devices-resolve.js"
+    "js/devices-resolve.js",
+    "js/nav-drawer.js"
 ]
