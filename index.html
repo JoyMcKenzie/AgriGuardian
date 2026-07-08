@@ -697,22 +697,20 @@
 
     <div id="settings-farm"></div><div style="border:1px solid #D7E4D7;border-radius:10px;overflow:hidden;margin-bottom:12px"><button onclick="toggleSettingsSection('settings-farm', this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#F3F8F2;border:none;cursor:pointer;text-align:left"><span style="font-size:13px;font-weight:600;color:#1F4D2E;text-transform:uppercase;letter-spacing:0.5px" id="sec-hdr-farm" data-i18n="farmAccountHeader">Farm account</span><span class="sec-arrow" style="font-size:14px;color:#7A8F80">▾</span></button><div id="sec-settings-farm" style="display:none;padding:12px 14px">
     <!-- Farm info — condensed -->
-    <div style="display:flex;align-items:center;justify-content:space-between;background:#F3F8F2;border-radius:10px;padding:10px 14px;margin-bottom:14px;border:0.5px solid #D7E4D7">
-      <div>
-        </div></div><div id="settings-farm-name" style="font-size:14px;font-weight:600;color:#22372A"></div>
-        <div id="settings-owner-role" style="font-size:12px;color:#7A8F80;margin-top:2px"></div>
-      </div>
-      <!-- Owner email for report delivery -->
-      <div style="margin-bottom:14px" id="owner-email-row">
-        <label style="font-size:12px;font-weight:600;color:#5F7266;display:block;margin-bottom:4px" id="lbl-owner-email-setting">Report delivery email <span style="color:#A32D2D;font-size:11px" data-i18n="requiredLabel">* required</span></label>
-        <div style="display:flex;gap:8px;align-items:center">
-          <input type="email" id="owner-email-input" style="flex:1;font-size:13px;padding:8px 12px;border:1px solid #CBD8CB;border-radius:8px;font-family:inherit" placeholder="owner@example.com">
-          <button onclick="saveOwnerEmail()" style="background:#1F4D2E;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;padding:8px 12px;white-space:nowrap" id="btn-save-email" data-i18n="saveLabel">Save</button>
-        </div>
-        <p style="font-size:11px;color:#7A8F80;margin-top:4px" id="lbl-owner-email-hint" data-i18n="ownerEmailHint">Used when emailing hygiene and activity reports.</p>
-      </div>
+    <div style="background:#F3F8F2;border-radius:10px;padding:10px 14px;margin-bottom:14px;border:0.5px solid #D7E4D7">
+      <div id="settings-farm-name" style="font-size:14px;font-weight:600;color:#22372A"></div>
+      <div id="settings-owner-role" style="font-size:12px;color:#7A8F80;margin-top:2px"></div>
     </div>
-
+    <!-- Owner email for report delivery (inside the collapsible section so it tucks away when Farm account is closed) -->
+    <div style="margin-bottom:14px" id="owner-email-row">
+      <label style="font-size:12px;font-weight:600;color:#5F7266;display:block;margin-bottom:4px" id="lbl-owner-email-setting">Report delivery email <span style="color:#A32D2D;font-size:11px" data-i18n="requiredLabel">* required</span></label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="email" id="owner-email-input" onblur="saveOwnerEmail()" onchange="saveOwnerEmail()" style="flex:1;font-size:13px;padding:8px 12px;border:1px solid #CBD8CB;border-radius:8px;font-family:inherit" placeholder="owner@example.com">
+        <span id="owner-email-saved" style="font-size:11px;font-weight:600;white-space:nowrap"></span>
+      </div>
+      <p style="font-size:11px;color:#7A8F80;margin-top:4px" id="lbl-owner-email-hint" data-i18n="ownerEmailHint">Used when emailing hygiene and activity reports.</p>
+    </div>
+    </div></div>
     <div id="settings-team"></div><div style="border:1px solid #D7E4D7;border-radius:10px;overflow:hidden;margin-bottom:12px"><button onclick="toggleSettingsSection('settings-team', this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#F3F8F2;border:none;cursor:pointer;text-align:left"><span style="font-size:13px;font-weight:600;color:#1F4D2E;text-transform:uppercase;letter-spacing:0.5px" id="sec-hdr-team" data-i18n="teamMembersHeader">Team members</span><span class="sec-arrow" style="font-size:14px;color:#7A8F80">▾</span></button><div id="sec-settings-team" style="display:none;padding:12px 14px">
     <!-- Team members -->
     <div id="team-section">
@@ -863,7 +861,6 @@
       </div>
       <div style="margin-top:14px;padding-top:14px;border-top:1px solid #eee">
         <p style="font-size:11px;color:#7A8F80;margin-bottom:8px" id="lbl-save-defaults-note" data-i18n="saveDefaultsNote">These settings and your language choice apply to this session only, until you save them as your personal default.</p>
-        <button id="btn-save-my-defaults" data-i18n="saveDefaultsBtn" onclick="saveMyPreferences()" style="width:100%;padding:9px 12px;border-radius:8px;border:1px solid #1F4D2E;background:#F3F8F2;color:#1F4D2E;font-size:13px;font-weight:600;cursor:pointer">Save as my default</button>
       </div>
     </div>
 

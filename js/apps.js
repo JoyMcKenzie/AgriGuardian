@@ -91,7 +91,7 @@ function renderBackupScreen() {
 
       // Notes
       '<div style="margin-bottom:12px">' +
-        '<label style="font-size:12px;font-weight:600;color:#5F7266;display:block;margin-bottom:6px">' + t('additionalNotes') + ' <span style="color:#aaa;font-weight:400">' + t('optional') + '</span></label>' +
+        '<label style="font-size:12px;font-weight:600;color:#5F7266;display:block;margin-bottom:6px">' + t('additionalNotes') + ' <span style="color:#A32D2D;font-weight:400">*' + t('required') + '</span></label>' +
         '<p style="font-size:11px;color:#A32D2D;background:#FCEBEB;border-radius:6px;padding:6px 10px;margin-bottom:6px">⚠️ ' + t('credWarning') + '</p>' +
         '<textarea id="bk-notes" rows="3" placeholder="' + t('backupNotesPlaceholder') + '" style="width:100%;font-size:13px;padding:8px 12px;border:1px solid #CBD8CB;border-radius:8px;resize:none;font-family:inherit">' + (farmBackup.notes||'') + '</textarea>' +
       '</div>' +
@@ -102,6 +102,13 @@ function renderBackupScreen() {
 
 function saveBackup() {
   if (!canSeeBackups()) return;
+  // Notes are mandatory: the owner must record WHERE each backup lives.
+  var bkNoteEl = document.getElementById('bk-notes');
+  if (!bkNoteEl || !bkNoteEl.value.trim()) {
+    alert(t('backupNotesRequired'));
+    if (bkNoteEl) bkNoteEl.focus();
+    return;
+  }
   farmBackup.hasPrimary   = document.getElementById('bk-primary')?.checked   || false;
   farmBackup.hasSecondary = document.getElementById('bk-secondary')?.checked || false;
   farmBackup.hasOffsite   = document.getElementById('bk-offsite')?.checked   || false;

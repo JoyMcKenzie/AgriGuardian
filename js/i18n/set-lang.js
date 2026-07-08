@@ -18,6 +18,7 @@
  */
 function setLang(lang, context) {
   currentLang = lang;
+  if (currentUser && currentUser.loggedIn && typeof persistPreferences === 'function') persistPreferences(); // auto-save language as default
 
   // 1) Translate every statically-annotated element in the whole document.
   applyI18n(document);

@@ -16,7 +16,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 .nav-scrim.show { opacity: 1; visibility: visible; }
 .nav-panel { position: absolute; top: 0; right: 0; height: 100%; width: 212px; transform: translateX(100%); transition: transform 0.25s ease; z-index: 50; box-shadow: -4px 0 16px rgba(0,0,0,0.12); }
 .nav-panel.open { transform: translateX(0); }
-.nav-handle { position: absolute; top: 50%; left: -27px; transform: translateY(-50%); width: 27px; height: 74px; background: #1F4D2E; border: none; border-radius: 13px 0 0 13px; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: -2px 0 7px rgba(0,0,0,0.22); touch-action: none; }
+.nav-handle { position: absolute; top: 116px; left: -27px; width: 27px; height: 74px; background: #1F4D2E; border: none; border-radius: 13px 0 0 13px; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: -2px 0 7px rgba(0,0,0,0.22); touch-action: none; }
 .nav-handle i { font-size: 19px; }
 body.reduced-motion .nav-panel, body.reduced-motion .nav-scrim { transition: none !important; }
 

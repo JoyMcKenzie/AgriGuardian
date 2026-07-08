@@ -208,6 +208,7 @@ function _enterApp() {
   document.getElementById('login-wrapper').style.display = 'none';
   document.getElementById('main-app').style.display = 'block';
   loadMyPreferences();
+  if (typeof resetSettingsSections === 'function') resetSettingsSections(); // always start Settings collapsed on login
   document.getElementById('header-farm').textContent = currentUser.farm || '';
   // Show role badge for non-owners
   var badge = document.getElementById('header-role-badge');

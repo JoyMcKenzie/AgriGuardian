@@ -11,15 +11,18 @@ var teamMembers = [
 ];
 
 function saveOwnerEmail() {
+  // Auto-saves on blur/change (no Save button). Silent: shows a small inline
+  // confirmation instead of alerts, and only logs when the value actually changes.
   const input = document.getElementById('owner-email-input');
   if (!input) return;
   const val = input.value.trim();
-  if (!val) { alert(t('emailRequired')); return; }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) { alert(t('emailInvalid')); return; }
+  const note = document.getElementById('owner-email-saved');
+  if (!val) { if (note) note.textContent = ''; return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) { if (note) { note.textContent = t('emailInvalid'); note.style.color = '#A32D2D'; } return; }
+  if (val === currentUser.email) { if (note) note.textContent = ''; return; }
   currentUser.email = val;
   logAction('logUpdatedReportEmail', {raw: val});
-  const btn = document.getElementById('btn-save-email');
-  if (btn) { const orig = btn.textContent; btn.textContent = '✓ ' + t('saved'); btn.style.background='#2E7A4E'; setTimeout(()=>{ btn.textContent=orig; btn.style.background='#1F4D2E'; }, 2000); }
+  if (note) { note.textContent = '✓ ' + t('saved'); note.style.color = '#2E7A4E'; setTimeout(function(){ if (note) note.textContent = ''; }, 2000); }
 }
 
 function renderSettings() {
@@ -174,10 +177,9 @@ function showMemberDetail(phone) {
     (canMng && !m.archived ? '<div style="margin-top:10px;padding-top:10px;border-top:1px solid #D7E4D7">' +
       '<div style="font-size:11px;font-weight:600;color:#7A8F80;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">' + t('editMemberTitle') + '</div>' +
       '<div style="margin-bottom:8px"><label style="font-size:12px;color:#5F7266;display:block;margin-bottom:3px">' + t('fullName') + '</label>' +
-      '<input id="edit-member-name" type="text" value="' + (m.name||'') + '" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid #CBD8CB;border-radius:6px;font-family:inherit"></div>' +
+      '<input id="edit-member-name" type="text" onchange="saveMemberEdits(\'' + m.phone + '\')" value="' + (m.name||'') + '" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid #CBD8CB;border-radius:6px;font-family:inherit"></div>' +
       '<div style="margin-bottom:10px"><label style="font-size:12px;color:#5F7266;display:block;margin-bottom:3px">' + t('phoneNumberLabel') + '</label>' +
-      '<input id="edit-member-phone" type="tel" value="' + m.phone + '" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid #CBD8CB;border-radius:6px;font-family:inherit"></div>' +
-      '<button onclick="saveMemberEdits(\'' + m.phone + '\')" style="background:#1F4D2E;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;width:100%">' + t('saveChanges') + '</button>' +
+      '<input id="edit-member-phone" type="tel" onchange="saveMemberEdits(\'' + m.phone + '\')" value="' + m.phone + '" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid #CBD8CB;border-radius:6px;font-family:inherit"></div>' +
     '</div>' : '') +
     '<div style="font-size:12px;color:#7A8F80;margin-top:3px">' + m.phone + ' &middot; ' + tRole(m.role) + ' &middot; <span style="color:' + statusColor + '">' + (m.status === 'Invited' ? t('statusInvited') : m.status === 'Archived' ? t('statusArchived') : t('statusActive')) + '</span></div>' +
     (m.archiveNote ? '<div style="font-size:11px;color:#A32D2D;margin-top:4px;font-style:italic">' + t('archivedTag') + ' ' + (m.archivedDate||'') + ': ' + m.archiveNote + '</div>' : '') +

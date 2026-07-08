@@ -120,21 +120,22 @@ function inviteMember() {
 }
 
 function saveMemberEdits(phone) {
+  // Auto-saves on blur/change (no Save button). Silent: skips incomplete or
+  // unchanged edits, and does not re-open the editor (so it doesn't steal focus
+  // mid-edit). The underlying list refreshes the next time Settings renders.
   const m = teamMembers.find(x => x.phone === phone);
-  if (!m) return;
-  if (!canActOnMember(m)) { alert(t('alertNoPermEdit')); return; }
-  const newName = document.getElementById('edit-member-name').value.trim();
-  const newPhone = document.getElementById('edit-member-phone').value.trim();
-  if (!newName) { alert(t('alertNameEmpty')); return; }
-  if (!newPhone) { alert(t('alertPhoneEmpty')); return; }
+  if (!m || !canActOnMember(m)) return;
+  const nameEl = document.getElementById('edit-member-name');
+  const phoneEl = document.getElementById('edit-member-phone');
+  if (!nameEl || !phoneEl) return;
+  const newName = nameEl.value.trim();
+  const newPhone = phoneEl.value.trim();
+  if (!newName || !newPhone) return;              // don't save an incomplete edit
+  if (newName === m.name && newPhone === m.phone) return; // no change
   const oldName = m.name;
   m.name = newName;
   m.phone = newPhone;
   logAction('logTeamMemberUpdated', {raw: oldName + ' → ' + newName + ' / ' + newPhone});
-  renderSettings();
-  // Re-open the member detail with new phone
-  setTimeout(() => showMemberDetail(newPhone), 100);
-  alert(t('alertMemberUpdated'));
 }
 
 function archiveMember(phone) {

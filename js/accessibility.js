@@ -34,6 +34,25 @@ function saveMyPreferences() {
   }
 }
 
+
+// Silent auto-persist of accessibility + language as this user's personal
+// default. Called automatically whenever a setting changes (no Save button).
+function persistPreferences() {
+  if (!currentUser || !currentUser.phone) return;
+  userPreferences[currentUser.phone] = {
+    largeText: a11ySettings.largeText, xlText: a11ySettings.xlText, highContrast: a11ySettings.highContrast,
+    colorBlind: a11ySettings.colorBlind, reducedMotion: a11ySettings.reducedMotion, lang: currentLang
+  };
+}
+
+// Collapse every Settings section. Called on login so sections always start
+// collapsed and never carry an expanded state across logout/login.
+function resetSettingsSections() {
+  ['sec-settings-farm','sec-settings-team','sec-settings-timezone','sec-settings-session','sec-settings-security','sec-a11y-section'].forEach(function(id){
+    var el = document.getElementById(id); if (el) el.style.display = 'none';
+  });
+  document.querySelectorAll('.sec-arrow').forEach(function(a){ a.textContent = '▸'; });
+}
 function toggleSettingsSection(id, btn) {
   const section = document.getElementById('sec-' + id);
   if (!section) return;
@@ -64,6 +83,7 @@ function goToAccessibility() {
 function toggleA11y(key) {
   a11ySettings[key] = !a11ySettings[key];
   applyA11yUI();
+  persistPreferences(); // auto-save as personal default (no Save button)
 }
 
 function applyA11yUI() {

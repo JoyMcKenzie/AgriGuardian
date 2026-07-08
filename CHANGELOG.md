@@ -13,6 +13,14 @@ changed — why / notes.
 
 ---
 
+## 2026-07-08 11:14 ET — Settings UX pass: auto-save, collapse behaviour, drawer tab, mandatory backup notes (build 070820261124)
+- **Settings auto-save (no Save buttons):** removed the "Save" button on the report-delivery email and the "Save as my default" button. The email now saves silently on blur/change (inline "✓ Saved", validates without alert spam); accessibility toggles and language changes persist automatically to the user's personal default via a new `persistPreferences()` (wired into `toggleA11y` and `setLang`). Helper note updated to say choices save automatically. Team-member name/phone edits also auto-save on change (member-edit "Save changes" button removed).
+- **Sections default collapsed + reset on login:** added `resetSettingsSections()` (collapses every Settings section and resets the ▸ arrows) and call it from `_enterApp`, so sections never carry an expanded state across logout/login.
+- **Farm Account now fully collapses:** the report-email block was malformed in the markup — a stray `</div></div>` closed `#sec-settings-farm` early, so the email row was reparented outside the collapsible body and stayed visible when the section was closed. Rebuilt the section markup cleanly so `#owner-email-row` lives inside `#sec-settings-farm`; collapsing Farm account now hides it. (Owner-only email gate preserved.)
+- **Drawer pull-tab pinned near the top:** `.nav-handle` was vertically centered (`top:50%`), so it drifted downward as sections expanded and the app grew. Pinned to `top:116px` (just below the header). Drawer stays on the right (no left/right move feature, per decision).
+- **Backup notes mandatory:** the Backups screen now requires a note describing where each backup lives (e.g. Amazon cloud, external drive in the safe) before saving — empty notes are blocked with a prompt. Label changed from "(optional)" to "* required"; placeholder updated with concrete examples. New key `backupNotesRequired` (EN/ES).
+- Built on the current GitHub base (`S:\Guardian Games`). Verified in a headless render test: all five changes plus regressions (email owner-only gate across roles, ES localization sweep, device list render) — 13/13 checks pass. `BUILD_TIMESTAMP` = `2026-07-08T15:14:56Z`.
+
 ## 2026-07-08 03:38 UTC — README: badges added
 - Added four badges under the `# AgriGuardian` title, above the legal notice: Live Demo (links to the Pages site), Pages Deploy (GitHub's own live workflow status badge, pulls real pass/fail from Actions automatically), Status: prototype (matches the existing disclaimer text elsewhere in the README), and License: all rights reserved (matches the actual `LICENSE`, not a generic open-source shield).
 - Deliberately did not add a standard OSS license badge or a "contributions welcome" badge, since neither would be true for an all-rights-reserved student project; badges that misrepresent the license tend to cost more credibility than they gain.
