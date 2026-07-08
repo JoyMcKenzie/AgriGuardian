@@ -110,7 +110,7 @@ function saveBackup() {
   farmBackup.offsiteNote   = document.getElementById('bk-offsite-note')?.value.trim()   || '';
   farmBackup.lastVerified  = document.getElementById('bk-verified')?.value || '';
   farmBackup.notes         = document.getElementById('bk-notes')?.value.trim() || '';
-  logAction('Backup status updated', '3-2-1: primary=' + farmBackup.hasPrimary + ' secondary=' + farmBackup.hasSecondary + ' offsite=' + farmBackup.hasOffsite);
+  logAction('logBackupStatusUpdated', {raw: '3-2-1: primary=' + farmBackup.hasPrimary + ' secondary=' + farmBackup.hasSecondary + ' offsite=' + farmBackup.hasOffsite});
   renderBackupScreen();
 }
 
@@ -222,7 +222,7 @@ function showAppDetail(id, keepScreen) {
 
     '<div class="risk-detail risk-detail-' + risk + '"><div class="risk-detail-title t-' + risk + '"><i class="ti ' + iconMap[risk] + '"></i>' + getAppRiskLabel(risk) + '</div><p>' + getAppRiskWhy(a) + '</p></div>' +
 
-    appAccSection('fix', a.id, 'ti-bulb', 'How to fix this', '',
+    appAccSection('fix', a.id, 'ti-bulb', t('howToFixTitle'), '',
       '<div class="action-box" style="margin:10px 0 0">' +
         '<div class="action-label">' + t('recommendedAction') + '</div>' +
         '<div class="action-text">' + getAppRecAction(a) + '</div>' +
@@ -333,7 +333,7 @@ function saveAppReview(id) {
   a.flaggedInsecure = flagEl ? flagEl.checked : a.flaggedInsecure;
   const noteEl = ctx.querySelector('#app-note-' + id);
   a.notes = noteEl ? noteEl.value.trim() : a.notes;
-  logAction('App reviewed', a.name + ' — ' + (a.reviewed === 'yes' ? 'reviewed' : 'not reviewed') + (a.flaggedInsecure ? ' (flagged insecure)' : '') + (a.mfaEnabled !== 'yes' ? ' (MFA off)' : ''));
+  logAction('logAppReviewed', {raw: a.name + ' — ' + (a.reviewed === 'yes' ? 'reviewed' : 'not reviewed') + (a.flaggedInsecure ? ' (flagged insecure)' : '') + (a.mfaEnabled !== 'yes' ? ' (MFA off)' : '')});
   renderAppsList();
   showScreen('apps', document.getElementById('nav-btn-apps'));
 }
@@ -344,7 +344,7 @@ function populateAppPicker() {
   const otherOpt = sel.querySelector('option[value="__other_app__"]');
   APP_CATALOG.forEach(function(cat) {
     const og = document.createElement('optgroup');
-    og.label = cat.group;
+    og.label = cat.groupKey ? t(cat.groupKey) : cat.group;
     cat.items.forEach(function(item) {
       const opt = document.createElement('option');
       opt.value = item;
@@ -406,7 +406,7 @@ function addApp() {
     lastReviewedDate: reviewed === 'yes' ? today : '',
     notes: ''
   });
-  logAction('App added', name + (vendor ? ' (' + vendor + ')' : ''));
+  logAction('logAppAdded', {raw: name + (vendor ? ' (' + vendor + ')' : '')});
   if (picker) picker.value = '';
   document.getElementById('app-name').value = '';
   document.getElementById('app-vendor').value = '';
@@ -441,7 +441,7 @@ function archiveApp(id) {
   if (!a) return;
   if (!confirm(t('archiveAppConfirm').replace('{name}', a.name))) return;
   a.archived = true;
-  logAction('App archived', a.name);
+  logAction('logAppArchived', {raw: a.name});
   renderAppsList();
 }
 
@@ -450,7 +450,7 @@ function restoreApp(id) {
   const a = apps.find(x => x.id === id);
   if (!a) return;
   a.archived = false;
-  logAction('App restored', a.name);
+  logAction('logAppRestored', {raw: a.name});
   renderAppsList();
 }
 
@@ -465,8 +465,6 @@ function deleteApp(id) {
     if (!confirm(t('deleteAppConfirm').replace('{name}', a.name))) return;
   }
   apps = apps.filter(x => x.id !== id);
-  logAction('App deleted', a.name + ' permanently removed');
+  logAction('logAppDeleted', {raw: a.name + ' permanently removed'});
   renderAppsList();
 }
-
-

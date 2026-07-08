@@ -270,7 +270,7 @@ function submitObservation(id) {
   d.observationPending = true;
   d.observationInvestigating = false;
   d.knownOperationalIssue = false;
-  logAction(t('handoffTypeObservation'), (d.label || d.type) + ' — ' + noteVal);
+  logAction('handoffTypeObservation', {raw: (d.label || d.type) + ' — ' + noteVal});
   const btn = document.getElementById('observation-box-' + id) ? document.getElementById('observation-box-' + id).querySelector('button') : null;
   if (noteEl) noteEl.value = '';
   if (btn) {
@@ -301,7 +301,7 @@ function dismissObservation(id) {
     note: noteVal || t('obsDismissedNoNote'),
     date: localTimestamp()
   });
-  logAction('Observation dismissed', (d.label || d.type) + (noteVal ? ' — ' + noteVal : ''));
+  logAction('logObservationDismissed', {raw: (d.label || d.type) + (noteVal ? ' — ' + noteVal : '')});
   renderDashList();
   renderDeviceList();
   showDetail(id);
@@ -345,7 +345,7 @@ function closeInvestigationNoIssue(id) {
     note: '',
     date: localTimestamp()
   });
-  logAction('Investigation closed — no issue found', (d.label || d.type));
+  logAction('logInvestigationClosedNoIssue', {raw: (d.label || d.type)});
   renderDashList();
   renderDeviceList();
   showDetail(id);
@@ -374,7 +374,7 @@ function closeInvestigationConfirmed(id) {
     note: noteVal,
     date: localTimestamp()
   });
-  logAction('Investigation closed — problem confirmed', (d.label || d.type) + ' — ' + noteVal);
+  logAction('logInvestigationClosedConfirmed', {raw: (d.label || d.type) + ' — ' + noteVal});
   renderDashList();
   renderDeviceList();
   showDetail(id);
@@ -396,7 +396,7 @@ function clearOperationalIssue(id) {
     note: '',
     date: localTimestamp()
   });
-  logAction('Operational issue cleared', (d.label || d.type));
+  logAction('logOperationalIssueCleared', {raw: (d.label || d.type)});
   renderDashList();
   renderDeviceList();
   showDetail(id);
@@ -420,7 +420,7 @@ function escalateIssue(id) {
   d.escalation = {
     target, targetName, reason,
     note: noteVal,
-    by: currentUser.name || currentUser.phone || 'Team member',
+    by: currentUser.name || currentUser.phone || t('teamMemberFallback'),
     date: localTimestamp()
   };
   if (!Array.isArray(d.handoffLog)) d.handoffLog = [];
@@ -432,8 +432,8 @@ function escalateIssue(id) {
     reason: reason,
     date: localTimestamp()
   });
-  logAction('Issue escalated to ' + targetName,
-    (d.label || d.type) + ' (' + d.brand + ') — ' + reason + ' | ' + noteVal);
+  logAction({key: 'logIssueEscalated', params: {target: tRole(targetName)}},
+    {raw: (d.label || d.type) + ' (' + d.brand + ') — ' + reason + ' | ' + noteVal});
   renderDashList();
   renderDeviceList();
   showScreen('devices', document.querySelectorAll('.nav-btn')[1]);
@@ -479,8 +479,8 @@ function partialResolveAndEscalate(id) {
     note: escNote, reason: escReason,
     date: ts
   });
-  logAction('Partial fix + escalated to ' + targetName,
-    (d.label || d.type) + ' (' + d.brand + ') — fixed: ' + fixNote + ' | escalated: ' + escReason + ' — ' + escNote);
+  logAction({key: 'logPartialFixEscalated', params: {target: tRole(targetName)}},
+    {raw: (d.label || d.type) + ' (' + d.brand + ') — fixed: ' + fixNote + ' | escalated: ' + escReason + ' — ' + escNote});
   renderDashList();
   renderDeviceList();
   showScreen('devices', document.querySelectorAll('.nav-btn')[1]);
@@ -493,10 +493,10 @@ function clearEscalation(d, reason) {
   d.escalation = {};
   // partiallyResolved stays true until explicitly fully resolved —
   // it's cleared when the device is marked fully resolved (resolveIssue).
-  logAction('Escalation cleared',
-    (d.label || d.type) + ' (' + d.brand + ')' +
+  logAction('logEscalationCleared',
+    {raw: (d.label || d.type) + ' (' + d.brand + ')' +
     (prev.by ? ' — originally flagged by ' + prev.by : '') +
-    (reason ? ' | ' + reason : ''));
+    (reason ? ' | ' + reason : '')});
 }
 function takeOwnership(id) {
   if (!canClearEscalation()) return;
@@ -511,7 +511,7 @@ function takeOwnership(id) {
   if (!Array.isArray(d.handoffLog)) d.handoffLog = [];
   d.handoffLog.push({
     type: 'takeOwnership',
-    from: prevAssignee || 'unassigned',
+    from: prevAssignee || t('unassignedLabel'),
     to: taker,
     note: noteVal,
     date: localTimestamp()
@@ -528,8 +528,8 @@ function sendBackToTech(id) {
   const noteEl = document.getElementById('send-back-note-' + id);
   const noteVal = noteEl ? noteEl.value.trim() : '';
   if (!noteVal) { alert(t('handoffNoteRequired')); return; }
-  const sender = currentUser.name || 'Manager';
-  const recipient = d.escalation && d.escalation.by ? d.escalation.by : (d.assignedTo || 'Technician');
+  const sender = currentUser.name || t('roleManager');
+  const recipient = d.escalation && d.escalation.by ? d.escalation.by : (d.assignedTo || t('roleTechnician'));
   d.needsOwnerAction = false;
   d.returnedToTech = true;
   d.returnNote = noteVal;
@@ -544,8 +544,8 @@ function sendBackToTech(id) {
     note: noteVal,
     date: localTimestamp()
   });
-  logAction('Escalation returned to tech',
-    (d.label || d.type) + ' (' + d.brand + ') — sent back to ' + recipient + ' | ' + noteVal);
+  logAction('logEscalationReturned',
+    {raw: (d.label || d.type) + ' (' + d.brand + ') — sent back to ' + recipient + ' | ' + noteVal});
   renderDashList();
   renderDeviceList();
   showDetail(id);

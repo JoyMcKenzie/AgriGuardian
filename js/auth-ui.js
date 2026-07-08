@@ -9,11 +9,11 @@ function togglePwVisibility(inputId, btn) {
   if (input.type === 'password') {
     input.type = 'text';
     if (icon) { icon.classList.remove('ti-eye'); icon.classList.add('ti-eye-off'); }
-    btn.setAttribute('aria-label', 'Hide password');
+    btn.setAttribute('aria-label', t('hidePassword'));
   } else {
     input.type = 'password';
     if (icon) { icon.classList.remove('ti-eye-off'); icon.classList.add('ti-eye'); }
-    btn.setAttribute('aria-label', 'Show password');
+    btn.setAttribute('aria-label', t('showPassword'));
   }
 }
 
@@ -25,14 +25,14 @@ function copyDemoPassword(el, pwd) {
   var revert = function() { setTimeout(function() { el.textContent = orig; }, 1200); };
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(pwd).then(function() {
-      el.textContent = 'Copied!';
+      el.textContent = t('copiedLabel');
       revert();
     }).catch(function() {
-      el.textContent = 'Copy failed';
+      el.textContent = t('copyFailed');
       revert();
     });
   } else {
-    el.textContent = 'Copy failed';
+    el.textContent = t('copyFailed');
     revert();
   }
 }
@@ -82,7 +82,9 @@ function showStep(step) {
     safeLogin('btn-validate-code', t('inviteContinueBtn'));
     safeLogin('lbl-invite-accepted', t('inviteAccepted'));
     safeLogin('lbl-invite-your-name', t('inviteYourName'));
-    safeLogin('lbl-invite-your-phone', t('inviteYourPhone'));
+    // lbl-invite-your-phone is handled by the declarative data-i18n sweep
+    // (its text is wrapped in spans alongside a translated "(your username)"
+    // hint, so we must not overwrite its textContent here).
     safeLogin('lbl-invite-role-label', t('inviteRoleLabel'));
     safeLogin('lbl-invite-manager', t('inviteRoleManager'));
     safeLogin('lbl-invite-manager-desc', t('inviteManagerDesc'));
@@ -160,8 +162,8 @@ function joinFarm() {
   var pass2 = pass2El ? pass2El.value : '';
   var roleEl = document.querySelector('input[name="invite-role"]:checked');
   if (!name || !phone) { alert(t('inviteFillName')); return; }
-  if (!pass || pass.length < 8) { alert('Please create a password with at least 8 characters.'); return; }
-  if (pass !== pass2) { alert('Passwords do not match.'); return; }
+  if (!pass || pass.length < 8) { alert(t('alertPwCreate8')); return; }
+  if (pass !== pass2) { alert(t('alertPwNoMatch')); return; }
   if (!roleEl) { alert(t('invitePickRole')); return; }
   var role = roleEl.value;
   var perms = defaultPermsForRole(role);
@@ -179,7 +181,7 @@ function joinFarm() {
   }
   // Sign them in
   currentUser = { phone: phone, name: name, role: role, farm: 'Old McDonald\'s Farm', email: '', loggedIn: true, isInviteDemo: true };
-  logAction('Joined via invite', name + ' joined as ' + role);
+  logAction('logJoinedViaInvite', { key: 'joinedAsDetail', params: { name: name, role: tRole(role) } });
   _enterApp();
 }
 
@@ -192,7 +194,7 @@ function joinFarm() {
 function signInAsDemoMember(who) {
   var lookup = { angus: '(555) 123-4567', carlos: '(555) 201-3344', sarah: '(555) 442-7781', jamie: '(555) 309-6612', joni: '(555) 014-2208' };
   var phone = lookup[who];
-  if (!DEMO_CREDENTIALS[phone]) { alert('Demo member not found.'); return; }
+  if (!DEMO_CREDENTIALS[phone]) { alert(t('alertDemoMemberNotFound')); return; }
   showStep('signin');
   var phoneEl = document.getElementById('phone-input');
   var passEl = document.getElementById('pass-input');
@@ -211,7 +213,7 @@ function _enterApp() {
   var badge = document.getElementById('header-role-badge');
   if (badge) {
     if (currentUser.role && currentUser.role !== 'Owner') {
-      badge.textContent = currentUser.role + (currentPerms().viewOnly ? ' · ' + t('viewOnlyBadge') : '');
+      badge.textContent = tRole(currentUser.role) + (currentPerms().viewOnly ? ' · ' + t('viewOnlyBadge') : '');
       badge.style.display = 'inline-block';
     } else {
       badge.style.display = 'none';
@@ -235,4 +237,3 @@ function _enterApp() {
   // Always land on the dashboard after sign-in, regardless of the previously active screen.
   try { showScreen('dashboard', document.querySelector('.nav-btn')); } catch(e) {}
 }
-

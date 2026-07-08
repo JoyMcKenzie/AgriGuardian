@@ -2,7 +2,7 @@
 function downloadHygieneReport() {
   if (!canExportReports()) return;
   var doc = pdfNew();
-  if (!doc) { alert('PDF engine not available.'); return; }
+  if (!doc) { alert(t('pdfEngineUnavailable')); return; }
   var h = computeHygiene();
   var active = devices.filter(function(d){ return !d.archived; });
   var farm = (currentUser && currentUser.farm) ? currentUser.farm : t('pdfYourFarm');
@@ -19,7 +19,7 @@ function downloadHygieneReport() {
   doc.setFont('helvetica','bold'); doc.setFontSize(20); doc.setTextColor(31,77,46);
   doc.text(t('pdfReportTitle'), margin, y); y += 18;
   doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(120,120,120);
-  doc.text(farm + '  \u00B7  ' + t('pdfGenerated') + ' ' + dateStr, margin, y); y += 22;
+  doc.text(farm + '  ·  ' + t('pdfGenerated') + ' ' + dateStr, margin, y); y += 22;
 
   // Score box
   var sc = h.overall >= 80 ? [46,125,50] : h.overall >= 50 ? [201,164,0] : [192,57,43];
@@ -56,13 +56,13 @@ function downloadHygieneReport() {
   doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(40,40,40);
   var openIssues = active.filter(function(d){ return !d.resolved && getRisk(d.brand,d.pw,d.healthStatus) !== 'green'; });
   if (openIssues.length === 0) {
-    doc.text(doc.splitTextToSize('\u2022 ' + t('pdfNoActions'), pageW-margin*2), margin, y); y += 16;
+    doc.text(doc.splitTextToSize('• ' + t('pdfNoActions'), pageW-margin*2), margin, y); y += 16;
   }
   openIssues.forEach(function(d){
     var r = getRisk(d.brand, d.pw, d.healthStatus);
-    var line = (d.label || d.type) + ' (' + d.brand + ') \u2014 ' + getRiskAction(r, d.pw, d.brand) +
+    var line = (d.label || d.type) + ' (' + d.brand + ') — ' + getRiskAction(r, d.pw, d.brand) +
       (d.assignedTo ? '  [' + t('assignedToLabel') + ': ' + d.assignedTo + ']' : '');
-    var lines = doc.splitTextToSize('\u2022 ' + line, pageW-margin*2-6);
+    var lines = doc.splitTextToSize('• ' + line, pageW-margin*2-6);
     ensure(lines.length*12 + 4); doc.text(lines, margin, y); y += lines.length*12 + 4;
   });
   y += 6;
@@ -86,9 +86,9 @@ function downloadHygieneReport() {
     var c0 = doc.splitTextToSize(d.label||d.type, dcols[0].w-4);
     var c1 = doc.splitTextToSize(d.brand, dcols[1].w-4);
     var c2 = doc.splitTextToSize(translateDeviceType(d.type), dcols[2].w-4);
-    var c5 = doc.splitTextToSize(d.assignedTo || '\u2014', dcols[5].w-4);
+    var c5 = doc.splitTextToSize(d.assignedTo || '—', dcols[5].w-4);
     var rowH = Math.max(c0.length,c1.length,c2.length,c5.length)*10 + 6;
-    ensure(rowH+4); 
+    ensure(rowH+4);
     doc.setTextColor(40,40,40);
     doc.text(c0, dcols[0].x+3, y+3); doc.text(c1, dcols[1].x+3, y+3); doc.text(c2, dcols[2].x+3, y+3);
     doc.text(d.pw==='yes'?t('pdfYes'):t('pdfNo'), dcols[3].x+3, y+3);
@@ -128,7 +128,7 @@ function downloadHygieneReport() {
   doc.text(doc.splitTextToSize(t('pdfDisclaimer'), pageW-margin*2), margin, y);
 
   doc.save('Hygiene_Report_' + reportFileStamp() + '.pdf');
-  logAction('Exported hygiene report', t('hygieneTitle') + ': ' + h.overall + '/100');
+  logAction('logExportedHygiene', {raw: t('hygieneTitle') + ': ' + h.overall + '/100'});
 }
 
 // Opens the system mail client to email a hygiene report summary (mailto: stub).
@@ -152,7 +152,7 @@ function emailHygieneReport() {
     '\n— ' + t('emailReportNote')
   );
   window.location.href = 'mailto:' + email + '?subject=' + subject + '&body=' + body;
-  logAction('Emailed hygiene report', email);
+  logAction('logEmailedHygiene', {raw: email});
 }
 
 // Opens the system mail client to email the activity log summary.
@@ -163,15 +163,15 @@ function emailActivityReport() {
   const farm = (currentUser && currentUser.farm) ? currentUser.farm : t('pdfYourFarm');
   const now = new Date().toLocaleDateString(currentLang === 'es' ? 'es-ES' : 'en-US', { year:'numeric', month:'long', day:'numeric' });
   const subject = encodeURIComponent(t('pdfActivityTitle') + ' — ' + farm + ' — ' + now);
-  const recent = auditLog.slice(0, 10).map(function(e){ return e.ts + ' — ' + e.actor + ': ' + e.action; }).join('\n');
+  const recent = auditLog.slice(0, 10).map(function(e){ return formatAuditTs(e.ts) + ' — ' + e.actor + ': ' + tAudit(e.actionKey); }).join('\n');
   const body = encodeURIComponent(
     t('pdfActivityTitle') + '\n' + farm + ' — ' + now + '\n\n' +
     (recent || t('pdfNoActivity')) + '\n\n' +
-    (auditLog.length > 10 ? '(' + (auditLog.length - 10) + ' more entries in the full download)\n\n' : '') +
+    (auditLog.length > 10 ? t('moreEntriesInline', {n: auditLog.length - 10}) + '\n\n' : '') +
     '— ' + t('emailReportNote')
   );
   window.location.href = 'mailto:' + email + '?subject=' + subject + '&body=' + body;
-  logAction('Emailed activity log', email);
+  logAction('logEmailedActivity', {raw: email});
 }
 // Records actions only — no device identifiers — consistent with the accountability-without-
 // surveillance approach.
@@ -193,7 +193,7 @@ function pdfNew() {
 function downloadActivityReport() {
   if (!canExportReports()) return;
   var doc = pdfNew();
-  if (!doc) { alert('PDF engine not available.'); return; }
+  if (!doc) { alert(t('pdfEngineUnavailable')); return; }
   var farm = (currentUser && currentUser.farm) ? currentUser.farm : t('pdfYourFarm');
   var now = new Date();
   var dateStr = now.toLocaleDateString(currentLang === 'es' ? 'es-ES' : 'en-US', { year:'numeric', month:'long', day:'numeric' });
@@ -206,7 +206,7 @@ function downloadActivityReport() {
   doc.text(t('pdfActivityTitle'), margin, y); y += 18;
   // Subtitle
   doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(120,120,120);
-  doc.text(farm + '  \u00B7  ' + t('pdfGenerated') + ' ' + dateStr + '  \u00B7  ' +
+  doc.text(farm + '  ·  ' + t('pdfGenerated') + ' ' + dateStr + '  ·  ' +
     auditLog.length + ' ' + (auditLog.length === 1 ? t('auditAction') : t('auditActions')), margin, y); y += 20;
 
   // Table columns
@@ -226,9 +226,10 @@ function downloadActivityReport() {
     doc.setTextColor(150,150,150); doc.text(t('pdfNoActivity'), margin+4, y+4); y += 16;
   }
   auditLog.forEach(function(e) {
-    var whatText = e.action + (e.detail ? ' \u2014 ' + e.detail : '');
-    var whoText = e.actor + ' (' + e.role + ')';
-    var whenLines = doc.splitTextToSize(e.ts || '', cols[0].w-8);
+    var detailText = tAudit(e.detail);
+    var whatText = tAudit(e.actionKey) + (detailText ? ' — ' + detailText : '');
+    var whoText = e.actor + ' (' + tRole(e.role) + ')';
+    var whenLines = doc.splitTextToSize(formatAuditTs(e.ts) || '', cols[0].w-8);
     var whoLines = doc.splitTextToSize(whoText, cols[1].w-8);
     var whatLines = doc.splitTextToSize(whatText, cols[2].w-8);
     var rowH = Math.max(whenLines.length, whoLines.length, whatLines.length) * 11 + 6;
@@ -246,7 +247,7 @@ function downloadActivityReport() {
   doc.text(doc.splitTextToSize(t('pdfActivityDisclaimer'), pageW-margin*2), margin, y+2);
 
   doc.save('Activity_Log_' + reportFileStamp() + '.pdf');
-  logAction('Exported activity log', auditLog.length + ' ' + (auditLog.length === 1 ? t('auditAction') : t('auditActions')));
+  logAction('logExportedActivity', {raw: auditLog.length + ' ' + (auditLog.length === 1 ? t('auditAction') : t('auditActions'))});
 }
 
 // Computes farm hygiene sub-scores (0-100) and an overall score.

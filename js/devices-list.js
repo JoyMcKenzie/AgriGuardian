@@ -49,7 +49,7 @@ function renderDeviceList() {
     notice = '<div style="background:#EFEAF7;border:1px solid #C4B5FD;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:13px;color:#5B21B6;display:flex;align-items:center;justify-content:space-between;gap:10px"><span><i class="ti ti-flag" style="font-size:14px;vertical-align:-2px" aria-hidden="true"></i> ' + t('escFilterNotice') + '</span><button onclick="clearEscalatedFilter()" style="background:#F3F8F2;border:1px solid #C4B5FD;color:#5B21B6;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer">' + t('escClearFilter') + '</button></div>';
   }
   if (filtered.length === 0) {
-    list.innerHTML = notice + '<p style="font-size:13px;color:#7A8F80;font-style:italic;padding:12px 0">No devices ' + (deviceFilter === 'archived' ? 'archived' : 'found') + '.</p>';
+    list.innerHTML = notice + '<p style="font-size:13px;color:#7A8F80;font-style:italic;padding:12px 0">' + (deviceFilter === 'archived' ? t('noDevicesArchived') : t('noDevicesFound')) + '</p>';
   } else {
     list.innerHTML = notice + filtered.map(d => deviceCardHTML(d, true)).join('');
   }
@@ -80,11 +80,11 @@ function deviceCardHTML(d, showActions) {
   const dotClass = resolvedFull ? 'dot-green' : 'dot-' + risk;
   const fhIcon = fh.icon;
   const badgeLabel = !canSee
-    ? 'Restricted'
+    ? t('restrictedLabel')
     : isPartial ? t('partiallyResolvedBadge')
     : (coarse ? fh.label : getRiskBadgeLabel(risk, d.resolved));
-  const dotTitle = !canSee ? 'Not assigned to you' : isPartial ? t('partiallyResolvedBadge') : (coarse ? fh.label : '');
-  const archivedTag = d.archived ? '<span class="archived-tag">Archived</span>' : '';
+  const dotTitle = !canSee ? t('notAssignedTitle') : isPartial ? t('partiallyResolvedBadge') : (coarse ? fh.label : '');
+  const archivedTag = d.archived ? '<span class="archived-tag">' + t('archivedTag') + '</span>' : '';
   const escalatedTag = (d.needsOwnerAction && !d.resolved && canSee && canSeeDetailedRisk())
     ? '<span style="margin-left:6px;display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:#5B21B6;background:#EFEAF7;border:1px solid #C4B5FD;border-radius:10px;padding:1px 7px;vertical-align:middle"><i class="ti ti-flag" style="font-size:10px" aria-hidden="true"></i> ' + t('escPill') + '</span>'
     : '';
@@ -134,9 +134,9 @@ function archiveDevice(id) {
   if (!canArchiveDevices()) return;
   const d = devices.find(x => x.id === id);
   if (!d) return;
-  if (!confirm('Archive this device? It will be hidden from your active dashboard but its history will be kept.')) return;
+  if (!confirm(t('confirmArchiveDevice'))) return;
   d.archived = true;
-  logAction('Device archived', (d.label||d.type) + ' (' + d.brand + ')');
+  logAction('logDeviceArchived', {raw: (d.label||d.type) + ' (' + d.brand + ')'});
   renderDashList();
   renderDeviceList();
   renderNetworkList();
@@ -159,9 +159,9 @@ function unarchiveDevice(id) {
     d.resolvedDate = '';
     d.verifiedDate = '';
     if (!d.flaggedDate) d.flaggedDate = localTimestamp();
-    logAction('Device restored — unresolved', (d.label||d.type) + ' (' + d.brand + ') restored from archive; issue reopened');
+    logAction('logDeviceRestoredUnresolved', {raw: (d.label||d.type) + ' (' + d.brand + ') restored from archive; issue reopened'});
   } else {
-    logAction('Device restored', (d.label||d.type) + ' (' + d.brand + ') restored from archive');
+    logAction('logDeviceRestored', {raw: (d.label||d.type) + ' (' + d.brand + ') restored from archive'});
   }
   renderDashList();
   renderDeviceList();
@@ -173,18 +173,13 @@ function deleteDevice(id) {
   if (!d) return;
   const hasHistory = d.resolved || d.resolveNote || d.healthStatus || d.verifiedDate || d.resolvedDate || d.healthDate;
   if (hasHistory) {
-    const choice = confirm(
-      'WARNING: This device has existing records.\n\n' +
-      'Deleting it will permanently erase all its history, risk records, and notes.\n\n' +
-      'We strongly recommend Archive instead — it removes the device from your active list but keeps all records.\n\n' +
-      'Tap OK to permanently delete anyway.\nTap Cancel to go back (then use Archive).'
-    );
+    const choice = confirm(t('confirmDeleteDeviceWarn'));
     if (!choice) return;
   } else {
-    if (!confirm('Permanently delete this device? This cannot be undone.')) return;
+    if (!confirm(t('confirmDeleteDevicePermanent'))) return;
   }
   devices = devices.filter(x => x.id !== id);
-  logAction('Device deleted', (d.label||d.type) + ' (' + d.brand + ') permanently removed');
+  logAction('logDeviceDeleted', {raw: (d.label||d.type) + ' (' + d.brand + ') permanently removed'});
   renderDashList();
   renderDeviceList();
 }

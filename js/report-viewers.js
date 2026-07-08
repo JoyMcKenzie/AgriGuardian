@@ -10,7 +10,7 @@ function _openReportViewer(titleText, bodyHtml) {
       '<div style="background:#F3F8F2;max-width:520px;width:100%;max-height:90vh;border-radius:12px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.25)">' +
       '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#1F4D2E;color:#fff">' +
       '<span id="report-viewer-title" style="font-size:14px;font-weight:600"></span>' +
-      '<button onclick="closeReportViewer()" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer">Close</button>' +
+      '<button onclick="closeReportViewer()" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer">' + t('closeLabel') + '</button>' +
       '</div>' +
       '<div id="report-viewer-body" style="padding:16px;overflow:auto;font-size:13px;color:#222;line-height:1.5"></div>' +
       '</div>';
@@ -68,7 +68,7 @@ function viewHygieneReport() {
     }).join('') + '</table>' +
     '<div style="font-size:11px;color:#7A8F80;margin-top:12px;border-top:1px solid #eee;padding-top:8px">' + t('pdfDisclaimer') + '</div>';
   _openReportViewer(t('pdfReportTitle'), html);
-  logAction('Viewed hygiene report', t('hygieneTitle') + ': ' + h.overall + '/100');
+  logAction('logViewedHygieneReport', {raw: t('hygieneTitle') + ': ' + h.overall + '/100'});
 }
 
 function viewActivityReport() {
@@ -83,13 +83,13 @@ function viewActivityReport() {
     html += '<table style="width:100%;border-collapse:collapse;font-size:12px">' +
       '<tr style="background:#F3F8F2;color:#1F4D2E"><th style="text-align:left;padding:6px">' + t('pdfWhen') + '</th><th style="text-align:left;padding:6px">' + t('pdfWho') + '</th><th style="text-align:left;padding:6px">' + t('pdfWhat') + '</th></tr>' +
       auditLog.map(function(e){
-        return '<tr style="border-top:1px solid #eee"><td style="padding:6px;color:#5F7266;white-space:nowrap">' + (e.ts || '') + '</td>' +
-          '<td style="padding:6px">' + e.actor + ' <span style="color:#7A8F80">(' + e.role + ')</span></td>' +
-          '<td style="padding:6px">' + e.action + (e.detail ? ' &mdash; <span style="color:#5F7266">' + e.detail + '</span>' : '') + '</td></tr>';
+        var detail = tAudit(e.detail);
+        return '<tr style="border-top:1px solid #eee"><td style="padding:6px;color:#5F7266;white-space:nowrap">' + formatAuditTs(e.ts) + '</td>' +
+          '<td style="padding:6px">' + e.actor + ' <span style="color:#7A8F80">(' + tRole(e.role) + ')</span></td>' +
+          '<td style="padding:6px">' + tAudit(e.actionKey) + (detail ? ' &mdash; <span style="color:#5F7266">' + detail + '</span>' : '') + '</td></tr>';
       }).join('') + '</table>';
   }
   html += '<div style="font-size:11px;color:#7A8F80;margin-top:12px;border-top:1px solid #eee;padding-top:8px">' + t('pdfActivityDisclaimer') + '</div>';
   _openReportViewer(t('pdfActivityTitle'), html);
-  logAction('Viewed activity log', auditLog.length + ' ' + (auditLog.length === 1 ? t('auditAction') : t('auditActions')));
+  logAction('logViewedActivityLog', {raw: auditLog.length + ' ' + (auditLog.length === 1 ? t('auditAction') : t('auditActions'))});
 }
-

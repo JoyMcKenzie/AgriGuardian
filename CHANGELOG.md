@@ -13,37 +13,76 @@ changed — why / notes.
 
 ---
 
-## 2026-07-07 — Page canvas back to neutral so the app doesn't bleed into the background
+## 2026-07-08 03:03 UTC — Favicon and Open Graph/Twitter share-card tags added (v18)
+- Live demo link had no favicon and no link-preview support: sharing `https://joymckenzie.github.io/AgriGuardian/` on LinkedIn/Slack/iMessage showed a bare URL with no title, description, or image.
+- Generated `favicon.ico`, `favicon-16.png`, `favicon-32.png`, and `apple-touch-icon.png` from the existing white LGD logo artwork (already embedded as base64 in `index.html`), cropped to its content bounds and placed on a forest green (`#1F4D2E`) square so the mark reads clearly at small sizes.
+- Built `og-image.png` (1200x630): forest green background, white LGD logo, "AgriGuardian" wordmark, tagline, and a one-line descriptor.
+- Added favicon `<link>` tags, `<meta name="description">`, Open Graph tags (`og:type`, `og:title`, `og:description`, `og:image`, `og:url`), and Twitter Card tags to `index.html`'s `<head>`, ahead of the existing stylesheet links.
+- `BUILD_TIMESTAMP` bumped to `2026-07-08T03:03:14Z`.
+- Note: `og:url`/`og:image` are hardcoded to the current Pages URL; update both if that URL ever changes.
+
+---
+
+## 2026-07-07 23:52 UTC — Owner-only report email: replaced fragile role gate with a stable id (v17)
+- The "Report delivery email" field in Settings > Farm Account is Owner-only. Its hide-for-non-owners gate used `emailSection.closest('div[style*="margin-bottom:14px"]')` — a brittle inline-style-substring lookup. It works on first render, but once any code sets `.style.display` the browser re-serialises the style to `margin-bottom: 14px` (with a space), so the selector stops matching on re-render and the gate can silently no-op, leaving the field showing to Farm Hand / Technician / Manager.
+- Gave the wrapper a real id `#owner-email-row` (index.html) and changed the gate in `settings.js` to `document.getElementById('owner-email-row')`. Now the field is hidden for every non-owner on every render. Verified across all four roles in a headless render test (Owner: visible; Farm Hand / Technician / Manager: hidden). Note: this gate was byte-identical to the original v13 — not introduced by the localization work — but it was genuinely fragile, so it's now fixed properly.
+- `BUILD_TIMESTAMP` bumped to `2026-07-07T23:52:21Z`.
+
+## 2026-07-07 23:42 UTC — Page background set to white (v16); stops the sage bleeding outside the prototype
+- The page canvas (`body` background in `styles.css`) was `#EEEEEA`, so the sage app card (`.app`, `#E7F0E7`) blended into a near-matching backdrop and read as sloppy bleed from the prototype. Changed the `body` background to `#ffffff` so the app frame sits on clean white and reads as a contained device mock. The app's own interior surface is unchanged.
+- Packaged as `AgriGuardian-redesign-stage1-2b-v16.zip` (supersedes v15). `BUILD_TIMESTAMP` bumped to `2026-07-07T23:42:46Z`.
+
+## 2026-07-07 23:36 UTC — Packaged as v15 snapshot (retires the confusing v14 packaging attempts)
+- Settled on `AgriGuardian-redesign-stage1-2b-v15.zip` as the single, unambiguous deliverable — the intermediate v14 zips caused version confusion and are discarded. Same app content: v13 + the Spanish-localization rebuild; no code change from the v14 attempts.
+- Zip follows the archive convention: `AgriGuardian/` root, 37-file layout, file permissions normalised to 0644/0755 so Windows' Attachment Manager doesn't flag the extensionless `LICENSE` (the execute bit inherited from the build sandbox had triggered a "potentially harmful" block on extract).
+- Bumped `BUILD_TIMESTAMP` to `2026-07-07T23:36:34Z` for the final build. (The stamp had previously lagged a couple of small post-localization edits — the `setLang` Apps/Backups re-render and the add-form `applyI18n()` sweeps; this reflects the shipped v15.)
+## 2026-07-07 22:50 UTC — Changelog timestamp reconciliation from archived version snapshots
+- Back-filled precise build times onto the redesign-series entries below (stage 2 through v13) using each archived zip's `BUILD_TIMESTAMP` (the authoritative UTC build marker). Times shown are UTC; subtract 4h for ET (e.g. 20:59 UTC = 16:59 ET). Entries before "Redesign stage 2" (17:46 UTC) predate the available snapshots and keep their original informal time-of-day markers.
+- Verified each snapshot's changed files against its changelog entry (v-stage1-2 → v13): every version's entry accurately reflects its actual changes — **except v6**, which shipped a comment-only edit with no entry. Recovered as the "Farm Hand caution comment aligned…" entry below (19:14 UTC).
+- No application code changed in this pass — changelog only.
+
+## 2026-07-07 22:29 UTC — Spanish localization rebuilt on one source of truth (systemic fix)
+- **Problem:** Spanish translation kept "half working" — some strings translated, others stayed English no matter what was patched. Root cause was architectural, not missing dictionary keys (EN/ES were already balanced). Four compounding causes: (1) `setLang()` translated by re-setting `.textContent` on a hand-maintained list of ~300 element IDs, and that list had drifted — ~69 entries pointed at IDs that no longer existed (`lbl-device-name` vs `lbl-device-label`, `brand-input` vs `custom-brand-input`, whole `opt-type-*`/`opt-loc-*`/`lbl-net-pw*` sets), and entire dropdowns (device type, location, network conn type, team roles) had no IDs and were never wired; (2) dynamically-rendered content emitted hardcoded English — `vulnerabilities.js` had zero `t()` calls, `networks.js` hardcoded recommendations/timeline/detail labels/confirms, device detail hardcoded "Not assigned to you"/accordion titles, and nearly every `alert()/confirm()/prompt()` was hardcoded; (3) the activity log stored and rendered raw English (actions, roles, timestamps); (4) risk/password/encryption logic was coupled to displayed text, so translating a value could silently break it.
+- **New architecture (one source of truth):** every UI string routes through one `t(key)` (now with `{placeholder}` interpolation, killing the broken sentence-concatenation). Every text element in `index.html` carries a `data-i18n`/`-ph`/`-aria`/`-title`/`-alt`/`-optlabel`/`-prefix` attribute (330 total), and a single new `applyI18n(root)` sweep (in `core.js`) translates them all — on load, on every language switch, and at the end of every dynamic render. `setLang()` shrank from ~330 hand-maintained lines to a ~30-line sweep plus the few genuinely dynamic cases (dropdown value sync, build stamp, interpolated invite hint, list/detail/settings/apps/backups re-renders).
+- **Audit log is now key-based** (`audit.js`): `logAction()` stores a translation key (+ optional `{params}`/`{raw}` data), and `renderAuditLog()`/report viewer/PDF translate action, role (`tRole()`), and timestamp at render time — so the whole log re-localizes on language switch. ~30 `logAction` call sites migrated across `session/team/settings/permissions/devices-*/networks/apps/reports/report-viewers/accessibility/auth-ui`.
+- **Dictionary:** ~200 new EN+ES keys added (dialogs, dynamic-render strings, vuln text, audit actions, form labels, option lists). EN/ES balanced.
+- **Explicit allowlist:** brand names, device model/serial numbers, person names, "AgriGuardian", CVE IDs, URLs, phone numbers and demo codes stay untranslated by simply carrying no `data-i18n` attribute — documented in `core.js`. Individual time-zone option labels left untranslated as geographic identifiers (their category headers *are* translated).
+- **Logic decoupled** from display text where it was coupled (dual-language matching for password/encryption auto-detect in `networks.js`; canonical role/status enums shown via `tRole()`/status keys). Fixed add-device/add-network form-open handlers that would have stripped translated label spans.
+- **Verified:** rendered the real annotated `index.html` against the real dictionary, switched to ES and swept — 302 translatable elements all render Spanish, **zero untranslated leaks**; all 285 HTML keys, 62 audit keys, and 594 `t()` references resolve to the dictionary; `node --check` clean across all 25 JS modules; role paths (Manager, Technician, Farm Hand/read-only) route role/permission labels through translation. `BUILD_TIMESTAMP` bumped.
+
+---
+
+## 2026-07-07 20:59 UTC — Page canvas back to neutral so the app doesn't bleed into the background
 - The outer page `body` had been turned sage (`#E7F0E7`) too, so the app card — whose own surface is also sage — dissolved into the background. Reverted the page canvas to a neutral `#EEEEEA`; the app's interior surface stays `#E7F0E7`, so the app reads as a contained frame again. Added the canvas value to `PALETTE.md`. `BUILD_TIMESTAMP` bumped.
 
-## 2026-07-07 — Slide-out drawer switched to the light theme
+## 2026-07-07 20:48 UTC — Slide-out drawer switched to the light theme
 - The expanded drawer read as too dark a slab against the now-light app. Reskinned it to a light panel using the canonical palette: body `#F3F8F2`, labels `#22372A`, icons `#5F7266`, active tab `#E2EFE8` with a `#1F4D2E` accent bar (and `#1F4D2E` label/icon), hover `#E7F0E7`, divider `#D7E4D7`. Added a soft left shadow (`-4px 0 16px rgba(0,0,0,0.12)`) so the light panel still reads as elevated over the content.
 - Report block in the drawer flipped to light too: green section headers (`#1F6E43`), ghost green View/Download icons (`#1F4D2E`) with `#E4EEE4` dividers, and the Email button kept solid green (`#2E7A4E`).
 - The dark-green pull tab (`#1F4D2E`, white chevron) is kept as the grab affordance — a small brand anchor against the light panel. High-contrast mode still forces white-bg/black-text as before.
 - Verified: `validate-split.py` passes. `BUILD_TIMESTAMP` bumped.
 
-## 2026-07-07 — Colour standardisation pass + palette reference + visual style guide
+## 2026-07-07 20:37 UTC — Colour standardisation pass + palette reference + visual style guide
 - Ran the approved colour audit and standardised the whole app to one shade per role (see `PALETTE.md`). Drift outside the high-contrast file is now zero.
 - **Role-aware, property-scoped** (never blind find/replace): text via `color:` (primary `#22372A`, secondary `#5F7266`, muted `#7A8F80`); borders via `solid #…` (card `#D7E4D7`, divider `#E4EEE4`, field `#CBD8CB`); card/box surfaces via `background:#…` -> `#F3F8F2` (form-field white kept). Single-role hexes unified: info blues -> `#1A5FA8` (+ tint `#E6F0FA`, border `#92B4E3`), escalation -> `#5B21B6` (+ tint `#EFEAF7`), success tint -> `#E2EFE8`, review tint -> `#FBF6E9`, stray dots `#C0392B`->`#E24B4A` / `#C9A400`->`#D4C000`.
 - **High-contrast palette left exactly as-is** (`accessibility.js`: `#CC0000`, `#006600`, `#005577`, etc.) — deliberately a separate set.
 - Added `PALETTE.md` (canonical values + drift map) and `style-guide.html` (visual swatch board with hexes, typography, and live component examples) to the repo docs.
 - Verified: `node --check` on every edited module; `validate-split.py` passes; HC values confirmed untouched; zero residual drift. `BUILD_TIMESTAMP` bumped.
 
-## 2026-07-07 — Manager dashboard unified with Owner; security tips shown to every role
+## 2026-07-07 20:20 UTC — Manager dashboard unified with Owner; security tips shown to every role
 - **Manager top summary** now uses the same calm FARM STATUS tab cards as the Owner (severity split, soft weight) instead of the big bold red "Device problems / 5" count cards Joy flagged as too high-contrast. The Manager keeps its own unassigned/assigned-work triage lists below — that's its distinct job, which the Owner doesn't have.
 - **Security tips for everyone:** the rotating tip card now renders on every role's dashboard (Owner, Manager, Technician, Farm Hand/Viewer), not just the Owner — general, non-sensitive, and most useful for the Farm Hand.
 - Refactored to two small closures in `renderDashList()` — `farmStatusCards()` (Owner + Manager) and `securityTipsCard()` (called once after the role branch, so all roles get it with no duplication and a single `#dash-tip-text`). No behaviour change to the work lists or navigation.
 - Verified: `node --check` + `validate-split.py`; `farmStatusCards()` used twice, `securityTipsCard()` once, no `dashDeviceProblems` count card left. `BUILD_TIMESTAMP` bumped.
 - Note: the Manager's conditional escalated *count* card (`card()`, shown only when escalations exist) still uses the bold style; can be calmed to the "Needs your attention" pattern on request.
 
-## 2026-07-07 — Rotating security-tip ticker fills the Owner dashboard
+## 2026-07-07 20:10 UTC — Rotating security-tip ticker fills the Owner dashboard
 - Replaced the Recent Activity fill with a rotating **security tip** card (Joy's idea — turns dead space into something educational, fitting the "make security routine" mission). Short, glanceable, one tip at a time, auto-advancing every ~6.5s with a fade; respects reduced-motion (no auto-rotate when that's on).
 - Local default tip set of 8 (bilingual EN/ES `securityTips` array + `securityTipLabel`), each a single plain-language action ("Turn on MFA for every account that offers it", "Change any device still using its factory password", etc.).
 - **Aligned to the backend plan Joy shared:** the ticker is the prototype stand-in for the vendor-side Third-Party Risk Monitoring / Alert Relay (`BACKEND-ARCHITECTURE-PLANNING.md` §12.3) feeding farm-specific findings as SecurityAlerts (§6) — fixed plain-language templates, one recommended step each. Code comment points at those sections; the array is swappable for that feed without changing the render/ticker.
 - New ticker helpers in `dashboard.js` (`currentSecurityTips()`, `startTipTicker()`, guarded single interval, cleared when the element leaves the DOM). Owner dashboard only for now.
 - Verified: `node --check` + `validate-split.py`; `securityTips` parses (array), label present in both language blocks. `BUILD_TIMESTAMP` bumped.
 
-## 2026-07-07 — Softer cards, sage everywhere, Recent Activity fills the Owner dashboard
+## 2026-07-07 20:05 UTC — Softer cards, sage everywhere, Recent Activity fills the Owner dashboard
 - Joy found the pure-white cards too stark against the sage background, and the Owner dashboard too empty below the status cards.
 - **Softer cards:** card fills moved from `#fff` to a warm off-white-green `#F3F8F2` with a gentler `#D7E4D7` border (dashboard cards, `alertRow`, `.device-card`) so they lift from the background without glaring.
 - **Sage everywhere:** the page `body` (`#f5f5f0`) and the app surface (`#EAF3EA`) both move to `#E7F0E7`, so there's no stark off-white left; only the cards stay lighter.
@@ -51,19 +90,23 @@ changed — why / notes.
 - Verified: `node --check` + `validate-split.py`; `recentActivityLabel` present in both language blocks and referenced. `BUILD_TIMESTAMP` bumped.
 - Note: several detail-screen cards in other files still use `#fff` inline; a full sweep to the soft tone can follow.
 
-## 2026-07-07 — Owner FARM STATUS cards toned to match the calm (non-read-only) style
+## 2026-07-07 19:27 UTC — Owner FARM STATUS cards toned to match the calm (non-read-only) style
 - Joy compared the Technician dashboard (calm) with the Owner FARM STATUS cards (too high-contrast). The difference was type weight: Technician device rows render at `font-weight:400` / `#333`, while the Owner tab cards were `600` / `#22372A`.
 - Brought the Owner tab-card labels down to `font-weight:500` / `#333`, and aligned the severity dot colours to the shared `alertRow` palette (`#E24B4A` red, `#D4C000` yellow) so every severity-seeing role matches. Read-only (Farm Hand/Viewer) keeps its own colour-safe treatment, unchanged.
 - Verified: `node --check` + `validate-split.py`. `BUILD_TIMESTAMP` bumped.
 - Note for a follow-up: the Manager dashboard uses a different bold "big number" count card (`card()`, 28px/800) — left as-is here; can be calmed the same way on request.
 
-## 2026-07-07 — Dashboard balance: calmer Owner, clearer Farm Hand (no amber)
+## 2026-07-07 19:14 UTC — Farm Hand caution comment aligned to the colour-safe treatment (docs only)
+- Reworded the inline comment in `dashboard.js` describing the Farm Hand view-only states so it matches the colour-safe palette shipped in the entry below ("soft green / soft blue / slate, with the icon shape carrying caution rather than colour"). Comment-only clarification — **no behaviour or output change**; `BUILD_TIMESTAMP` bumped (19:14:56 UTC).
+- Reconstructed from version snapshot **v6** during a changelog timestamp reconciliation (2026-07-07 22:xx UTC): v6 shipped this comment edit with no changelog entry at the time. Logged now for completeness.
+
+## 2026-07-07 19:14 UTC — Dashboard balance: calmer Owner, clearer Farm Hand (no amber)
 - Addressing the two extremes Joy flagged — the Owner dashboard read as very high-contrast/busy, the Farm Hand one as almost too muted. Mocked and approved before coding.
 - **Owner:** the four separate colour-coded sections (escalated=purple, observations=blue/amber, returned=orange, partial=purple) are folded into one calm "Needs your attention" list. Two accents only now: purple for action items (escalated / decision-needed / returned), blue for observations — the icon (`ti-flag` / `ti-bolt` / `ti-arrow-back-up` / `ti-eye`) and a sublabel carry the type. Cards are white with a small tinted icon and normal-weight text instead of bold colour on saturated tints. All click targets (`showDetail(id)`) and the 3-state observation logic are preserved. New bilingual key `needsAttentionLabel` (EN "Needs your attention" / ES "Requiere tu atención").
 - **Farm Hand:** kept colour-safe (still no red/yellow severity, per least-privilege) but made the three states legible and consistent with the Owner card layout — Fine = soft green + thumb-up, Known issue = soft blue + info, Use with caution = slate + alert-triangle. **Amber removed** (it sat too close to the severity yellow); the triangle icon now carries "caution", not colour. Added a leading device-icon tile so it reads as the same app, not a stripped-down list.
 - Verified: `node --check js/dashboard.js`; `validate-split.py` passes; `needsAttentionLabel` present in both language blocks and referenced once. `BUILD_TIMESTAMP` bumped.
 
-## 2026-07-07 — Icon pass batch 1: nav-tab icons + icon-only card row-actions
+## 2026-07-07 18:25 UTC — Icon pass batch 1: nav-tab icons + icon-only card row-actions
 - From the app-wide icon audit; the two lowest-risk, highest-payoff batches.
 - **Nav tabs (icon + label):** drawer tabs now lead with icons — Dashboard `ti-home`, Devices `ti-device-desktop`, Network `ti-wifi`, Apps `ti-apps`, Backups `ti-cloud`, Settings `ti-settings`. Labels kept (still translated via their spans); icons `aria-hidden`.
 - **Card row-actions (icon-only):** Archive `ti-archive`, Restore `ti-arrow-back-up`, Delete `ti-trash` on device, network and app cards. Text replaced by icons but preserved as a `.sr-only` label + a `title` tooltip, so screen readers and hover still get the word, and the EN/ES `t()` values still drive both. Networks/apps gained the `title` tooltips they previously lacked.
@@ -71,20 +114,20 @@ changed — why / notes.
 - Verified: `node --check` on all three edited modules; `validate-split.py` passes. `BUILD_TIMESTAMP` bumped.
 - Deferred to a later batch (per the audit): the icon+label actions (Assign/Escalate/Verify/Invite/Run backup, etc.) and team-member row actions.
 
-## 2026-07-07 — Drawer reports: icon-only actions (fixes clipped Email button)
+## 2026-07-07 18:17 UTC — Drawer reports: icon-only actions (fixes clipped Email button)
 - Joy found the Email action missing from the drawer's Hygiene Report / Activity Log rows. Cause: flexbox overflow — the long "Download" label kept the three buttons from shrinking, so they overran the 212px drawer and the card's `overflow:hidden` clipped the third (Email) button.
 - Fixed by making the drawer report actions icon-only: `min-width:0` on the buttons plus a screen-reader-only treatment on the label `<span>`s (visually hidden, still announced). Icons (eye / download / envelope) stay; the accessible names are preserved for screen readers and accessibility mode. `BUILD_TIMESTAMP` bumped.
 
-## 2026-07-07 — Drawer polish: wider content gutter so the pull tab clears the content
+## 2026-07-07 18:15 UTC — Drawer polish: wider content gutter so the pull tab clears the content
 - Joy noticed the slide-out handle rested on top of the screen content because the content ran to the app's right edge. Widened `.screen` padding to `18px 40px 18px 18px` (extra right gutter) so the resting handle sits in empty space beside the content, not over it. `BUILD_TIMESTAMP` bumped.
 
-## 2026-07-07 — Redesign stage 2b: report actions moved into the slide-out drawer
+## 2026-07-07 18:09 UTC — Redesign stage 2b: report actions moved into the slide-out drawer
 - The Hygiene Report and Activity Log button block (`#report-buttons`) moved from the dashboard screen into the navigation drawer, below the tabs — the dashboard is now just the farm status.
 - Kept the same element ids (`report-buttons`, `btn-view/download/email-report`, `btn-view/download/email-activity`), so `dashboard.js`'s visibility gating (`canExportReports()` -> show/hide) and every `onclick` still resolve with no JS change. Moved by div-depth extraction; verified the ids stay unique.
 - `styles.css`: added `.nav-panel #report-buttons` overrides so the block reads on the dark-green drawer (transparent card headers with mint labels, translucent View/Download buttons, green Email button).
 - Verified: `validate-split.py` passes (98 handlers resolve); structural check confirms the block is in the drawer, gone from the dashboard, all six report-button ids present and unique. `BUILD_TIMESTAMP` bumped.
 
-## 2026-07-07 — Redesign stage 2: top tab bar converted to a right-side slide-out drawer
+## 2026-07-07 17:46 UTC — Redesign stage 2: top tab bar converted to a right-side slide-out drawer
 - The horizontal `.nav` tab bar is now a right-anchored slide-out panel (`#nav-panel`) with a peek handle (`#nav-handle`) on the right edge and a dim scrim (`#nav-scrim`). Tap the handle to open, drag it (pointer events) to open/close, tap the scrim or pick a tab to close.
 - **Deliberately conservative:** the six `.nav-btn` buttons are unchanged — same class, order, ids (`nav-btn-network/apps/backups`), and `onclick="showScreen(...)"`. Only their container moved and was restyled. This keeps every existing reference working: `showScreen`'s `.active` toggling, the index-based back-refs (`querySelectorAll('.nav-btn')[1]`/`[2]`), `:last-child` (Settings), `querySelector('.nav-btn')` (Dashboard fallback), and the role-gating in `auth-ui.js` that hides Network/Apps/Backups by id.
 - New self-contained module `js/nav-drawer.js` (registered in `index.html` and `module-load-order.json`) wires the handle via `addEventListener` — no new inline handlers. Close-on-select is event-delegated on `.nav`, so no button markup changed.
@@ -245,46 +288,4 @@ Applied against the 3-state-observation build, from the audit in `AUDIT-FINDINGS
 
 ## 2026-07-06 (evening) — Network detail screen: full accordion + assignment/return-to-assigner
 - `showNetDetail()` rebuilt around six animated collapsible sections (How to fix this / Assignment / Network details / Notes / Network history / Remediation checklist — renamed from "What was done?" for this screen only; devices keep their original wording).
-- New assignment system for networks — previously didn't exist at all; any role with resolve permission could act on any network regardless of assignment. Added `assignedTo`/`assignedBy` fields, `netAssignBoxHTML()`, `assignNetIssue()`, `unassignNetIssue()`.
-- New return-to-assigner workflow (`canReturnNetIssue()`, `canActOnReturnedNet()` in `permissions.js`; `returnNetIssue()` in `networks.js`) — the assignee hands an issue back to whoever specifically assigned it, carrying checklist progress forward automatically, purple-styled (`#5B21B6`/`#F3EEFF`/`#C4B5FD`) per an explicit decision to treat this as escalation-equivalent. Deliberately simpler than the device escalation system (no structural-issue severity gate — networks have no brand/CVE data to gate on).
-- Non-farm devices added to the demo inventory: Owner's iPhone (Apple, green), Farm Manager's Android phone (Samsung, yellow — deliberate, shows a relatable everyday gap on ordinary tech), Farm office laptop (Dell, green), Farm records tablet (Apple, green). New `getRiskData()` entries for Apple/Samsung/Dell; new device types Smartphone/Laptop/Tablet added to `index.html` and `lang-data.js` (EN+ES); `team.js` brand-collision list updated.
-- **Two open questions, not resolved by guessing:** whether Owner should have any distinct ability beyond Manager on the network detail screen specifically (currently identical); how a genuinely read-only network viewer should be modeled (no such role currently exists — Farm Hand/Viewer are locked out of the Network tab entirely at the nav level, unlike the more nuanced device model).
-
-## 2026-07-06 (~7:22pm session, real content recovered from Trash — "Managing a change request audit document")
-- Unified sign-in flow so all paths use one real MFA mechanism (no bypass).
-- **Session-persistence security fix:** `pendingLogin` staging pattern in `auth-flow.js`/`session.js`, preventing `verifyCode()` from silently authenticating using a previous session's stale `currentUser` data.
-- Farm Hand/Viewer least-privilege redesign: Network tab removed entirely, device detail information tiering, neutral-only status indicators, observation reporting feature.
-- Two bugs fixed in `saveAll()` that caused resolve operations to silently fail or wipe their own data.
-- Manager-to-Owner escalation enabled (previously blocked alongside Owner despite Managers having the same need).
-- Collapsible sections added to device and network detail pages (pre-dating this evening's fuller accordion rebuild above).
-
-## 2026-07-06 (~6:13pm-ish sessions — NOT confirmed present in current files, flagged not fabricated)
-- Two same-day sessions ("Demo - Alpha 2" and "Code fix token consumption inefficiency") described: a weighted hygiene-scoring rework, an SMS-style invite-code flow, `isPrincipalTier()`/`isSuccessorTier()`/`isTopTier()` role-tier groundwork functions, and `sendBackToTech()` being replaced by `reassignEscalation()`.
-- None of these were found in the recovered 7:22pm file. If you still have a separate delivered zip from either of those specific sessions, upload it and these can be verified and merged in; otherwise treat this entry as a record that the work was described as done, not as confirmation it exists in current code.
-
-## 2026-07-06 — RBAC & auth overhaul (earlier reconstruction, historical)
-- Full RBAC redesign consolidated in `permissions.js`.
-- Farm Hand / Viewer least-privilege model: all devices visible, no severity color-coding, generic status notes, Network tab hidden, technical risk detail gated behind `canSeeDetailedRisk()`.
-- Observation/report mechanism ("Notice something?") surfacing to Owner/Manager dashboards.
-- Login/auth flow overhaul: removed external "Create an account" flow, unified sign-in through MFA.
-- Added demo personas Joni Dear (Technician) and Casey Aitch (invite-flow placeholder).
-- Passwords replaced with NIST SP 800-63B-aligned passphrases.
-- Resolve/escalate workflow rebuilt as a unified tabbed box; escalation color unified to purple app-wide.
-- Hygiene scoring reworked to weighted math (red counts 3× yellow).
-
-## 2026-07-05 — Token-efficiency / file-map session
-- Split the former `app.js` monolith into standalone modules — the monolith is retired, modules are the sole source of truth.
-- Created `FILE-MAP.md` and `module-load-order.json`.
-
-## 2026-07-04 and earlier — historical, condensed
-- Farm Hand/Viewer least-privilege groundwork, Manager escalation toggles, view-only assignment with instruction notes, B-file merge and color unification, structured least-privilege permission redesign (OS superuser/primary-user/guest model), project scope assessment against nine security principles, initial prototype build (device management, network monitoring, RBAC, escalation chains, hygiene scoring, red/yellow/green tiering), brand identity established.
-
----
-
-### A note on sourcing and trust
-This changelog has been rebuilt once already today after discovering the
-first version was constructed against a stale base. Entries above marked
-"NOT confirmed present" are exactly that — described in a session summary,
-not verified against actual code. Going forward, nothing gets marked as
-"fixed" or "done" in this file without direct execution verification in the
-same turn.
+- New 

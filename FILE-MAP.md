@@ -220,9 +220,9 @@ this doc is about *what things do*, that one is about *what loads first*.
 **Purpose:** Third-party PDF generation library. Do not edit directly.
 **Used by:** `reports.js`.
 
-### `index.html` (983 lines)
-**Purpose:** All screen markup/containers (`screen-dashboard`, `screen-devices`, `screen-detail`, `screen-add`, `screen-network`, `screen-net-detail`, `screen-apps`, `screen-app-detail`, `screen-backups`, `screen-settings`), plus static forms that get cloned by JS.
-**Notes:** known prior defects — duplicate element IDs, malformed div nesting in the Settings section. Verify structure with a linter/grep before assuming a given `id` is unique.
+### `index.html` (1003 lines)
+**Purpose:** All screen markup/containers (`screen-dashboard`, `screen-devices`, `screen-detail`, `screen-add`, `screen-network`, `screen-net-detail`, `screen-apps`, `screen-app-detail`, `screen-backups`, `screen-settings`), plus static forms that get cloned by JS. `<head>` also carries favicon links and Open Graph/Twitter meta tags for link-preview sharing (2026-07-08).
+**Notes:** known prior defects — duplicate element IDs, malformed div nesting in the Settings section. Verify structure with a linter/grep before assuming a given `id` is unique. `og:url`/`og:image` are hardcoded to `https://joymckenzie.github.io/AgriGuardian/` — update both if the Pages URL ever changes.
 **Redesign stage 2 (2026-07-07):** the nav is no longer a top bar — the `.nav` list is wrapped in `#nav-panel` (right-side slide-out) with `#nav-handle` and `#nav-scrim`, controlled by `js/nav-drawer.js`. The six `.nav-btn` buttons themselves are unchanged (class/order/ids/onclick), so every `showScreen`/index-based reference still resolves. **Stage 2b:** the `#report-buttons` block (Hygiene Report / Activity Log actions) now lives inside the drawer under the tabs, not on the dashboard screen — same ids, so `dashboard.js` gating is unchanged.
 
 ### `nav-drawer.js`
@@ -238,6 +238,14 @@ this doc is about *what things do*, that one is about *what loads first*.
 
 ### `module-load-order.json`
 **Purpose:** Defines the script tag load order in `index.html`. Not a functional/purpose map — see this file only when load-order/dependency-timing bugs are suspected.
+
+### `favicon.ico`, `favicon-16.png`, `favicon-32.png`, `apple-touch-icon.png` (2026-07-08)
+**Purpose:** Browser tab icon and mobile home-screen icon. Generated from the white LGD logo artwork already embedded (as base64) in `index.html`, cropped to its content bounds and placed on a forest green (`#1F4D2E`) square so it reads clearly at small sizes.
+**Notes:** static binary assets, not edited directly — regenerate from the logo source if the logo art ever changes.
+
+### `og-image.png` (1200x630, 2026-07-08)
+**Purpose:** Link-preview image shown when the live demo URL is shared on LinkedIn, Slack, iMessage, etc. Forest green background, white LGD logo, "AgriGuardian" wordmark, and tagline.
+**Notes:** static asset, not edited directly — regenerate if wordmark, tagline, or brand color ever change. Referenced by absolute URL in `index.html`'s `og:image`/`twitter:image` tags.
 
 ---
 

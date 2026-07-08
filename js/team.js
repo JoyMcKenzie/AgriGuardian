@@ -21,7 +21,7 @@ function resolveCustomBrand(input) {
   const builtIn = ['John Deere','Valley Irrigation','Hog Slat','DeLaval','Trimble','DJI','Arable','Apple','Samsung','Dell'];
   const existing = builtIn.concat(customBrands).find(b => normalizeName(b) === norm);
   if (existing) {
-    alert('"' + trimmed + '" is too similar to an existing brand: "' + existing + '". Using "' + existing + '" instead.');
+    alert(t('brandTooSimilar', {input: trimmed, existing: existing}));
     return existing;
   }
   customBrands.push(trimmed);
@@ -42,7 +42,7 @@ function resolveCustomType(input) {
   const builtIn = ['Irrigation controller','Soil sensor','Livestock monitor','Camera / security','GPS / guidance system','Barn ventilation controller','Drone','Feed system'];
   const existing = builtIn.concat(customTypes).find(t => normalizeName(t) === norm);
   if (existing) {
-    alert('"' + trimmed + '" is too similar to an existing type: "' + existing + '". Using "' + existing + '" instead.');
+    alert(t('typeTooSimilar', {input: trimmed, existing: existing}));
     return existing;
   }
   customTypes.push(trimmed);
@@ -111,54 +111,54 @@ function inviteMember() {
     demoInviteProfile = { name: name, phone: phone, role: role };
     document.getElementById('member-name').value = '';
   document.getElementById('member-phone').value = '';
-    btn.textContent = t('inviteBtn') || 'Send invitation';
+    btn.textContent = t('inviteBtn') || t('sendInvitation');
     btn.disabled = false;
     btn.style.background = '';
     renderSettings();
-    logAction('Team member invited', name + ' (' + phone + ')'); alert(t('invitationSentTo') + phone + '. They will receive an SMS to download AgriGuardian and join ' + (currentUser.farm || 'your farm') + '.');
+    logAction('logTeamMemberInvited', {raw: name + ' (' + phone + ')'}); alert(t('invitationSentFull', {phone: phone, farm: (currentUser.farm || t('myFarm'))}));
   }, 1200);
 }
 
 function saveMemberEdits(phone) {
   const m = teamMembers.find(x => x.phone === phone);
   if (!m) return;
-  if (!canActOnMember(m)) { alert('You do not have permission to edit this member.'); return; }
+  if (!canActOnMember(m)) { alert(t('alertNoPermEdit')); return; }
   const newName = document.getElementById('edit-member-name').value.trim();
   const newPhone = document.getElementById('edit-member-phone').value.trim();
-  if (!newName) { alert('Name cannot be empty.'); return; }
-  if (!newPhone) { alert('Phone number cannot be empty.'); return; }
+  if (!newName) { alert(t('alertNameEmpty')); return; }
+  if (!newPhone) { alert(t('alertPhoneEmpty')); return; }
   const oldName = m.name;
   m.name = newName;
   m.phone = newPhone;
-  logAction('Team member updated', oldName + ' → name: ' + newName + ', phone: ' + newPhone);
+  logAction('logTeamMemberUpdated', {raw: oldName + ' → ' + newName + ' / ' + newPhone});
   renderSettings();
   // Re-open the member detail with new phone
   setTimeout(() => showMemberDetail(newPhone), 100);
-  alert('Member updated successfully.');
+  alert(t('alertMemberUpdated'));
 }
 
 function archiveMember(phone) {
   const m = teamMembers.find(x => x.phone === phone);
   if (!m) return;
-  if (!canActOnMember(m)) { alert('You do not have permission to archive this member.'); return; }
-  const note = prompt('Why is ' + (m.name || phone) + ' being archived?\n\nA note is required. Their record and history will be kept.\n\nArchive reason:');
+  if (!canActOnMember(m)) { alert(t('alertNoPermArchive')); return; }
+  const note = prompt(t('promptArchiveReason', {name: (m.name || phone)}));
   if (note === null) return; // cancelled
-  if (!note.trim()) { alert('Please enter a reason for archiving this user.'); return; }
+  if (!note.trim()) { alert(t('alertEnterArchiveReason')); return; }
   m.archived = true;
   m.status = 'Archived';
   m.archiveNote = note.trim();
   m.archivedDate = localTimestamp();
-  logAction('Team member archived', (m.name || phone) + ' — ' + note.trim());
+  logAction('logTeamMemberArchived', {raw: (m.name || phone) + ' — ' + note.trim()});
   renderSettings();
 }
 
 function restoreMember(phone) {
   const m = teamMembers.find(x => x.phone === phone);
   if (!m) return;
-  if (!canActOnMember(m)) { alert('You do not have permission to restore this member.'); return; }
+  if (!canActOnMember(m)) { alert(t('alertNoPermRestore')); return; }
   m.archived = false;
   m.status = 'Active';
-  logAction('Team member restored', m.name || phone);
+  logAction('logTeamMemberRestored', {raw: m.name || phone});
   renderSettings();
 }
 
@@ -175,16 +175,11 @@ function updateFarmTimezone() {
   const newTz = sel.value;
   if (newTz === currentUser.timezone) return;
   const tzLabel = sel.options[sel.selectedIndex].text;
-  const confirmed = confirm(
-    'Change farm time zone to:\n\n' + tzLabel + '\n\n' +
-    'This will affect all timestamps recorded from this point forward. ' +
-    'Previously saved timestamps will not change.\n\n' +
-    'Are you sure?'
-  );
+  const confirmed = confirm(t('confirmChangeTz', {tz: tzLabel}));
   if (confirmed) {
-    const prevTz = currentUser.timezone || '(unset)';
+    const prevTz = currentUser.timezone || t('tzUnset');
     currentUser.timezone = newTz;
-    logAction('Farm time zone updated', prevTz + ' → ' + newTz);
+    logAction('logFarmTzUpdated', {raw: prevTz + ' → ' + newTz});
     alert(t('timeZoneUpdatedTo') + tzLabel + '.');
   } else {
     sel.value = currentUser.timezone;

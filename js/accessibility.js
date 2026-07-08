@@ -25,11 +25,11 @@ function saveMyPreferences() {
     largeText: a11ySettings.largeText, xlText: a11ySettings.xlText, highContrast: a11ySettings.highContrast,
     colorBlind: a11ySettings.colorBlind, reducedMotion: a11ySettings.reducedMotion, lang: currentLang
   };
-  logAction('Saved default preferences', currentUser.name || currentUser.phone);
+  logAction('logSavedDefaultPrefs', { raw: currentUser.name || currentUser.phone });
   var btn = document.getElementById('btn-save-my-defaults');
   if (btn) {
     var orig = btn.textContent;
-    btn.textContent = t('savedConfirm') || 'Saved!';
+    btn.textContent = t('savedConfirm') || t('savedExclaim');
     setTimeout(function() { btn.textContent = orig; }, 1500);
   }
 }
@@ -71,7 +71,7 @@ function applyA11yUI() {
   Object.keys(btnMap).forEach(function(key) {
     const btn = document.getElementById(btnMap[key]);
     if (btn) {
-      btn.textContent = a11ySettings[key] ? 'On' : 'Off';
+      btn.textContent = a11ySettings[key] ? t('onLabel') : t('offLabel');
       btn.style.background = a11ySettings[key] ? '#1F4D2E' : '#f0f0f0';
       btn.style.color = a11ySettings[key] ? '#fff' : '#555';
       btn.style.borderColor = a11ySettings[key] ? '#1F4D2E' : '#ddd';
@@ -161,4 +161,3 @@ function applyA11yUI() {
   renderDashList();
   renderDeviceList();
 }
-

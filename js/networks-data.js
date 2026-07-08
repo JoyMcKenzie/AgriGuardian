@@ -103,10 +103,10 @@ var nextAppId = 4;
 // the brand/type picker pattern used for devices and networks. "Other" falls
 // back to a free-text field.
 var APP_CATALOG = [
-  { group: 'Accounting & payroll', items: ['QuickBooks Online', 'FreshBooks', 'Gusto', 'ADP'] },
-  { group: 'Equipment & dealer portals', items: ['John Deere Operations Center', 'Case IH AFS Connect', 'AGCO Connect', 'CNH Industrial Portal'] },
-  { group: 'Crop & field management', items: ['Climate FieldView', 'Granular', 'Trimble Ag Software', 'AgLeader SMS'] },
-  { group: 'Livestock management', items: ['DeLaval DelPro', 'Allflex', 'CattleMax', 'Herdwatch'] }
+  { group: 'Accounting & payroll', groupKey: 'appGroupAccounting', items: ['QuickBooks Online', 'FreshBooks', 'Gusto', 'ADP'] },
+  { group: 'Equipment & dealer portals', groupKey: 'appGroupEquipment', items: ['John Deere Operations Center', 'Case IH AFS Connect', 'AGCO Connect', 'CNH Industrial Portal'] },
+  { group: 'Crop & field management', groupKey: 'appGroupCrop', items: ['Climate FieldView', 'Granular', 'Trimble Ag Software', 'AgLeader SMS'] },
+  { group: 'Livestock management', groupKey: 'appGroupLivestock', items: ['DeLaval DelPro', 'Allflex', 'CattleMax', 'Herdwatch'] }
 ];
 
 // Apps risk mirrors network risk in shape (red/yellow/green) but is driven by
@@ -142,4 +142,3 @@ function getAppRiskWhy(a) {
   if (isAppReviewStale(a)) return t('appRiskWhyStale');
   return t('appRiskWhyGood');
 }
-

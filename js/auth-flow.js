@@ -40,16 +40,16 @@ function normalizePhone(p) {
 function sendCode() {
   const phoneRaw = document.getElementById('phone-input').value.trim();
   const pass = document.getElementById('pass-input').value.trim();
-  if (!phoneRaw || !pass) { alert('Please enter your phone number and password.'); return; }
+  if (!phoneRaw || !pass) { alert(t('alertEnterPhonePw')); return; }
   const normalized = normalizePhone(phoneRaw);
   const phone = Object.keys(DEMO_CREDENTIALS).find(function(p) { return normalizePhone(p) === normalized; });
   if (!phone || DEMO_CREDENTIALS[phone] !== pass) {
-    alert('Phone number or password not recognized. Use one of the demo accounts shown below, or tap a profile to fill them in automatically.');
+    alert(t('alertPhonePwNotRecognized'));
     pendingLogin = null;
     return;
   }
   const account = resolveDemoAccount(phone);
-  if (!account) { alert('Demo account not found.'); pendingLogin = null; return; }
+  if (!account) { alert(t('alertDemoAccountNotFound')); pendingLogin = null; return; }
   // Staged, not applied yet — verifyCode() is what actually commits this to
   // currentUser, and only if this exact object is still here when it runs.
   // currentUser itself is never touched until the code is verified, so a
@@ -66,7 +66,7 @@ function sendCode() {
     btn.disabled = false;
     btn.style.background = '';
     showStep('code');
-    document.getElementById('code-msg').textContent = t('verificationSentTo') + phone + '. Enter it below to sign in.';
+    document.getElementById('code-msg').textContent = t('codeSentSignInMsg', { phone: phone });
   }, 1200);
 }
 

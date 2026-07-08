@@ -157,7 +157,7 @@ function deviceDecisionSlotHTML(d) {
     return '<div style="background:#FFF3E0;border:2px solid #E6823A;border-radius:10px;padding:12px 14px;margin-bottom:14px">' +
       '<div style="font-weight:700;color:#7A3200;font-size:14px;margin-bottom:6px">↩️ ' + t('returnedBannerTitle') + '</div>' +
       '<div style="font-size:13px;color:#22372A;line-height:1.5;margin-bottom:8px">' +
-        '<div><strong>' + t('returnedBannerFrom') + ':</strong> ' + (d.returnedBy || 'Manager') + '</div>' +
+        '<div><strong>' + t('returnedBannerFrom') + ':</strong> ' + (d.returnedBy || t('roleManager')) + '</div>' +
         '<div style="margin-top:4px;padding:8px 10px;background:#F3F8F2;border-radius:6px;border:1px solid #E6C7AA;font-style:italic">' + (d.returnNote || '') + '</div>' +
       '</div>' +
       '<p style="font-size:12px;color:#7A3200;margin:0">' + t('returnedBannerHint') + '</p>' +
@@ -172,12 +172,12 @@ function deviceDecisionSlotHTML(d) {
         return '<div style="background:#EFEAF7;border:2px solid #5B21B6;border-radius:10px;padding:12px 14px;margin-bottom:14px">' +
           '<div style="font-weight:700;color:#5B21B6;font-size:14px;margin-bottom:8px">⚡ ' + t('partialEscBannerTitle') + '</div>' +
           '<div style="font-size:13px;color:#3B0764;line-height:1.5;margin-bottom:10px">' +
-            '<div style="font-weight:600;margin-bottom:4px;font-size:12px;text-transform:uppercase;letter-spacing:0.3px;color:#5B21B6">' + t('partialEscWhatFixed').replace('{name}', d.partialResolveBy || 'Technician') + '</div>' +
+            '<div style="font-weight:600;margin-bottom:4px;font-size:12px;text-transform:uppercase;letter-spacing:0.3px;color:#5B21B6">' + t('partialEscWhatFixed').replace('{name}', d.partialResolveBy || t('roleTechnician')) + '</div>' +
             '<div style="padding:8px 10px;background:#F3F8F2;border-radius:6px;border:1px solid #C4B5FD;font-style:italic;margin-bottom:10px">' + (d.partialResolveNote || '—') + '</div>' +
             '<div style="font-weight:600;margin-bottom:4px;font-size:12px;text-transform:uppercase;letter-spacing:0.3px;color:#5B21B6">' + t('partialEscWhatRemains') + '</div>' +
             '<div><strong>' + t('escBannerReason') + ':</strong> ' + (d.escalation && d.escalation.reason || '—') + '</div>' +
             ((d.escalation && d.escalation.note) ? '<div style="padding:8px 10px;background:#F3F8F2;border-radius:6px;border:1px solid #C4B5FD;font-style:italic;margin-top:6px">' + d.escalation.note + '</div>' : '') +
-            '<div style="margin-top:8px;font-size:12px;color:#5B21B6;background:#EFEAF7;border-radius:6px;padding:6px 10px">' + t('partialEscHandledBy').replace('{name}', (d.escalation && d.escalation.targetName) || 'Manager') + '</div>' +
+            '<div style="margin-top:8px;font-size:12px;color:#5B21B6;background:#EFEAF7;border-radius:6px;padding:6px 10px">' + t('partialEscHandledBy').replace('{name}', (d.escalation && d.escalation.targetName) || t('roleManager')) + '</div>' +
           '</div>' +
           '<label style="font-size:12px;font-weight:600;color:#5F7266;display:block;margin-bottom:4px">' + t('handoffNoteLabel') + ' <span style="color:#A32D2D;font-size:11px">*' + t('required') + '</span></label>' +
           '<textarea id="take-ownership-note-' + d.id + '" rows="2" placeholder="' + t('takeOwnershipNotePlaceholder') + '" style="width:100%;font-size:13px;padding:8px 12px;border:1px solid #C4B5FD;border-radius:8px;resize:none;font-family:inherit;margin-bottom:10px"></textarea>' +
@@ -190,7 +190,7 @@ function deviceDecisionSlotHTML(d) {
           '<div style="font-weight:700;color:#5B21B6;font-size:14px;margin-bottom:6px"><i class="ti ti-flag" style="font-size:14px;vertical-align:-2px" aria-hidden="true"></i> ' + t('escBannerTitle') + '</div>' +
           (d.partiallyResolved ?
             '<div style="background:#F3F8F2;border:1px solid #C4B5FD;border-radius:8px;padding:8px 10px;margin-bottom:10px">' +
-              '<div style="font-size:11px;font-weight:600;color:#5B21B6;text-transform:uppercase;letter-spacing:0.3px;margin-bottom:4px">⚡ ' + t('partialEscWhatFixed').replace('{name}', d.partialResolveBy || 'Technician') + '</div>' +
+              '<div style="font-size:11px;font-weight:600;color:#5B21B6;text-transform:uppercase;letter-spacing:0.3px;margin-bottom:4px">⚡ ' + t('partialEscWhatFixed').replace('{name}', d.partialResolveBy || t('roleTechnician')) + '</div>' +
               '<div style="font-size:13px;color:#3B0764;font-style:italic">' + (d.partialResolveNote || '') + '</div>' +
             '</div>'
           : '') +
@@ -220,7 +220,7 @@ function deviceDecisionSlotHTML(d) {
       return '<div style="background:#E6F0FA;border:2px solid #92B4E3;border-radius:10px;padding:12px 14px;margin-bottom:14px">' +
         '<div style="font-weight:700;color:#1A5FA8;font-size:14px;margin-bottom:6px">👁 ' + t('escBannerFyiTitle') + '</div>' +
         '<div style="font-size:13px;color:#22372A;line-height:1.5;margin-bottom:10px">' +
-          '<div>' + t('escBannerFyiDesc').replace('{name}', (d.escalation && d.escalation.targetName) || 'Manager') + '</div>' +
+          '<div>' + t('escBannerFyiDesc').replace('{name}', (d.escalation && d.escalation.targetName) || t('roleManager')) + '</div>' +
           '<div style="margin-top:4px"><strong>' + t('escBannerBy') + ':</strong> ' + (d.escalation && d.escalation.by || '—') + (d.escalation && d.escalation.date ? ' ' + t('escBannerOn') + ' ' + d.escalation.date : '') + '</div>' +
           '<div style="margin-top:2px"><strong>' + t('escBannerReason') + ':</strong> ' + (d.escalation && d.escalation.reason || '—') + '</div>' +
           ((d.escalation && d.escalation.note) ? '<div style="margin-top:6px;padding:8px 10px;background:#F3F8F2;border-radius:6px;border:1px solid #92B4E3;font-style:italic">' + d.escalation.note + '</div>' : '') +
@@ -255,9 +255,9 @@ function deviceDecisionSlotHTML(d) {
               return '<option value="' + r + '">' + r + '</option>';
             }).join('') +
           '</select>' +
-          '<label style="font-size:12px;font-weight:600;color:#5F7266;display:block;margin-bottom:4px">' + t('escNoteLabel').replace('{target}', 'Owner') + '</label>' +
+          '<label style="font-size:12px;font-weight:600;color:#5F7266;display:block;margin-bottom:4px">' + t('escNoteLabel').replace('{target}', t('roleOwner')) + '</label>' +
           '<textarea id="esc-note-' + d.id + '" rows="2" placeholder="' + t('escNotePlaceholder') + '" style="width:100%;font-size:13px;padding:8px 12px;border:1px solid #C4B5FD;border-radius:8px;resize:none;font-family:inherit;margin-bottom:10px"></textarea>' +
-          '<button onclick="escalateIssue(' + d.id + ')" style="width:100%;background:#5B21B6;color:#fff;border:none;border-radius:8px;padding:10px;font-size:13px;font-weight:600;cursor:pointer">' + t('escSendBtn').replace('{target}', 'Owner') + '</button>' +
+          '<button onclick="escalateIssue(' + d.id + ')" style="width:100%;background:#5B21B6;color:#fff;border:none;border-radius:8px;padding:10px;font-size:13px;font-weight:600;cursor:pointer">' + t('escSendBtn').replace('{target}', t('roleOwner')) + '</button>' +
         '</div>'
       : '') +
     '</div>';
@@ -394,7 +394,7 @@ function showDetail(id, keepScreen) {
   currentDetailView = { type: 'device', id: id };
   const d = devices.find(x => x.id === id);
   if (!d) return;
-  logAction(t('logViewedDevice').replace('{device}', (d.label || d.type) + ' (' + d.brand + ')'), '');
+  logAction({key: 'logViewedDevice', params: {device: (d.label || d.type) + ' (' + d.brand + ')'}});
   const risk = getRisk(d.brand, d.pw, d.healthStatus);
   const why = getRiskWhy(d.brand, d.pw, risk);
   const action = getRiskAction(risk, d.pw, d.brand);
@@ -411,10 +411,10 @@ function showDetail(id, keepScreen) {
   document.getElementById('detail-content').setAttribute('data-device-id', id);
   document.getElementById('detail-content').innerHTML =
     '<div class="device-name-large">' + (d.label || d.type) + '</div>' +
-    '<div class="device-sub">' + d.brand + ' &middot; ' + d.type + '</div>' +
+    '<div class="device-sub">' + d.brand + ' &middot; ' + translateDeviceType(d.type) + '</div>' +
 
     (!canSee && !d.resolved && risk !== 'green' ?
-      '<div class="risk-detail" style="background:#F3F8F2;border:1px solid #d9dee3"><div class="risk-detail-title" style="color:#5F7266"><i class="ti ti-lock"></i>Not assigned to you</div><p style="color:#5F7266">Security details for this device are only shown to the team member it is assigned to, plus the Owner and Manager. This protects sensitive information by limiting who can see open issues.</p></div>' :
+      '<div class="risk-detail" style="background:#F3F8F2;border:1px solid #d9dee3"><div class="risk-detail-title" style="color:#5F7266"><i class="ti ti-lock"></i>' + t('notAssignedTitle') + '</div><p style="color:#5F7266">' + t('notAssignedDeviceBody') + '</p></div>' :
     !canDetail ? '' :
     // Suppress the green "Looking good"/resolved banner specifically when an
     // observation-related state is active (pending, under investigation, or
@@ -436,7 +436,7 @@ function showDetail(id, keepScreen) {
 
       // "How to fix this" — read-only guidance, never where the actual fix happens
       ((canSee && !d.resolved && risk !== 'green') ?
-        deviceAccSection('fix', d.id, 'ti-bulb', 'How to fix this', '',
+        deviceAccSection('fix', d.id, 'ti-bulb', t('howToFixTitle'), '',
           '<div class="action-box" style="margin:10px 0 0">' +
             '<div class="action-label">' + t('recommendedAction') + '</div>' +
             '<div class="action-text">' + action + '</div>' +
@@ -456,7 +456,7 @@ function showDetail(id, keepScreen) {
 
       // Assignment — assign/reassign box for assigners, plain status for everyone else
       ((canAssign || (canSee && !canAssign && risk !== 'green' && !d.resolved)) ?
-        deviceAccSection('assign', d.id, 'ti-user-question', 'Assignment',
+        deviceAccSection('assign', d.id, 'ti-user-question', t('assignmentTitle'),
           d.assignedTo ? d.assignedTo : t('unassignedLabel'),
           (canAssign ? assignBoxHTML(d) :
             '<div style="font-size:12.5px;color:#22372A;line-height:1.6;margin-top:10px">' +
@@ -473,7 +473,7 @@ function showDetail(id, keepScreen) {
       (canAct ?
         deviceAccSection('remediate', d.id, 'ti-checklist', t('whatWasDone'), '',
           (risk === 'green' && !d.resolved ? verifyBoxHTML(d) : addressIssueBoxHTML(d)) +
-          (d.resolved ? '<div class="resolved-badge" style="margin-top:14px">✅ Marked resolved: ' + d.resolveStatus + (d.resolveNote ? ' — ' + d.resolveNote : '') + (d.resolvedDate ? '<span style="font-weight:400;margin-left:8px;color:#5F7266">(' + d.resolvedDate + ')</span>' : '') + '</div>' : ''),
+          (d.resolved ? '<div class="resolved-badge" style="margin-top:14px">✅ ' + t('resolvedBadge') + ' ' + d.resolveStatus + (d.resolveNote ? ' — ' + d.resolveNote : '') + (d.resolvedDate ? '<span style="font-weight:400;margin-left:8px;color:#5F7266">(' + d.resolvedDate + ')</span>' : '') + '</div>' : ''),
           false)
       : isViewOnlyNote ?
         deviceAccSection('remediate', d.id, 'ti-checklist', t('whatWasDone'), '',
@@ -507,8 +507,8 @@ function showDetail(id, keepScreen) {
           '<div class="detail-row"><span class="detail-key">' + t('knownVulnerabilities') + '</span><span class="detail-val">' + (info.cve > 0 ? info.cve + ' ' + t('cveFound') : t('cveNone')) + '</span></div>' +
           (canAct ? '<div class="detail-row" style="margin-top:4px"><button onclick="checkVulnerabilities(' + d.id + ')" style="width:100%;background:#1F4D2E;color:#fff;border:none;border-radius:8px;padding:8px;font-size:13px;cursor:pointer;font-weight:500">' + t('hwVulnCheck') + '</button></div>' : '') +
           '<div id="vuln-results-' + d.id + '" style="margin-top:8px"></div>' +
-          (d.autoUpdate ? '<div class="detail-row"><span class="detail-key">Auto-update</span><span class="detail-val">' + d.autoUpdate + '</span></div>' : '') +
-          (d.lastFirmware ? '<div class="detail-row"><span class="detail-key">Last device software update</span><span class="detail-val">' + new Date(d.lastFirmware).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'}) + '</span></div>' : '')
+          (d.autoUpdate ? '<div class="detail-row"><span class="detail-key">' + t('autoUpdate') + '</span><span class="detail-val">' + d.autoUpdate + '</span></div>' : '') +
+          (d.lastFirmware ? '<div class="detail-row"><span class="detail-key">' + t('lastSoftwareUpdate') + '</span><span class="detail-val">' + new Date(d.lastFirmware).toLocaleDateString(currentLang === 'es' ? 'es-ES' : 'en-US', {month:'short',day:'numeric',year:'numeric'}) + '</span></div>' : '')
         ) : ''),
         false) +
 
@@ -519,7 +519,7 @@ function showDetail(id, keepScreen) {
         var histBody = deviceTimelineHTML(d) + handoffLogRowsHTML(d);
         if (!histBody) return '';
         var eventCount = (Array.isArray(d.handoffLog) ? d.handoffLog.length : 0);
-        return deviceAccSection('history', d.id, 'ti-history', t('tlTitle'), eventCount ? (eventCount + ' events') : '', histBody, false);
+        return deviceAccSection('history', d.id, 'ti-history', t('tlTitle'), eventCount ? (eventCount + ' ' + t('eventsSuffix')) : '', histBody, false);
       })()
 
     ) : '') +
@@ -563,8 +563,8 @@ function addressIssueBoxHTML(d) {
         '<span>' + t('resolveStepCallout') + '</span>' +
       '</div>' +
       '<div class="health-box" style="margin-top:0">' +
-        '<div class="health-title">' + t('healthTitle') + ' <span style="color:#A32D2D;font-size:11px;font-weight:600">* required</span></div>' +
-        '<div id="health-warning-' + d.id + '" style="display:none;background:#FCEBEB;border:1px solid #F09595;border-radius:6px;padding:8px 12px;margin-bottom:8px;font-size:12px;color:#791F1F;align-items:center;gap:6px">⚠️ Please select a device software update status before saving.</div>' +
+        '<div class="health-title">' + t('healthTitle') + ' <span style="color:#A32D2D;font-size:11px;font-weight:600">* ' + t('required') + '</span></div>' +
+        '<div id="health-warning-' + d.id + '" style="display:none;background:#FCEBEB;border:1px solid #F09595;border-radius:6px;padding:8px 12px;margin-bottom:8px;font-size:12px;color:#791F1F;align-items:center;gap:6px">' + t('healthWarnSelectStatus') + '</div>' +
         (Array.isArray(t('healthOpts')) ? t('healthOpts') : []).map(function(opt) {
           const sel = d.healthStatus === opt;
           return '<label class="health-opt ' + (sel ? 'selected' : '') + '">' +
@@ -705,8 +705,8 @@ function assignIssue(id) {
     note: noteVal,
     date: localTimestamp()
   });
-  logAction(prev ? 'Reassigned issue' : 'Assigned issue',
-    (d.label || d.type) + ' → ' + name + (prev ? ' (was ' + prev + ')' : '') + ' | ' + noteVal);
+  logAction(prev ? 'logReassignedIssue' : 'logAssignedIssue',
+    {raw: (d.label || d.type) + ' → ' + name + (prev ? ' (was ' + prev + ')' : '') + ' | ' + noteVal});
   renderDashList();
   renderDeviceList();
   showDetail(id);
@@ -718,7 +718,7 @@ function unassignIssue(id) {
   if (!d) return;
   const prev = d.assignedTo;
   d.assignedTo = '';
-  logAction('Cleared assignment', (d.label || d.type) + (prev ? ' (was ' + prev + ')' : ''));
+  logAction('logClearedAssignment', {raw: (d.label || d.type) + (prev ? ' (was ' + prev + ')' : '')});
   renderDashList();
   renderDeviceList();
   showDetail(id);
@@ -738,8 +738,8 @@ function showScreen(name, btn) {
   if (btn) btn.classList.add('active');
   // Log every tab visit so the activity log shows a full picture of who
   // viewed what and when — not just actions taken.
-  var screenNames = { dashboard: 'Dashboard', devices: 'Devices', network: 'Network', settings: 'Settings', apps: 'Apps', backups: 'Backups' };
-  if (screenNames[name]) logAction(t('logViewedTab').replace('{tab}', screenNames[name]), '');
+  var navKey = { dashboard: 'navDash', devices: 'navDevices', network: 'navNetwork', settings: 'navSettings', apps: 'navApps', backups: 'navBackups' };
+  if (navKey[name]) logAction('logViewedTab', {key: navKey[name]});
   if (name === 'dashboard') renderDashList();
   if (name === 'devices') { renderDeviceList(); hideAddForm(); }
   if (name === 'settings') renderSettings();
@@ -776,21 +776,22 @@ function showAddForm() {
   // Re-attach event handlers by re-setting onclick for the submit button
   const btn = inline.querySelector('.submit-btn');
   if (btn) btn.onclick = addDevice;
+  // Translate the cloned form declaratively — this covers every data-i18n
+  // element (including the wrapped "Serial number / (optional)" style labels
+  // and every option) in the active language, so newly-cloned DOM is never
+  // left untranslated. The manual lines below are legacy belt-and-suspenders
+  // for the few elements that pre-date the data-i18n pass.
+  applyI18n(inline);
   // Translate all form elements in the cloned inline form
   const safeInline = (sel, val) => { const el = inline.querySelector(sel); if(el) el.textContent = val; };
   const phInline = (sel, val) => { const el = inline.querySelector(sel); if(el) el.placeholder = val; };
   safeInline('[id="lbl-add-device-title"]', t('addADevice'));
   safeInline('[id="lbl-brand"]', t('brandLabel'));
-  safeInline('[id="lbl-mfr-model"]', t('mfrModelNum'));
-  safeInline('[id="lbl-security-lookups"]', t('usedForLookups'));
-  safeInline('[id="lbl-serial"]', t('serialLabel') + ' ');
-  // MAC label has a child span so update its first text node in the cloned form
-  (function(){ var el=inline.querySelector('[id="lbl-mac"]'); if(el&&el.childNodes[0]&&el.childNodes[0].nodeType===3) el.childNodes[0].textContent=t('macFieldLabel')+' '; })();
-  safeInline('[id="lbl-mac-hint"]', t('macHint'));
-  safeInline('[id="lbl-device-label"]', t('deviceNameLabel') + ' ');
+  // lbl-mfr-model, lbl-serial, lbl-device-label, lbl-dealer and lbl-mac are
+  // wrapped label+hint spans handled by applyI18n(inline) above — setting their
+  // textContent here would strip the hint spans, so they are intentionally omitted.
   safeInline('[id="lbl-location"]', t('locationLabel'));
   safeInline('[id="lbl-conn-type"]', t('connectionLabel'));
-  safeInline('[id="lbl-dealer"]', t('dealerLabel') + ' ');
   safeInline('[id="lbl-pw-changed"]', t('hasPwChanged'));
   safeInline('[id="lbl-add-device-btn"]', t('addBtn'));
   safeInline('[id="lbl-pw-yes"]', t('pwYes'));
@@ -893,10 +894,10 @@ function addDevice() {
   const serial = getVal('device-serial') ? getVal('device-serial').trim() : '';
   const mac = getVal('device-mac') ? getVal('device-mac').trim() : '';
   const pw = document.querySelector('input[name="pw"]:checked') ? document.querySelector('input[name="pw"]:checked').value : null;
-  if (!brand || !type || !pw) { alert('Please complete all fields before adding the device.'); return; }
+  if (!brand || !type || !pw) { alert(t('alertCompleteFields')); return; }
   const contactNotes = document.getElementById('device-contact-notes') ? document.getElementById('device-contact-notes').value.trim() : '';
   devices.push({ id: nextId++, addedDate: localTimestamp(), flaggedDate: (pw === 'no' ? localTimestamp() : ''), brand: brand, type: type, label: label || type, model: model, serial: serial, mac: mac, pw: pw, contactNotes: contactNotes, resolved: false, resolveStatus: '', resolveNote: '', resolvedDate: '', verifiedDate: '', autoUpdate: '', lastFirmware: '', firmwareCheckedDate: '' });
-  logAction('Device added', (label || type) + ' (' + brand + ')' + (pw === 'no' ? ' — default password flagged' : ''));
+  logAction('logDeviceAdded', {raw: (label || type) + ' (' + brand + ')'});
   document.getElementById('brand-select').value = '';
   if (document.getElementById('device-model')) document.getElementById('device-model').value = '';
   if (document.getElementById('device-serial')) document.getElementById('device-serial').value = '';

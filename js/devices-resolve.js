@@ -30,7 +30,7 @@ function markVerified(id, silent) {
   if (!d) return;
   d.verifiedDate = localTimestamp();
   if (!silent) {
-    logAction('Device verified', (d.label||d.type) + ' (' + d.brand + ')');
+    logAction('logDeviceVerified', {raw: (d.label||d.type) + ' (' + d.brand + ')'});
     renderDashList(); renderDeviceList(); showDetail(id);
   }
 }
@@ -51,7 +51,7 @@ function saveAll(id) {
   const sel = ctx.querySelector('input[name="health-' + id + '"]:checked');
   const warningEl = document.getElementById('health-warning-' + id);
   if (!sel) {
-    if (warningEl) { warningEl.textContent = '⚠️ Please select a device software update status before saving.'; warningEl.style.display = 'flex'; warningEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+    if (warningEl) { warningEl.textContent = t('healthWarnSelectStatus'); warningEl.style.display = 'flex'; warningEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
     return;
   }
   if (warningEl) warningEl.style.display = 'none';
@@ -66,7 +66,7 @@ function saveAll(id) {
   const otherChk = ctx.querySelector('#resolve-other-check-' + id);
   const otherTxt = ctx.querySelector('#resolve-other-text-' + id);
   if (otherChk && otherChk.checked && otherTxt && otherTxt.value.trim()) {
-    statusParts.push('Other: ' + otherTxt.value.trim());
+    statusParts.push(t('otherPrefix') + otherTxt.value.trim());
   }
   // Real bug found via user report: with no requirement here, clicking "Mark
   // as resolved" with zero boxes checked used to silently set d.resolved =
@@ -74,11 +74,11 @@ function saveAll(id) {
   // nothing. At least one action is now required, same as health-status.
   if (statusParts.length === 0) {
     if (warningEl) {
-      warningEl.textContent = '⚠️ Select at least one action that addresses this issue before marking it resolved.';
+      warningEl.textContent = t('resolveSelectAction');
       warningEl.style.display = 'flex';
       warningEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } else {
-      alert('Select at least one action that addresses this issue before marking it resolved.');
+      alert(t('resolveSelectActionAlert'));
     }
     return;
   }
@@ -124,7 +124,7 @@ function saveAll(id) {
   if (d.resolveStatus) auditDetail += ' | Actions taken: ' + d.resolveStatus;
   if (d.resolveNote) auditDetail += ' | Note: ' + d.resolveNote;
   if (d.healthStatus) auditDetail += ' | Update status: ' + d.healthStatus;
-  logAction(d.resolved ? 'Issue addressed' : 'Device updated', auditDetail);
+  logAction(d.resolved ? 'logIssueAddressed' : 'logDeviceUpdated', {raw: auditDetail});
 
   // ── Device replaced → archive the old device & prompt for replacement ──
   // Lifecycle hygiene: a decommissioned device shouldn't keep counting toward
@@ -134,7 +134,7 @@ function saveAll(id) {
   if (wasReplaced) {
     d.archived = true;
     d.archiveReason = 'Replaced with new device';
-    logAction('Device replaced — archived', (d.label||d.type) + ' (' + d.brand + ') archived; awaiting replacement entry');
+    logAction('logDeviceReplaced', {raw: (d.label||d.type) + ' (' + d.brand + ') archived; awaiting replacement entry'});
   }
 
   // Reset form fields to blank — ready for next use.
@@ -163,7 +163,7 @@ function saveAll(id) {
 // Open Add Device form pre-filled as a replacement for an archived device.
 // Demo-only: the link between old and new device lives in audit + contactNotes.
 function promptReplacementDevice(oldDev) {
-  var msg = 'The old device "' + oldDev.label + '" has been archived.\n\nAdd the replacement device now?';
+  var msg = t('replacementConfirm', {label: oldDev.label});
   var addNow = window.confirm(msg);
   if (!addNow) {
     showScreen('devices', document.querySelectorAll('.nav-btn')[1]);
@@ -179,12 +179,12 @@ function promptReplacementDevice(oldDev) {
         var banner = document.createElement('div');
         banner.className = 'replacement-banner';
         banner.style.cssText = 'background:#E6F0FA;border:1px solid #92B4E3;color:#1A5FA8;border-radius:6px;padding:10px 12px;margin-bottom:12px;font-size:13px;font-weight:600;';
-        banner.textContent = 'Replacement for: ' + oldDev.label + ' (archived)';
+        banner.textContent = t('replacementForBanner', {label: oldDev.label});
         inline.insertBefore(banner, inline.firstChild);
       }
       var notes = inline.querySelector('#device-contact-notes');
       if (notes && !notes.value) {
-        notes.value = 'Replaces: ' + oldDev.label + ' (' + oldDev.brand + ')';
+        notes.value = t('replacesPrefill', {label: oldDev.label, brand: oldDev.brand});
       }
       var locSel = inline.querySelector('#location-select');
       if (locSel && oldDev.location) {

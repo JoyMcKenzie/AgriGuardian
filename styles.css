@@ -1,5 +1,5 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #EEEEEA; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 24px 16px; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #ffffff; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 24px 16px; }
 .app { max-width: 420px; width: 100%; background: #E7F0E7; min-height: 600px; border: 1px solid #cfe0cf; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
 .header { background: #1F4D2E; padding: 0; display: flex; align-items: stretch; gap: 10px; overflow: hidden; height: 100px; }
 .header-logo { width: 100px; background: none; display: flex; align-items: center; justify-content: center; flex-shrink: 0; align-self: stretch; }
