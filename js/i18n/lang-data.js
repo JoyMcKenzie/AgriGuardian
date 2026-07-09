@@ -582,7 +582,15 @@ var LANG = {
       "Keep guest and smart devices on their own Wi-Fi, away from farm controls.",
       "Review who still has access after someone leaves the farm.",
       "A red dot means act now; yellow means plan it soon.",
-      "Never reuse the same password across accounts."
+      "Never reuse the same password across accounts.",
+      "Use long, random passphrases and a password manager to store them safely.",
+      "Think before you click. Learn to spot fake emails and scams targeting you.",
+      "Guard your laptops and phones with antivirus to block malware early.",
+      "Only access the specific files and systems needed for your job.",
+      "Lock up your data so it stays unreadable if your device is stolen.",
+      "Keep three copies of your files in different places to survive ransomware.",
+      "Treat every login request as unverified until you confirm it is safe.",
+      "Know your role and who to contact immediately if you get hacked."
     ],
     recentActivityLabel: "Recent activity",
     needsAttentionLabel: "Needs your attention",
@@ -1507,7 +1515,15 @@ var LANG = {
       "Mantén los dispositivos de invitados e inteligentes en su propia red, lejos de los controles de la granja.",
       "Revisa quién conserva acceso después de que alguien deja la granja.",
       "Un punto rojo significa actuar ahora; amarillo, planificarlo pronto.",
-      "Nunca reutilices la misma contraseña en varias cuentas."
+      "Nunca reutilices la misma contraseña en varias cuentas.",
+      "Usa contraseñas largas y aleatorias, y un gestor de contraseñas para guardarlas de forma segura.",
+      "Piensa antes de hacer clic. Aprende a reconocer correos falsos y estafas dirigidas a ti.",
+      "Protege tus laptops y teléfonos con antivirus para bloquear el malware a tiempo.",
+      "Accede solo a los archivos y sistemas específicos que necesitas para tu trabajo.",
+      "Cifra tus datos para que sigan siendo ilegibles si roban tu dispositivo.",
+      "Guarda tres copias de tus archivos en lugares distintos para sobrevivir a un ransomware.",
+      "Trata toda solicitud de inicio de sesión como no verificada hasta confirmar que es segura.",
+      "Conoce tu función y a quién contactar de inmediato si te hackean."
     ],
     recentActivityLabel: "Actividad reciente",
     needsAttentionLabel: "Requiere tu atención",

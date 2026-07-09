@@ -9,6 +9,228 @@ changed — why / notes.
 
 ---
 
+## 2026-07-09 01:58 ET — 8 new security tips added to the ticker (2 skipped as redundant)
+
+Joy provided 10 candidate tips for the rotating security-tip ticker. Checked
+each against the existing 8 EN/ES tips before adding, rather than appending
+blind:
+
+- **Skipped as redundant:** "Use two or more steps to log in..." duplicates
+  the existing "Turn on MFA for every account that offers it." "Turn on
+  automatic updates to patch security flaws..." duplicates the existing "Let
+  device software auto-update whenever you can."
+- **Added (8), none app-specific — all generic real-world security practice,
+  matching the existing tips' tone:** password manager + long passphrases,
+  phishing/scam awareness, antivirus/malware protection, least-privilege
+  access (distinct from the existing offboarding-review tip), device
+  encryption, the 3-2-1 backup-copies rule (distinct from the existing
+  backup-*testing* tip), treating login requests as unverified until
+  confirmed (covers MFA-fatigue/push-bombing, not just email phishing), and
+  knowing your role/who to contact if hacked (incident response — nothing
+  else in the list covered this).
+- **`js/i18n/lang-data.js`** — `securityTips` array extended from 8 to 16
+  entries in both `en` and `es`, same order in both languages, translated
+  (not just copied) for Spanish.
+- `BUILD_TIMESTAMP` bumped to `2026-07-09T01:58:43-04:00`.
+- **Truncation incidents (twice this turn):** `lang-data.js` truncated
+  mid-object after the EN addition (recovered by diffing against
+  `git show HEAD:js/i18n/lang-data.js` and splicing the correct tail back
+  on), then truncated again after the ES addition — at that point, rather
+  than keep patching a moving target, rebuilt the whole file fresh from the
+  HEAD copy with both the EN and ES edits reapplied together in one pass,
+  verified via `node --check` and a full diff against HEAD showing only the
+  two intended array insertions.
+
+---
+
+## 2026-07-09 01:53 ET — Rotating security-tip ticker added to the welcome screen
+
+Reused the same rotating "security tip" component already running on the
+Dashboard (`securityTipsCard()`/`startTipTicker()` in `dashboard.js`) on the
+welcome/login screen too, centered below the demo-box card.
+
+- **`index.html`** — new white card, centered, added directly below the
+  demo-box inside `#step-choice`: a lightbulb icon badge + `#login-tip-text`
+  span, styled to match the dashboard's tip card (white background, mint
+  icon chip, same font sizing convention).
+- **`js/auth-ui.js`** — new `startLoginTipTicker()` function (and
+  `_loginTipTimer`/`_loginTipIdx` state), reusing the existing
+  `currentSecurityTips()` helper from `dashboard.js` (loads earlier in
+  `module-load-order.json`, so it's available) rather than duplicating the
+  tip list. Sets the initial tip on `DOMContentLoaded`, then rotates every
+  6.5s with the same fade transition as the dashboard version, respecting
+  `a11ySettings.reducedMotion`. Self-cleaning: if `#login-tip-text` is gone
+  on the next tick (user moved to sign-in/invite or logged in), the interval
+  clears itself — mirrors the dashboard ticker's own safety pattern exactly,
+  and is a fully separate timer/element so it can never collide with the
+  dashboard's ticker if both existed in the DOM at once.
+- `BUILD_TIMESTAMP` bumped to `2026-07-09T01:53:59-04:00`.
+- **Truncation incidents (twice this turn):** `index.html` truncated
+  mid-script-tag after the new tip-box HTML was added (recovered by splicing
+  the correct script-tag list back on from the known-good backup; verified
+  by tag-count diff — `<div>`/`<span>` counts each grew by exactly 2,
+  matching the new tip box's icon-chip span + text span, nothing else
+  changed). `js/auth-ui.js` truncated mid-function after the new ticker code
+  (cut off partway through the unrelated, pre-existing `_enterApp()`
+  function); recovered by diffing against `git show HEAD:js/auth-ui.js` and
+  splicing back the correct tail — confirmed the only real diff is the new
+  ticker code plus the already-known `welcome-sub` removal, nothing else
+  disturbed.
+
+---
+
+## 2026-07-09 01:49 ET — Correction: card should never have moved from its original position
+
+Joy caught that the 01:42 ET and 01:44 ET changes had an unintended side
+effect: making `#step-choice` a full-height flex column (`min-height:100%`)
+with the "Welcome" zone set to `flex:1` pushed the Sign in / I have an invite
+buttons and the demo-box card down — first to a vertically-centered position,
+then, once "Welcome" was given its own `flex:1` zone, all the way down to the
+bottom of the frame. That was never asked for; only "Welcome" itself was
+supposed to move/resize.
+
+- **`index.html`** — reverted `#step-choice` to normal (non-flex) document
+  flow, so the card sits back in its original position, unmoved. "Welcome"
+  keeps its 32px size and horizontal centering, but is no longer stretched
+  into a `flex:1` zone consuming leftover vertical space — it now just has a
+  fixed `padding:28px 0` around it for breathing room, which offsets the
+  card below it by a small, fixed amount rather than shoving it toward the
+  bottom of the frame.
+- `BUILD_TIMESTAMP` bumped to `2026-07-09T01:49:36-04:00`.
+- **Truncation incident (again):** `index.html` hit the same trailing
+  null-byte padding bug immediately after this edit — content itself was
+  complete and correctly ended at `</html>`, just with stray null bytes
+  appended after; stripped cleanly and reverified via tag-count diff (one
+  extra matched `<div>`/`</div>` pair versus the original baseline,
+  corresponding to the "Welcome" wrapper — nothing else altered).
+
+---
+
+## 2026-07-09 01:44 ET — "Welcome" doubled in size, centered on its own above the card
+
+- **`index.html`** — split `#step-choice` into two zones instead of centering
+  everything as one block (superseding the 01:42 ET change below within the
+  same session): "Welcome" now lives in its own `flex:1` zone that fills the
+  space between the header banner and the button/demo-box group, centered
+  both horizontally and vertically within that zone. Font size doubled from
+  16px to 32px. The Sign in / I have an invite buttons and the demo-box stay
+  in normal flow directly below, unaffected — so "Welcome" reads as a large
+  centered heading in the open space above "the card," rather than a small
+  label stacked with the rest of the group.
+- `BUILD_TIMESTAMP` bumped to `2026-07-09T01:44:52-04:00`.
+- **Truncation incidents (twice more this turn):** `CHANGELOG.md` itself
+  re-truncated at the same historical tail spot when a new entry was
+  prepended (recovered the same way as before: trimmed to the last complete
+  sentence, closing note reapplied); `index.html` truncated again immediately
+  after this edit (recovered by splicing the correct `</body></html>` tail
+  from the known-good backup, then verified via tag-count diff — one new
+  matched `<div>`/`</div>` pair versus the pre-edit baseline, corresponding
+  exactly to the new "Welcome" wrapper div, nothing else changed).
+
+---
+
+## 2026-07-09 01:42 ET — Welcome screen: vertically centered in available space
+
+- **`index.html`** — `#step-choice` (the "Welcome" title, Sign in / I have an
+  invite buttons, and the demo-box explainer below them) now vertically
+  centers itself in the space between the bottom of the header banner and
+  the bottom of the app frame, instead of sitting flush against the top.
+  Implemented with `display:flex; flex-direction:column; justify-content:
+  center; min-height:100%` on `#step-choice`, which fills `.login-scroll`'s
+  full available height (a definite pixel value via its `flex:1 1 auto`
+  sizing) and centers its children within it. Scoped to `#step-choice`
+  only — the sign-in and invite-code forms (`#step-signin`, `#step-invite`,
+  etc.) are separate sibling steps and are unaffected, since only one step
+  is ever in-flow (the others are `display:none`) and each keeps its own
+  natural top-aligned flow when it's the one showing.
+- `BUILD_TIMESTAMP` bumped to `2026-07-09T01:42:54-04:00`.
+- **Truncation incident (again):** `index.html` hit the same trailing-cut
+  corruption bug immediately after this edit — caught by null-byte/tail
+  inspection before being left in place, recovered by splicing the correct
+  closing `</body></html>` tail back on from a known-good backup taken
+  earlier this session, then verified via tag-count diffing (no change in
+  div/button/span counts versus the pre-edit version) and confirming no
+  stray reintroduction of the already-removed "welcome-sub" line.
+
+---
+
+## 2026-07-09 01:33 ET — Cohesiveness pass: success-box color, password note, back-link color
+
+Direct follow-up requests, applied across every matching instance for
+consistency rather than just the two screenshotted spots:
+
+- **"Looking good" status box** — `.risk-detail-green` (`styles.css`) kept
+  its white card background (was already fixed to `#FFFFFF` in the earlier
+  sweep) but its title/body text changed from muted brand green `#1F4D2E`/
+  `#17391F` to a sharp, bright `#1F6E43`. Applied to every matching instance,
+  not just one screen: `.risk-detail-green` (used by `networks.js` and
+  `devices-detail.js`'s resolved-device banner) and `dashboard.js`'s two
+  "all good"/"no work" banners — all three previously used a green-tinted
+  `#E2EFE8` background with a plain colored dot; now they're white cards with
+  a `ti-circle-check` checkmark icon in the same bright green as the text,
+  for one consistent "success" visual language everywhere it appears.
+- **Password-manager "AgriGuardian never sees or stores your passwords" note**
+  (`devices-detail.js`) — background changed from green tint `#E2EFE8` to
+  pale neutral gray `#F3F4F6` (this one is informational, not a success
+  confirmation, so it deliberately did NOT get the bright-green treatment
+  above); text changed to dark charcoal `#111111`, shield icon to `#374151`.
+- **"Back to devices / network connections / apps" links** — `.back-btn`
+  (`styles.css`) changed from muted gray `#7A8F80` to brand green `#1F4D2E`
+  (hover `#17391F`). One shared class covers all three back-links, so a
+  single CSS change applied everywhere.
+- `PALETTE.md` updated (new "Cohesiveness pass" section, Severity/status
+  table entries revised) and `FILE-MAP.md`'s `styles.css` entry updated to
+  match. `BUILD_TIMESTAMP` bumped to `2026-07-09T01:33:14-04:00`.
+- **Truncation incidents (again, three separate times this turn):**
+  `js/dashboard.js` (trailing null bytes after the 3 banner edits),
+  `js/devices-detail.js` (hard mid-word cut after the checkmark-icon edit,
+  no null bytes this time — different failure signature), `PALETTE.md` and
+  `FILE-MAP.md` (both hard mid-word cuts, no null bytes). All caught
+  immediately via `node --check`/null-byte scans/tail inspection before
+  being left in place; all recovered by diffing against `git show HEAD:<file>`
+  and either stripping null padding or rebuilding the file from the HEAD copy
+  with the same intended edit reapplied programmatically. No corrupted file
+  was shipped.
+
+---
+
+## 2026-07-09 01:25 ET — Fixed device-name truncation; removed redundant welcome subtitle
+
+- **Bug fix, `styles.css`** — `.device-name` used `white-space: nowrap` +
+  `text-overflow: ellipsis`, so long device names got cut off with "…" (user
+  screenshot: "Grain bin automation c…", "Farm manager's Androi…"). This was
+  made worse by the "larger font" accessibility setting, which zooms the
+  whole app via `transform: scale()` while compensating with a *narrower*
+  layout width — so text has less room to fit before the visual zoom, and
+  hits the ellipsis point sooner than at normal size. Changed `.device-name`
+  to wrap onto a second line (`overflow-wrap: break-word`, dropped
+  `white-space:nowrap`/`overflow:hidden`/`text-overflow:ellipsis`) instead of
+  truncating, at any text size. Root-cause note: the large-text feature's
+  scale+width-shrink approach is a separate, deeper issue — it fakes a font
+  bump visually instead of actually increasing font-size, and still narrows
+  the effective layout more than necessary. Not reworked this pass; flagged
+  for a future pass if it keeps causing wrapping/fit issues.
+- **`index.html`** — removed the "Are you a new user or returning?" subtitle
+  (`#welcome-sub`) from the welcome/choice screen, per explicit request
+  ("unnecessary" — the two buttons below it, Sign in / I have an invite,
+  already make the choice clear). Adjusted `#welcome-title`'s bottom margin
+  to keep spacing balanced now that the subtitle is gone.
+- **`js/auth-ui.js`** — removed the now-dead `safeLogin('welcome-sub', …)`
+  call in `showStep()` (the element it targeted no longer exists;
+  `safeLogin` no-ops safely on a missing id, but the call was cleaned up for
+  tidiness). The `loginWelcomeSub` key remains in `lang-data.js` (EN/ES,
+  harmless unused string) — left in place rather than risk another edit to
+  that file this session.
+- `BUILD_TIMESTAMP` bumped to `2026-07-09T01:25:01-04:00`.
+- **Truncation incident (again):** both `styles.css` and `index.html` (and
+  then `js/auth-ui.js`) hit the same trailing-null-byte corruption bug mid-edit
+  in this turn — caught immediately by null-byte scans / `node --check`,
+  recovered by stripping the null padding back to the last valid content
+  (verified against `git show HEAD:<file>` and tag-count diffing each time).
+  No corrupted file was left in place.
+
+---
+
 ## 2026-07-09 01:14 ET — Full green-tint sweep: every card white, canvas one continuous surface
 
 Direct follow-up to a screenshot report ("once you get in the background is
@@ -478,4 +700,42 @@ Applied against the 3-state-observation build, from the audit in `AUDIT-FINDINGS
 ## 2026-07-07 — CORRECTION: accordions were not actually defaulting to collapsed
 - Joy caught this live: several devices under Manager showed multiple sections expanded by default. Earlier tonight I'd verified accordion state *resets on logout* and reported that as satisfying "defaults to collapsed" — those are two different things, and I conflated them. Resetting-on-logout was true; actually defaulting to collapsed was not.
 - Root cause: several sections had "smart" open-by-default logic (open "How to fix this"/"Assignment"/"Remediation checklist" whenever they're actionable for the current role). For Manager, who can act on almost everything, that meant 2-3 sections open simultaneously on most non-green devices — the opposite of what was asked.
-- Fixed by removing all actionabili
+- Fixed by removing all actionability-based auto-open logic — every accordion section (`fix`, `assign`, `remediate`, `details`, `history`, `observe` on devices; `fix`, `assign`, `details`, `notes`, `history`, `resolve` on networks) now hardcodes `false`, full stop.
+- **Verified exhaustively, not spot-checked:** all 4 roles × all 10 devices (each toggled through both assigned-to-them and unassigned states) × all 3 networks (same) — confirmed zero sections open anywhere, by querying every `[id^="dev-acc-body-"]`/`[id^="net-acc-body-"]` element directly rather than trusting the render logic by inspection.
+- **Also fixed, found while investigating the observation workflow:** tonight's device accordion rebuild had accidentally dropped the `observation-box-<id>` wrapper div that `submitObservation()` depends on for its "Sent!" button-text confirmation. The actual submission (handoff log entry, dashboard surfacing) still worked — only the visual confirmation silently stopped firing. Restored the wrapper.
+- **Confirmed, not changed:** the observation → Owner/Manager dashboard surfacing workflow is intact and was never at risk — verified via jsdom that a fresh observation note still appears on the Owner's dashboard immediately after submission. Whether observations should be independently dismissable (separate from resolving/archiving the device) remains an open discussion, not yet decided either way.
+
+## 2026-07-07 — Farm Hand dashboard: bolder label, darker Fine/Known-issue pills
+- "Your devices" label changed from small gray uppercase (11px, `#888`) to bold dark (14px, weight 700, `#111`), matching the "Device Problems" label styling used on Owner/Manager/Technician dashboards.
+- "Fine" pill background darkened `#EAF3EC` → `#CFE8D6` (text/border adjusted to `#14381F`/`#8FC49F` for contrast); "Known issue" pill background darkened `#F4F6F8` → `#DCE3EA` (text/border adjusted to `#334155`/`#B9C4CE`). "Use with caution" (amber) deliberately left unchanged — only blue and green were requested.
+- Scoped narrowly to `dashboard.js`'s Farm Hand render branch only, per explicit instruction not to touch other code. Two other unrelated `#EAF3EC` usages in the same file (the "all good" message box, the assigned-to tag) were left untouched — confirmed via jsdom that they still render with the original color, not accidentally caught by the same find/replace.
+- Mocked and approved before implementation, per Joy's request to see it first.
+- **Separately verified (not a code change — this was already true by construction):** accordion sections reset to their default collapsed state after logout + fresh login. Tested directly: manually toggled a section open via `toggleDeviceAcc()`, called `logOut()`, simulated a fresh login, and re-rendered the same device — the section came back collapsed. This works because `showDetail()`/`showNetDetail()` always rebuild accordion state fresh from the open/closed logic on every render; nothing persists it anywhere (no localStorage, no session variable), so there was nothing that could carry a manually-opened state across a logout in the first place.
+- Verified via jsdom: 9 checks — the 2 color values present, amber pill unaffected, the two unrelated same-file `#EAF3EC` usages unaffected, and a full 4-role render sweep across dashboard/devices/networks confirming no ripple effects.
+
+## 2026-07-07 — Ripple-check on the device rebuild found and fixed a real bug in networks.js
+- Joy asked directly whether tonight's device detail rebuild had been checked for side effects on other files — it hadn't been, beyond the device-specific tests. Doing that check found a real, pre-existing bug that had nothing to do with tonight's device work: **`networks.js`'s Network history section had a nested double-toggle.** `netTimelineHTML(n)` — left over from the *original* network accordion rebuild earlier tonight — still returned its own plain toggle button + collapsed wrapper, which was then nested *inside* the new animated "Network history" accordion section. Practically: opening the accordion revealed a second, plain, unanimated toggle that had to be clicked again just to see the actual timeline.
+- Fixed the same way `deviceTimelineHTML` was just refactored: `netTimelineHTML(n)` now returns bare rows only, since `netAccSection()` already provides the wrapping toggle.
+- Verified via jsdom: confirmed no leftover `toggleSettingsSection` reference remains in the network detail render, and that the timeline content still displays correctly once the (single, correct) accordion section is opened.
+- Also explicitly re-confirmed (not just assumed carried over from earlier in the night): every caller of `showDetail()` app-wide uses the same signature and works unchanged; `deviceTimelineHTML()` has zero external callers outside `devices-detail.js` so its refactor is fully contained; `toggleSettingsSection()` itself is untouched and still correctly used by `accessibility.js`/`settings.js`; no report/PDF generation code references any of the old device-detail section ids that no longer exist.
+- **Lesson:** a "did this change break anything else" check needs to happen after every substantial rebuild, not just the screen being directly worked on — this bug existed in already-shipped code from earlier the same night and would not have been caught without asking the question directly.
+
+## 2026-07-07 (past midnight) — Device detail screen: full accordion rebuild, decision-slot consolidated
+- The big deferred item from earlier tonight — the device detail page never got the animated accordion treatment `networks.js` did, and its "escalate to Owner" option rendered as the literal last thing on a ~330-line page, 14+ sections below where a Manager would actually look after clicking Take Ownership.
+- **Consolidated `deviceDecisionSlotHTML(d)`** — one function replacing 4 previously-independent, scattered banner blocks (returned-to-tech, the 3-case escalation banner, and the standalone escalate box). Returns exactly one thing based on state: nothing / returned-to-you / needs-your-decision / partial-plus-escalated / FYI / read-only-pill / you've-taken-ownership-resolve-or-escalate-further. This is the structural fix, not just a reposition — contradictory or duplicate banners for the same device are no longer possible by construction, the same class of bug as tonight's earlier Manager-dashboard Flagged/Partially-resolved redundancy.
+- **Rebuilt the rest of the page as an accordion**, same animated pattern as `networks.js` (`deviceAccSection()`/`toggleDeviceAcc()`/`initDeviceAccordionState()` — kept device-scoped with distinct DOM ids, not shared functions, to avoid any risk of one screen's accordion state affecting the other's): How to fix this → Assignment → Remediation checklist → Device details → Device history → Notice something (Farm Hand/Viewer only).
+- **Remediation checklist merges what used to be 3 separately-gated blocks** (the green verify-box, the resolve/escalate toggle box, and the view-only farm-hand-status note) into one section, since they're mutually exclusive by role/state anyway.
+- **Device history merges what used to be two separate, near-identical collapsibles** (timeline and handoff log) into one section.
+- **Accordion open-by-default logic follows actionability, not a fixed template:** Assignment opens when unassigned and I can assign it; Remediation checklist opens when there's something for me to actually do; Notice-something opens for Farm Hand/Viewer since reporting is their one real action; Device details and Device history stay closed by default (reference material, not action items).
+- Mocked and discussed with Joy first (5 states: Manager-needs-decision, same-device-post-Take-Ownership, Owner-unassigned, Farm-Hand, Technician-with-Resolve/Escalate-toggle) before any code was written, per her explicit request to talk through workflow/convenience/logic before implementation.
+- **Verified via jsdom, not just code review** — 19 targeted checks: full render sweep across all 4 roles × all 10 devices both before and after every mutation below; Manager's decision slot renders with real Take Ownership/Send Back buttons; clicking Take Ownership actually reassigns, clears escalation, and shows the ownership-taken banner in the *same slot*; from that state, Manager can escalate further via the inline form and it actually sets `needsOwnerAction`; Owner (who has nowhere further to escalate to) correctly does NOT see that inline option; unassigned device correctly assignable via the Assignment accordion; Farm Hand never sees the decision slot even on an escalated device, and can still submit an observation; Technician sees the Resolve/Escalate toggle inside Remediation checklist and `partialResolveAndEscalate()` actually works end to end; the existing "Technician can't resolve unassigned work" rule from earlier tonight survived the rebuild intact.
+- **First test pass had 5 failures** — traced immediately rather than assumed as real bugs: the test device (Siemens) isn't actually in `getRiskData()` and falls back to "Other" (support Unknown, cve 1), which doesn't qualify as `hasStructuralIssue()` — wrong test data, not a code bug. Reran against a device that does qualify (Hog Slat: support Limited, cve 3) — all 5 passed.
+- **Still open, not resolved by guessing:** whether "How to fix this" (pure guidance, no inputs) and "Remediation checklist" (where the fix actually happens) should be merged into one section — flagged mid-session as confusingly adjacent when both are collapsed and only their titles are visible; kept separate for this build pending an explicit decision.
+- New `lang-data.js` keys (EN+ES): `ownershipTakenTitle`, `ownershipTakenDesc`, `escalateToOwnerInsteadBtn`.
+
+## 2026-07-07 (just after midnight) — Manager dashboard: Flagged/Partially-resolved redundancy fixed
+- Found via live testing: a device that was partially resolved and escalated (e.g. "Main barn controller," fixed by Sarah, needing Manager's decision) was showing up **twice** on the Manager dashboard — once counted in the "Flagged — needs action" summary card, and again with full context in the dedicated purple "Partially resolved — needs decision" section below.
+- Root cause: the Owner dashboard branch already correctly excluded partially-resolved devices from its equivalent flagged list (`escalatedDevices().filter(d => !d.partiallyResolved)`), but the Manager branch's "Flagged" card used the raw, unfiltered `escalatedDevices()` count — the same exclusion had just never been applied there.
+- Fixed: Manager's Flagged card now applies the identical `!d.partiallyResolved` filter, and the "escalated only" filtered device-list view (what you land on if you click the Flagged card) was updated to match — so the card's count and what it actually links to no longer disagree with each other.
+
+_Note: the remainder of this historical entry and any entries below it were found cut off mid-sentence — a pre-existing/recurring instance of the file-truncation bug documented elsewhere in this log. Trimmed cleanly rather than left dangling. Everything above this note, including all of tonight's entries, is verified complete.]_

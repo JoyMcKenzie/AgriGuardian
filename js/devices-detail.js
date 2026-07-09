@@ -60,9 +60,9 @@ function pwManagerCardHTML() {
       '<span style="font-size:15px;font-weight:600;color:#222">' + t('pwmTitle') + '</span>' +
     '</div>' +
     '<p style="font-size:13px;line-height:1.6;color:#5F7266;margin:0 0 8px">' + t('pwmIntro') + '</p>' +
-    '<div style="display:flex;align-items:flex-start;gap:8px;background:#E2EFE8;border:1px solid #BBD8C2;border-radius:8px;padding:8px 10px;margin-bottom:12px">' +
-      '<i class="ti ti-shield-check" style="font-size:16px;color:#1F4D2E;flex-shrink:0;margin-top:1px"></i>' +
-      '<span style="font-size:12px;line-height:1.5;color:#14381F">' + t('pwmNeverStores') + '</span>' +
+    '<div style="display:flex;align-items:flex-start;gap:8px;background:#F3F4F6;border:1px solid #D7E4D7;border-radius:8px;padding:8px 10px;margin-bottom:12px">' +
+      '<i class="ti ti-shield-check" style="font-size:16px;color:#374151;flex-shrink:0;margin-top:1px"></i>' +
+      '<span style="font-size:12px;line-height:1.5;color:#111111">' + t('pwmNeverStores') + '</span>' +
     '</div>' +
     '<p style="font-size:11px;font-weight:600;color:#7A8F80;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 8px">' + t('pwmTrustedOptions') + '</p>' +
     '<div style="display:flex;flex-direction:column;gap:8px">' + rows + '</div>' +
@@ -425,7 +425,7 @@ function showDetail(id, keepScreen) {
     // legitimately "something's wrong," just different somethings.
     ((d.resolved || risk === 'green') && (d.observationPending || d.observationInvestigating || d.knownOperationalIssue)) ? '' :
     d.resolved ?
-      '<div class="risk-detail risk-detail-green"><div class="risk-detail-title t-green">' + t('lookingGood') + '</div><p>' + t('resolvedMsg') + (d.resolvedDate ? ' ' + d.resolvedDate : '') + '. ' + t('monitorMsg2') + '</p></div>' :
+      '<div class="risk-detail risk-detail-green"><div class="risk-detail-title t-green"><i class="ti ti-circle-check"></i>' + t('lookingGood') + '</div><p>' + t('resolvedMsg') + (d.resolvedDate ? ' ' + d.resolvedDate : '') + '. ' + t('monitorMsg2') + '</p></div>' :
       '<div class="risk-detail risk-detail-' + risk + '"><div class="risk-detail-title t-' + risk + '"><i class="ti ' + iconMap[risk] + '"></i>' + getRiskLabel(risk, false) + '</div><p>' + why + '</p></div>'
     ) +
 

@@ -55,8 +55,9 @@
 
     <!-- STEP 1: CHOOSE -->
     <div id="step-choice">
-      <p style="font-size:16px;font-weight:600;color:#1F4D2E;margin-bottom:6px" id="welcome-title" data-i18n="loginWelcomeTitle">Welcome</p>
-      <p style="font-size:13px;color:#7A8F80;margin-bottom:16px" id="welcome-sub" data-i18n="loginWelcomeSub">New user or returning?</p>
+      <div style="padding:28px 0;text-align:center">
+        <p style="font-size:32px;font-weight:600;color:#1F4D2E;margin:0" id="welcome-title" data-i18n="loginWelcomeTitle">Welcome</p>
+      </div>
       <button class="login-btn secondary" style="margin-top:10px" id="btn-signin-choice" data-i18n="loginSigninBtn" onclick="showStep('signin')">Sign in</button>
       <button class="login-btn secondary" style="margin-top:10px" id="btn-invite-choice" data-i18n="loginHaveInviteBtn" onclick="showStep('invite')">I have an invite</button>
       <div style="margin-top:20px;background:#FFFFFF;border:1px solid #D7E4D7;border-radius:10px;padding:12px 14px" id="demo-box">
@@ -73,6 +74,10 @@
           <p id="lbl-demo-card2-title" data-i18n="loginDemoCard2Title" style="font-size:12px;color:#1F4D2E;font-weight:600;margin-bottom:3px">2. I have an invite → <span style="font-weight:400;color:#5F7266">join an existing farm</span></p>
           <p id="lbl-demo-card2-desc" data-i18n="loginDemoCard2Desc" style="font-size:11px;color:#5F7266;margin:0">Tap <strong data-i18n="loginHaveInviteBtn">I have an invite</strong> and enter code <strong style="background:#EEEEEE;padding:1px 6px;border-radius:4px;letter-spacing:1px">987654</strong> to see how a new team member accepts a farm invitation and gets real permissions for their role.</p>
         </div>
+      </div>
+      <div style="margin-top:16px;background:#FFFFFF;border:1px solid #D7E4D7;border-radius:12px;padding:12px 14px;display:flex;align-items:center;justify-content:center;gap:10px;text-align:center">
+        <span style="width:26px;height:26px;border-radius:8px;background:#E2EFE8;color:#1F6E43;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0"><i class="ti ti-bulb" aria-hidden="true"></i></span>
+        <span id="login-tip-text" style="font-size:12px;color:#111111;line-height:1.4;transition:opacity 0.2s"></span>
       </div>
     </div>
 

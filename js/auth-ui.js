@@ -1,5 +1,29 @@
 /* AgriGuardian: login steps and enter app */
 
+// Rotating security-tip ticker for the welcome/login screen — same data
+// source and fade pattern as the dashboard's startTipTicker() (dashboard.js),
+// just targeting the login screen's own element so the two never collide.
+// Self-cleaning: if #login-tip-text is gone on the next tick (user moved on
+// to sign-in/invite or logged in), the interval clears itself.
+var _loginTipTimer = null, _loginTipIdx = 0;
+function startLoginTipTicker() {
+  var el = document.getElementById('login-tip-text');
+  if (!el || typeof currentSecurityTips !== 'function') return;
+  var tips = currentSecurityTips();
+  if (!tips.length) return;
+  el.textContent = tips[_loginTipIdx];
+  if (_loginTipTimer) { clearInterval(_loginTipTimer); _loginTipTimer = null; }
+  if (tips.length < 2 || (typeof a11ySettings !== 'undefined' && a11ySettings.reducedMotion)) return;
+  _loginTipTimer = setInterval(function() {
+    var el2 = document.getElementById('login-tip-text');
+    if (!el2) { clearInterval(_loginTipTimer); _loginTipTimer = null; return; }
+    _loginTipIdx = (_loginTipIdx + 1) % tips.length;
+    el2.style.opacity = '0';
+    setTimeout(function() { el2.textContent = tips[_loginTipIdx]; el2.style.opacity = '1'; }, 200);
+  }, 6500);
+}
+document.addEventListener('DOMContentLoaded', startLoginTipTicker);
+
 // Shared show/hide toggle for any password field. Used by sign-in, invite,
 // and password-reset fields — one function instead of one-off copies.
 function togglePwVisibility(inputId, btn) {
@@ -57,7 +81,6 @@ function showStep(step) {
     safeLogin('lbl-demo-card2-title', t('loginDemoCard2Title'));
     safeLogin('lbl-demo-card2-desc', t('loginDemoCard2Desc'));
     safeLogin('welcome-title', t('loginWelcomeTitle'));
-    safeLogin('welcome-sub', t('loginWelcomeSub'));
     safeLogin('btn-signin-choice', t('loginSigninBtn'));
     safeLogin('btn-invite-choice', t('loginHaveInviteBtn'));
   }

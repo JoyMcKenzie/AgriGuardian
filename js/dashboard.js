@@ -150,7 +150,7 @@ function renderDashList() {
 
     const allEsc = escalatedDevices();
     if (deviceProblems + networkProblems === 0 && allEsc.length === 0 && partialDevs.length === 0) {
-      html += '<div style="background:#E2EFE8;border:1px solid #BBD8C2;border-radius:8px;padding:12px 14px;font-size:13px;color:#1F4D2E;display:flex;align-items:center;gap:10px"><div style="width:10px;height:10px;border-radius:50%;background:#2E7A4E;flex-shrink:0"></div><span>' + t('allGoodMsg') + '</span></div>';
+      html += '<div style="background:#FFFFFF;border:1px solid #D7E4D7;border-radius:8px;padding:12px 14px;font-size:13px;color:#1F6E43;display:flex;align-items:center;gap:10px"><i class="ti ti-circle-check" style="font-size:16px;flex-shrink:0"></i><span>' + t('allGoodMsg') + '</span></div>';
     }
 
   // ── MANAGER dashboard ──────────────────────────────────────────────────────
@@ -216,7 +216,7 @@ function renderDashList() {
       }).join('');
     }
     if (deviceProblems + networkProblems === 0) {
-      html += '<div style="background:#FFFFFF;border:1px solid #D7E4D7;border-radius:8px;padding:12px 14px;font-size:13px;color:#111111;display:flex;align-items:center;gap:10px"><div style="width:10px;height:10px;border-radius:50%;background:#2E7A4E;flex-shrink:0"></div><span>' + t('allGoodMsg') + '</span></div>';
+      html += '<div style="background:#FFFFFF;border:1px solid #D7E4D7;border-radius:8px;padding:12px 14px;font-size:13px;color:#1F6E43;display:flex;align-items:center;gap:10px"><i class="ti ti-circle-check" style="font-size:16px;flex-shrink:0"></i><span>' + t('allGoodMsg') + '</span></div>';
     }
 
   // ── TECHNICIAN dashboard ───────────────────────────────────────────────────
@@ -241,7 +241,7 @@ function renderDashList() {
       }).join('');
     }
     if (myDevices.length === 0 && unassigned.length === 0) {
-      html += '<div style="background:#E2EFE8;border:1px solid #BBD8C2;border-radius:8px;padding:12px 14px;font-size:13px;color:#1F4D2E;display:flex;align-items:center;gap:10px"><div style="width:10px;height:10px;border-radius:50%;background:#2E7A4E;flex-shrink:0"></div><span>' + t('techNoWorkMsg') + '</span></div>';
+      html += '<div style="background:#FFFFFF;border:1px solid #D7E4D7;border-radius:8px;padding:12px 14px;font-size:13px;color:#1F6E43;display:flex;align-items:center;gap:10px"><i class="ti ti-circle-check" style="font-size:16px;flex-shrink:0"></i><span>' + t('techNoWorkMsg') + '</span></div>';
     }
 
   // ── DEFAULT (Farm Hand, Viewer) ────────────────────────────────────────────

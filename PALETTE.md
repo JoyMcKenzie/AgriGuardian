@@ -36,6 +36,7 @@ separate, deliberate set and are **never** unified with these.
 | On dark | `#FFFFFF` |
 | Device row text (name + subtext) | `#111111` — deep charcoal/near-black, sunlight-readable on the new pure-white row background; overrides Primary within `.device-card` only |
 | Nav bar, inactive tab | `#374151` — deep charcoal-gray (was washed-out `#888`); active tab stays brand green `#1F4D2E` |
+| "Back to X" link (device/network/app detail) | `#1F4D2E` — was muted gray `#7A8F80`; hover `#17391F` |
 
 ### Severity / status (Owner, Manager, Technician only)
 | Role | Value |
@@ -49,8 +50,9 @@ separate, deliberate set and are **never** unified with these.
 | Review tint | `#FBF6E9` |
 | OK dot | `#2E7A4E` |
 | Success text | `#1F6E43` |
-| Success tint | `#E2EFE8` |
+| Success tint (badges/chips only — NOT the "Looking good" status box) | `#E2EFE8` |
 | Success border | `#BBD8C2` |
+| "Looking good" status box (`.risk-detail-green`, dashboard all-good/no-work banners) | background `#FFFFFF` (was tinted `#E2EFE8`), text + checkmark icon `#1F6E43` — bright green on a plain white card, changed 2026-07-09 so the "everything's fine" message stands out through color, not a tinted box |
 
 ### Semantic families
 | Family | fg | tint | border |
@@ -133,7 +135,28 @@ white, so they still read as a distinct "chip" against the white card behind
 them — this is neutral gray, not green, consistent with "no shades of green."
 
 Deliberately LEFT UNCHANGED (semantic, not generic cards): `#E2EFE8` success
-tint (confirmed/fine/assigned badges, success banners' icon chips), the
-severity/status color families, and HC (accessibility) overrides — these
-carry meaning and are documented separately above, not part of the "menu
-card" surface.
+tint on small badges/chips (confirmed/fine/assigned tags), the severity/status
+color families, and HC (accessibility) overrides — these carry meaning and are
+documented separately above, not part of the "menu card" surface.
+
+## Cohesiveness pass (2026-07-09, later same session)
+Three follow-up refinements once every card was confirmed white:
+- **"Looking good" status box** (`.risk-detail-green` in `styles.css`; the
+  dashboard all-good/no-work banners in `dashboard.js`) — background changed
+  from tinted `#E2EFE8` to plain `#FFFFFF` (matching every other card), and
+  the text + a `ti-circle-check` checkmark icon changed to a sharp, bright
+  green `#1F6E43` so the success signal now reads through color/iconography
+  on a white card rather than a colored box. `devices-detail.js`'s "Looking
+  good" resolved-device banner gained the same checkmark icon for consistency
+  with the equivalent banner in `networks.js`, which already had one.
+- **Password-manager "AgriGuardian never sees or stores your passwords" note**
+  (`devices-detail.js`, inside the password-manager suggestion card) — this
+  one is informational, not a success confirmation, so it intentionally did
+  NOT get the bright-green treatment above. Background changed from green
+  tint `#E2EFE8` to pale neutral gray `#F3F4F6`; text changed to dark charcoal
+  `#111111` and its shield icon to `#374151`, matching the deep-charcoal
+  convention used for inactive/neutral elements elsewhere.
+- **"Back to devices / network connections / apps" links** — `.back-btn` in
+  `styles.css` changed from muted gray `#7A8F80` to brand green `#1F4D2E`
+  (hover `#17391F`), consistent with other navigational text/icons using
+  brand green.
