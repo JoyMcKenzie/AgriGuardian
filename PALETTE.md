@@ -19,8 +19,9 @@ separate, deliberate set and are **never** unified with these.
 | Role | Value |
 |---|---|
 | Page canvas (behind the app card, neutral) | `#EEEEEA` |
-| Page / app surface (sage) | `#E7F0E7` |
-| Card / box (soft, on sage) | `#F3F8F2` |
+| Page / app surface (within the app frame, not the outer page canvas) | `#C6D0C8` (muted sage — was `#D1D5DB` for a few hours, before that sage `#E7F0E7`; settled 2026-07-09 so white cards pop without going full neutral-gray) |
+| Menu card (device row, stat tile, action/resolve/health box, alert row, dashboard summary/attention cards, app/settings/network cards, report headers, login/demo cards) | `#FFFFFF` (was off-white `#F3F8F2`/`#f7f7f5`; fully swept 2026-07-09 across every screen — no card, button, or panel anywhere in the app should use the old green-tinted off-white) |
+| Device row accent bar (left edge) | `#1F4D2E` — brand green, 6px, anchors agricultural identity on every row |
 | Card border (hairline) | `#D7E4D7` |
 | Divider inside a card | `#E4EEE4` |
 | Form-field fill | `#FFFFFF` (kept white on purpose) |
@@ -33,6 +34,8 @@ separate, deliberate set and are **never** unified with these.
 | Secondary | `#5F7266` |
 | Muted / hint | `#7A8F80` |
 | On dark | `#FFFFFF` |
+| Device row text (name + subtext) | `#111111` — deep charcoal/near-black, sunlight-readable on the new pure-white row background; overrides Primary within `.device-card` only |
+| Nav bar, inactive tab | `#374151` — deep charcoal-gray (was washed-out `#888`); active tab stays brand green `#1F4D2E` |
 
 ### Severity / status (Owner, Manager, Technician only)
 | Role | Value |
@@ -98,3 +101,39 @@ Role-aware, not blind find/replace — the same literal can serve different role
 Standardisation is done role-by-role with verification (`node --check`,
 `validate-split.py`) — never a global find/replace, since `#fff`, `#888`, `#ddd`
 legitimately serve more than one role. HC values are left exactly as-is.
+
+## Typography convention (2026-07-09)
+Section headers and small all-caps labels (`.section-title`, `.action-label`,
+Settings section headers, report-card titles) use `text-transform: capitalize`,
+not `uppercase`. The underlying strings in `lang-data.js` are still authored in
+sentence case (e.g. `"Farm account"`) — `capitalize` renders them Title Case
+without needing every string rewritten. Do not switch these back to
+`uppercase` without also deciding whether the strings themselves should change.
+
+## Drift fully swept (2026-07-09)
+Every inline `background:#F3F8F2` card/button/panel across the app has been
+converted to `#FFFFFF`: `dashboard.js` (tab cards, attention cards, security
+tip, all-good banners, Farm Hand/Viewer rows, alert rows), `apps.js`,
+`settings.js` (including the collapsible section header buttons and the
+farm-account summary box in `index.html`), `networks.js`, `devices-list.js`,
+`devices-detail.js`, `report-viewers.js`, `vulnerabilities.js`,
+`devices-resolve.js`, `auth-ui.js`, `i18n/set-lang.js`, plus the login/welcome
+screen in `index.html` (demo-box, persona picker + all 5 persona buttons,
+demo-hint box, report modal headers). Paired primary text (`color:#22372A`)
+in those same files was converted to `#111111` alongside the background swap.
+`style-guide.html`'s own reference swatches/cards were updated to match.
+
+The `.login-scroll` background (the pre-login "app surface") was changed from
+`#F3F8F2` to `#C6D0C8` to match the post-login `.app` canvas — "the welcome
+page all the way in" now shares one continuous surface color.
+
+Small inline code/password chips on the login screen (`#F3F8F2` pills showing
+demo codes/passwords) were changed to a neutral `#EEEEEE` rather than pure
+white, so they still read as a distinct "chip" against the white card behind
+them — this is neutral gray, not green, consistent with "no shades of green."
+
+Deliberately LEFT UNCHANGED (semantic, not generic cards): `#E2EFE8` success
+tint (confirmed/fine/assigned badges, success banners' icon chips), the
+severity/status color families, and HC (accessibility) overrides — these
+carry meaning and are documented separately above, not part of the "menu
+card" surface.

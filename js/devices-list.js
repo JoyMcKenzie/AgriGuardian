@@ -46,7 +46,7 @@ function renderDeviceList() {
   const list = document.getElementById('device-list');
   let notice = '';
   if (escalatedOnlyFilter) {
-    notice = '<div style="background:#EFEAF7;border:1px solid #C4B5FD;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:13px;color:#5B21B6;display:flex;align-items:center;justify-content:space-between;gap:10px"><span><i class="ti ti-flag" style="font-size:14px;vertical-align:-2px" aria-hidden="true"></i> ' + t('escFilterNotice') + '</span><button onclick="clearEscalatedFilter()" style="background:#F3F8F2;border:1px solid #C4B5FD;color:#5B21B6;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer">' + t('escClearFilter') + '</button></div>';
+    notice = '<div style="background:#EFEAF7;border:1px solid #C4B5FD;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:13px;color:#5B21B6;display:flex;align-items:center;justify-content:space-between;gap:10px"><span><i class="ti ti-flag" style="font-size:14px;vertical-align:-2px" aria-hidden="true"></i> ' + t('escFilterNotice') + '</span><button onclick="clearEscalatedFilter()" style="background:#FFFFFF;border:1px solid #C4B5FD;color:#5B21B6;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer">' + t('escClearFilter') + '</button></div>';
   }
   if (filtered.length === 0) {
     list.innerHTML = notice + '<p style="font-size:13px;color:#7A8F80;font-style:italic;padding:12px 0">' + (deviceFilter === 'archived' ? t('noDevicesArchived') : t('noDevicesFound')) + '</p>';

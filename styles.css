@@ -4,7 +4,7 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Robo
 .device-shell { max-width: 440px; width: 100%; background: #26282B; border-radius: 44px; padding: 30px 10px 26px; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.28); }
 .device-notch { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); width: 90px; height: 16px; background: #101112; border-radius: 10px; z-index: 2; }
 .device-home-indicator { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); width: 120px; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.35); z-index: 2; }
-.app { max-width: 420px; width: 100%; height: 844px; background: #E7F0E7; border: 1px solid #cfe0cf; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+.app { max-width: 420px; width: 100%; height: 844px; background: #C6D0C8; border: 1px solid #cfe0cf; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
 /* Fixed-size phone frame: height is constant regardless of content length or
    browser window size, matching #main-app below. Only .screens-wrap/.login-scroll
    (the actual screen content) scroll internally — the frame itself never resizes. */
@@ -22,21 +22,21 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Robo
 .screens-wrap::-webkit-scrollbar { display: none; width: 0; height: 0; }
 .nav-panel { background: #fff; border-top: 1px solid #D7E4D7; box-shadow: 0 -2px 8px rgba(0,0,0,0.08); flex-shrink: 0; }
 .nav { display: flex; flex-direction: row; background: #fff; }
-.nav-btn { flex: 1; padding: 10px 4px 8px; font-size: 11px; border: none; background: none; cursor: pointer; color: #888; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border-top: 2px solid transparent; transition: all 0.15s; font-weight: 500; min-height: 56px; }
+.nav-btn { flex: 1; padding: 10px 4px 8px; font-size: 11px; border: none; background: none; cursor: pointer; color: #374151; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border-top: 2px solid transparent; transition: all 0.15s; font-weight: 500; min-height: 56px; }
 .nav-btn.active { color: #1F4D2E; border-top: 2px solid #1F4D2E; }
-.nav-btn:hover { background: #F3F8F2; }
+.nav-btn:hover { background: #F1F2F1; }
 .nav-btn i { font-size: 20px; }
 .nav-btn.active i { color: #1F4D2E; }
 
 .screen { display: none; padding: 18px; }
 .screen.active { display: block; }
-.stat { background: #f7f7f5; border-radius: 10px; padding: 10px 8px; text-align: center; }
+.stat { background: #FFFFFF; border-radius: 10px; padding: 10px 8px; text-align: center; }
 .stat-num { font-size: 24px; font-weight: 600; }
-.stat-label { font-size: 11px; color: #7A8F80; margin-top: 2px; }
+.stat-label { font-size: 11px; color: #111111; margin-top: 2px; }
 .red { color: #A32D2D; }
 .yellow { color: #7A6514; }
 .green { color: #1F4D2E; }
-.device-card { background: #F3F8F2; border: 1px solid #D7E4D7; border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.15s; }
+.device-card { background: #FFFFFF; border: 1px solid #D7E4D7; border-left: 6px solid #1F4D2E; border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.15s; }
 .device-card:hover { border-color: #1F4D2E; background: #f9fdf9; }
 .risk-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .dot-red { background: #E24B4A; }
@@ -47,8 +47,8 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Robo
 .badge-gray { background: #EFEFEF; color: #5F7266; border: 1px solid #CBD8CB; }
 .badge-purple { background: #EFEAF7; color: #5B21B6; border: 1px solid #C4B5FD; }
 .device-info { flex: 1; min-width: 0; }
-.device-name { font-size: 14px; font-weight: 500; color: #22372A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.device-brand { font-size: 12px; color: #7A8F80; margin-top: 2px; }
+.device-name { font-size: 14px; font-weight: 500; color: #111111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.device-brand { font-size: 12px; color: #111111; margin-top: 2px; }
 .risk-badge { font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 500; flex-shrink: 0; white-space: nowrap; }
 .badge-red { background: #FCEBEB; color: #A32D2D; }
 .badge-yellow { background: #FBF6E9; color: #7A6514; border: 1px solid #FEF08A; }
@@ -75,28 +75,28 @@ select:focus, input:focus { border-color: #1F4D2E; box-shadow: 0 0 0 3px rgba(31
 .risk-detail-red p { color: #791F1F; }
 .risk-detail-yellow p { color: #3D2B00; }
 .risk-detail-green p { color: #17391F; }
-.action-box { background: #f7f7f5; border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
-.action-label { font-size: 11px; color: #7A8F80; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; font-weight: 600; }
-.action-text { font-size: 14px; font-weight: 500; color: #22372A; line-height: 1.5; }
+.action-box { background: #FFFFFF; border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+.action-label { font-size: 11px; color: #111111; text-transform: capitalize; letter-spacing: 0.5px; margin-bottom: 6px; font-weight: 600; }
+.action-text { font-size: 14px; font-weight: 500; color: #111111; line-height: 1.5; }
 .detail-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid #E4EEE4; font-size: 13px; }
 .detail-row:last-child { border-bottom: none; }
-.detail-key { color: #7A8F80; }
-.detail-val { font-weight: 500; color: #22372A; }
+.detail-key { color: #111111; }
+.detail-val { font-weight: 500; color: #111111; }
 .back-btn { display: flex; align-items: center; gap: 6px; background: none; border: none; color: #7A8F80; font-size: 13px; cursor: pointer; margin-bottom: 14px; padding: 0; }
 .back-btn:hover { color: #22372A; }
-.section-title { font-size: 11px; font-weight: 600; color: #7A8F80; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
-.device-name-large { font-size: 16px; font-weight: 600; margin-bottom: 4px; color: #22372A; }
-.device-sub { font-size: 13px; color: #7A8F80; margin-bottom: 16px; }
-.resolve-box { background: #f7f7f5; border: 1px solid #D7E4D7; border-radius: 10px; padding: 14px; margin-top: 14px; }
-.resolve-title { font-size: 13px; font-weight: 600; color: #22372A; margin-bottom: 10px; }
+.section-title { font-size: 11px; font-weight: 600; color: #7A8F80; margin-bottom: 10px; text-transform: capitalize; letter-spacing: 0.5px; }
+.device-name-large { font-size: 16px; font-weight: 600; margin-bottom: 4px; color: #111111; }
+.device-sub { font-size: 13px; color: #111111; margin-bottom: 16px; }
+.resolve-box { background: #FFFFFF; border: 1px solid #D7E4D7; border-radius: 10px; padding: 14px; margin-top: 14px; }
+.resolve-title { font-size: 13px; font-weight: 600; color: #111111; margin-bottom: 10px; }
 .resolve-check { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #22372A; margin-bottom: 10px; cursor: pointer; }
 .resolve-check input { width: auto; accent-color: #1F4D2E; width: 18px; height: 18px; }
 .resolve-note { width: 100%; font-size: 13px; padding: 8px 12px; border: 1px solid #CBD8CB; border-radius: 8px; resize: none; font-family: inherit; color: #22372A; }
 .resolve-note:focus { border-color: #1F4D2E; outline: none; }
 .resolve-btn { width: 100%; padding: 10px; background: #1F4D2E; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 8px; }
 .resolve-btn:hover { background: #17391f; }
-.health-box { background: #f7f7f5; border: 1px solid #D7E4D7; border-radius: 10px; padding: 14px; margin-top: 14px; }
-.health-title { font-size: 13px; font-weight: 600; color: #22372A; margin-bottom: 10px; }
+.health-box { background: #FFFFFF; border: 1px solid #D7E4D7; border-radius: 10px; padding: 14px; margin-top: 14px; }
+.health-title { font-size: 13px; font-weight: 600; color: #111111; margin-bottom: 10px; }
 .health-opt { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid #CBD8CB; border-radius: 8px; cursor: pointer; font-size: 13px; margin-bottom: 6px; }
 .health-opt.selected { border-color: #1F4D2E; background: #E2EFE8; font-weight: 500; }
 .health-opt input { width: auto; accent-color: #1F4D2E; }
@@ -128,8 +128,8 @@ select:focus, input:focus { border-color: #1F4D2E; box-shadow: 0 0 0 3px rgba(31
 .login-btn.secondary { background: #fff; color: #1F4D2E; border: 2px solid #1F4D2E; margin-top: 8px; }
 .resolved-badge { display: inline-flex; align-items: center; gap: 6px; background: #E2EFE8; color: #1F4D2E; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 20px; margin-bottom: 12px; }
 .alert-row { display:flex;align-items:center;justify-content:space-between;gap:8px;border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:13px; }
-.alert-row-red { background:#fff;border:1px solid #D7E4D7;color:#22372A;border-radius:8px; }
-.alert-row-yellow { background:#fff;border:1px solid #D7E4D7;color:#22372A;border-radius:8px; }
+.alert-row-red { background:#fff;border:1px solid #D7E4D7;color:#111111;border-radius:8px; }
+.alert-row-yellow { background:#fff;border:1px solid #D7E4D7;color:#111111;border-radius:8px; }
 .alert-fix-btn { background:#111;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;padding:4px 10px;white-space:nowrap;flex-shrink:0; }
 
 

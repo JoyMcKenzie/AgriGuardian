@@ -50,7 +50,7 @@ function renderSettings() {
       const auditBox = document.createElement('div');
       auditBox.id = 'audit-box';
       auditBox.style.cssText = 'border:1px solid #D7E4D7;border-radius:10px;overflow:hidden;margin-bottom:12px';
-      auditBox.innerHTML = '<button onclick="toggleSettingsSection(\'settings-audit\', this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#F3F8F2;border:none;cursor:pointer;text-align:left">' +
+      auditBox.innerHTML = '<button onclick="toggleSettingsSection(\'settings-audit\', this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#FFFFFF;border:none;cursor:pointer;text-align:left">' +
         '<span id="sec-hdr-audit" style="font-size:13px;font-weight:600;color:#1F4D2E;text-transform:uppercase;letter-spacing:0.5px">' + t('auditLogTitle') + '</span>' +
         '<span class="sec-arrow" style="font-size:14px;color:#7A8F80">▸</span></button>' +
         '<div id="sec-settings-audit" style="display:none;padding:12px 14px">' +
@@ -159,8 +159,8 @@ function showMemberDetail(phone) {
   // contact info so anyone needing to reach the Owner by phone can. No edit
   // controls, no permission checkboxes: nothing here to safely act on.
   if (phone === '(555) 123-4567') {
-    panel.innerHTML = '<div style="background:#F3F8F2;border-radius:10px;padding:12px 14px">' +
-      '<div style="font-size:14px;font-weight:600;color:#22372A">Angus MacDonald</div>' +
+    panel.innerHTML = '<div style="background:#FFFFFF;border-radius:10px;padding:12px 14px">' +
+      '<div style="font-size:14px;font-weight:600;color:#111111">Angus MacDonald</div>' +
       '<div style="font-size:12px;color:#7A8F80;margin-top:3px">' + phone + ' &middot; ' + t('roleOwner') + '</div>' +
     '</div>';
     return;
@@ -172,7 +172,7 @@ function showMemberDetail(phone) {
   const canMng = canManage();
   const statusColor = m.archived ? '#7A8F80' : (m.status === 'Invited' ? '#854F0B' : '#2E7A4E');
 
-  const header = '<div style="background:#F3F8F2;border-radius:10px;padding:12px 14px;margin-bottom:10px">' +
+  const header = '<div style="background:#FFFFFF;border-radius:10px;padding:12px 14px;margin-bottom:10px">' +
     '<div style="font-size:14px;font-weight:600;color:' + (m.archived?'#999':'#111') + '">' + (m.name||m.phone) + (m.archived?' <span style="font-size:10px;background:#e0e0e0;color:#5F7266;padding:2px 6px;border-radius:10px">' + t('archivedTag') + '</span>':'') + '</div>' +
     (canMng && !m.archived ? '<div style="margin-top:10px;padding-top:10px;border-top:1px solid #D7E4D7">' +
       '<div style="font-size:11px;font-weight:600;color:#7A8F80;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">' + t('editMemberTitle') + '</div>' +
@@ -211,7 +211,7 @@ function showMemberDetail(phone) {
 }
 
 function permCheckbox(idx, key, label, checked) {
-  return '<label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#22372A;cursor:pointer">' +
+  return '<label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#111111;cursor:pointer">' +
     '<input type="checkbox" ' + (checked ? 'checked' : '') + ' onchange="togglePermission(' + idx + ', \'' + key + '\', this.checked)" style="width:auto;accent-color:#1F4D2E"> ' + label +
   '</label>';
 }

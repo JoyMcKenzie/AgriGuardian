@@ -34,7 +34,7 @@ function setLang(lang, context) {
   var invHint = document.getElementById('lbl-invite-demo-hint');
   if (invHint) {
     invHint.innerHTML = t('inviteDemoHint').replace('987654',
-      '<strong style="background:#F3F8F2;padding:2px 8px;border-radius:6px;border:1px solid #E2EFE8;letter-spacing:2px">987654</strong>');
+      '<strong style="background:#FFFFFF;padding:2px 8px;border-radius:6px;border:1px solid #E2EFE8;letter-spacing:2px">987654</strong>');
   }
 
   // 5) Re-render dynamic app content so newly-built DOM is in the active language.

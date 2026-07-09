@@ -63,7 +63,7 @@ function netTimelineHTML(n) {
           (isLast ? '' : '<div style="width:2px;flex:1;background:#e0e0e0;margin:2px 0"></div>') +
         '</div>' +
         '<div style="padding-bottom:' + (isLast ? '0' : '14px') + ';flex:1;min-width:0">' +
-          '<div style="font-size:13px;color:#22372A">' + e.label + '</div>' +
+          '<div style="font-size:13px;color:#111111">' + e.label + '</div>' +
           (e.date ? '<div style="font-size:11px;color:#7A8F80">' + e.date + '</div>' : '') +
         '</div>' +
       '</div>';
@@ -94,7 +94,7 @@ function netAccSection(key, netId, iconClass, title, previewHTML, bodyHTML, star
   return '<div style="border:1px solid #CBD8CB;border-radius:10px;margin-bottom:8px;overflow:hidden">' +
     '<button type="button" id="' + btnId + '" onclick="toggleNetAcc(\'' + key + '\',' + netId + ')" aria-expanded="' + (startOpen?'true':'false') + '" style="width:100%;display:flex;align-items:center;gap:8px;padding:13px 12px;background:' + (startOpen?'#E2EFE8':'#fff') + ';border:none;text-align:left;cursor:pointer;min-height:44px;transition:background-color 0.2s ease;font-family:inherit">' +
       '<i class="ti ' + iconClass + '" style="font-size:16px;color:#1F4D2E;flex-shrink:0"></i>' +
-      '<span style="font-size:13px;font-weight:500;color:#22372A;flex-shrink:0">' + title + '</span>' +
+      '<span style="font-size:13px;font-weight:500;color:#111111;flex-shrink:0">' + title + '</span>' +
       '<span style="margin-left:auto;font-size:11px;color:#7A8F80;white-space:nowrap;flex-shrink:1;padding-left:6px;overflow:hidden;text-overflow:ellipsis;max-width:150px">' + (previewHTML||'') + '</span>' +
       '<i id="' + chevId + '" class="ti ti-chevron-down" style="font-size:15px;color:#7A8F80;flex-shrink:0;display:inline-block;transform:rotate(' + (startOpen?'180deg':'0deg') + ');transition:transform 0.25s ease"></i>' +
     '</button>' +
@@ -150,12 +150,12 @@ function netAssignBoxHTML(n) {
   const primaryLabel = n.assignedTo ? t('reassignBtn') : t('assignBtn');
   const isReassign = !!n.assignedTo;
   return '<p style="font-size:11px;color:#7A8F80;margin:0 0 8px">' + t('assignDesc') + '</p>' +
-    '<select id="net-assign-select-' + n.id + '" style="width:100%;font-size:13px;padding:9px 10px;border:1px solid #CBD8CB;border-radius:8px;background:#F3F8F2;font-family:inherit;margin-bottom:8px">' + options + '</select>' +
+    '<select id="net-assign-select-' + n.id + '" style="width:100%;font-size:13px;padding:9px 10px;border:1px solid #CBD8CB;border-radius:8px;background:#FFFFFF;font-family:inherit;margin-bottom:8px">' + options + '</select>' +
     '<label style="font-size:11px;font-weight:600;color:#5F7266;display:block;margin-bottom:4px">' + t('assignNoteLabel') + ' <span style="color:#A32D2D">*' + t('required') + '</span></label>' +
     '<textarea id="net-assign-note-' + n.id + '" rows="2" placeholder="' + t('assignNotePlaceholder') + '" style="width:100%;font-size:12.5px;padding:8px 10px;border:1px solid #CBD8CB;border-radius:8px;resize:none;font-family:inherit;margin-bottom:8px"></textarea>' +
     '<div style="display:flex;gap:8px">' +
       '<button onclick="assignNetIssue(' + n.id + ')" style="flex:1;background:#1F4D2E;color:#fff;border:none;border-radius:8px;padding:9px;font-size:12.5px;font-weight:500">' + primaryLabel + '</button>' +
-      (isReassign ? '<button onclick="unassignNetIssue(' + n.id + ')" style="flex:0 0 auto;background:#F3F8F2;color:#A32D2D;border:1px solid #E0B4B4;border-radius:8px;padding:9px 14px;font-size:12.5px;font-weight:500">' + t('unassignBtn') + '</button>' : '') +
+      (isReassign ? '<button onclick="unassignNetIssue(' + n.id + ')" style="flex:0 0 auto;background:#FFFFFF;color:#A32D2D;border:1px solid #E0B4B4;border-radius:8px;padding:9px 14px;font-size:12.5px;font-weight:500">' + t('unassignBtn') + '</button>' : '') +
     '</div>';
 }
 
@@ -182,7 +182,7 @@ function showNetDetail(id, keepScreen) {
     '<div class="device-sub">' + n.type + '</div>' +
 
     (!canSee && !n.resolved && risk !== 'green' ?
-      '<div class="risk-detail" style="background:#F3F8F2;border:1px solid #d9dee3"><div class="risk-detail-title" style="color:#5F7266"><i class="ti ti-lock"></i>' + t('restrictedLabel') + '</div><p style="color:#5F7266">' + t('notAssignedNetBody') + '</p></div>' :
+      '<div class="risk-detail" style="background:#FFFFFF;border:1px solid #d9dee3"><div class="risk-detail-title" style="color:#111111"><i class="ti ti-lock"></i>' + t('restrictedLabel') + '</div><p style="color:#111111">' + t('notAssignedNetBody') + '</p></div>' :
       n.resolved ?
         '<div class="risk-detail risk-detail-green"><div class="risk-detail-title t-green"><i class="ti ti-circle-check"></i>' + t('lookingGood') + '</div><p>' + (n.savedDate ? t('resolvedBadge') + ' ' + n.savedDate + '. ' : '') + t('netRecNone') + '</p></div>' :
         '<div class="risk-detail risk-detail-' + risk + '"><div class="risk-detail-title t-' + risk + '"><i class="ti ' + iconMap[risk] + '"></i>' + getNetRiskLabel(risk) + '</div><p>' + getNetRiskWhy(n) + '</p></div>'
@@ -196,13 +196,13 @@ function showNetDetail(id, keepScreen) {
         '<div style="font-weight:700;color:#5B21B6;font-size:13px;margin-bottom:6px"><i class="ti ti-corner-up-left"></i> ' + t('netReturnedTitle') + '</div>' +
         '<div style="font-size:13px;color:#3B0764;line-height:1.5">' +
           '<div><strong>' + (n.assignedTo || t('teamMemberFallback')) + '</strong> ' + t('netReturnSentNote') + '</div>' +
-          '<div style="margin-top:4px;padding:8px 10px;background:#F3F8F2;border-radius:6px;border:1px solid #C4B5FD;font-style:italic">' + (n.returnNote || '') + '</div>' +
+          '<div style="margin-top:4px;padding:8px 10px;background:#FFFFFF;border-radius:6px;border:1px solid #C4B5FD;font-style:italic">' + (n.returnNote || '') + '</div>' +
         '</div>' +
       '</div>' : '') +
 
     (canSee ? (
 
-      netAccSection('fix', n.id, 'ti-bulb', t('howToFixTitle'), '', '<p style="font-size:12.5px;color:#22372A;line-height:1.6;margin:10px 0 0">' + getNetRecAction(n) + '</p>', false) +
+      netAccSection('fix', n.id, 'ti-bulb', t('howToFixTitle'), '', '<p style="font-size:12.5px;color:#111111;line-height:1.6;margin:10px 0 0">' + getNetRecAction(n) + '</p>', false) +
 
       // Assignment section — visible to whoever can assign (Manager/Owner) or
       // to the current assignee viewing their own assignment.
@@ -210,7 +210,7 @@ function showNetDetail(id, keepScreen) {
         netAccSection('assign', n.id, 'ti-user-question', t('assignmentTitle'),
           n.assignedTo ? n.assignedTo : t('unassignedLabel'),
           (canAssign ? netAssignBoxHTML(n) :
-            '<div style="font-size:12.5px;color:#22372A;line-height:1.6;margin-top:10px">' +
+            '<div style="font-size:12.5px;color:#111111;line-height:1.6;margin-top:10px">' +
               '<div style="margin-bottom:6px"><strong>' + t('assignedToLabel') + ':</strong> ' + (n.assignedTo || '—') + '</div>' +
             '</div>'
           ), false) : '') +
@@ -226,7 +226,7 @@ function showNetDetail(id, keepScreen) {
         '<div id="net-vuln-results-' + n.id + '" style="margin-top:8px"></div>',
         false) +
 
-      (n.notes ? netAccSection('notes', n.id, 'ti-note', t('notes'), n.notes.split('\n')[0], '<div style="font-size:12.5px;color:#22372A;line-height:1.5;white-space:pre-line;margin-top:10px">' + n.notes + '</div>', false) : '') +
+      (n.notes ? netAccSection('notes', n.id, 'ti-note', t('notes'), n.notes.split('\n')[0], '<div style="font-size:12.5px;color:#111111;line-height:1.5;white-space:pre-line;margin-top:10px">' + n.notes + '</div>', false) : '') +
 
       (function(){
         var hist = netTimelineHTML(n);
@@ -255,13 +255,13 @@ function showNetDetail(id, keepScreen) {
         '</div>' +
         '<div style="display:flex;gap:8px">' +
           '<button onclick="saveNetwork(' + id + ')" style="flex:1;background:#1F4D2E;color:#fff;border:none;border-radius:8px;padding:11px;font-size:13px;font-weight:500">' + t('saveBtn') + '</button>' +
-          (canReturn ? '<button onclick="returnNetIssue(' + id + ')" style="flex:0 0 auto;background:#F3F8F2;color:#5B21B6;border:1px solid #C4B5FD;border-radius:8px;padding:11px 14px;font-size:13px;font-weight:500">' + t('netReturnBtn') + ' ' + (n.assignedBy || t('unassignedLabel')) + '</button>' : '') +
+          (canReturn ? '<button onclick="returnNetIssue(' + id + ')" style="flex:0 0 auto;background:#FFFFFF;color:#5B21B6;border:1px solid #C4B5FD;border-radius:8px;padding:11px 14px;font-size:13px;font-weight:500">' + t('netReturnBtn') + ' ' + (n.assignedBy || t('unassignedLabel')) + '</button>' : '') +
         '</div>',
         false) : '') +
 
     ((canSee && !canAct && !n.resolved && risk !== 'green') ?
-      '<div class="resolve-box" style="background:#F3F8F2;border:1px solid #d9dee3">' +
-        '<p style="font-size:13px;color:#5F7266;margin:0">🔒 ' + t('viewOnlyIssueNote') + '</p>' +
+      '<div class="resolve-box" style="background:#FFFFFF;border:1px solid #d9dee3">' +
+        '<p style="font-size:13px;color:#111111;margin:0">🔒 ' + t('viewOnlyIssueNote') + '</p>' +
       '</div>' : '');
 
   if (!keepScreen) {

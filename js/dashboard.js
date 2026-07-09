@@ -32,7 +32,7 @@ function renderDashList() {
     const total = redCount + yellowCount;
     const bd = hc ? '2px solid #000' : '1px solid #D7E4D7';
     const sub = total > 0
-      ? '<div style="font-size:12px;color:#7a8f80;margin-top:2px">' + total + ' ' + (total === 1 ? t('issuesSingular') : t('issuesPlural')) + '</div>'
+      ? '<div style="font-size:12px;color:#111111;margin-top:2px">' + total + ' ' + (total === 1 ? t('issuesSingular') : t('issuesPlural')) + '</div>'
       : '';
     function chipDot(color, val) {
       return '<span style="display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:#48604F">' +
@@ -53,8 +53,8 @@ function renderDashList() {
       if (yellowCount > 0) parts.push(cb ? chipShape('ti-alert-circle', '#B4611A', yellowCount) : chipDot('#D4C000', yellowCount));
       sev = parts.join('<span style="display:inline-block;width:8px"></span>');
     }
-    return '<button onclick="' + navFn + '" style="width:100%;text-align:left;background:#F3F8F2;border:' + bd + ';border-radius:12px;padding:15px 16px;margin-bottom:11px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px">' +
-      '<div><div style="font-size:15px;font-weight:500;color:#22372A">' + label + '</div>' + sub + '</div>' +
+    return '<button onclick="' + navFn + '" style="width:100%;text-align:left;background:#FFFFFF;border:' + bd + ';border-left:6px solid #1F4D2E;border-radius:12px;padding:15px 16px;margin-bottom:11px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px">' +
+      '<div><div style="font-size:15px;font-weight:500;color:#111111">' + label + '</div>' + sub + '</div>' +
       '<div style="display:flex;align-items:center;gap:14px">' + sev + '<i class="ti ti-chevron-right" style="font-size:18px;color:#7A8F80" aria-hidden="true"></i></div>' +
     '</button>';
   }
@@ -102,9 +102,9 @@ function renderDashList() {
     if (!tips.length) return '';
     if (_tipIdx >= tips.length) _tipIdx = 0;
     return '<p style="font-size:11px;font-weight:700;color:#7A8F80;text-transform:uppercase;letter-spacing:0.5px;margin:16px 0 8px">' + t('securityTipLabel') + '</p>' +
-      '<div style="background:#F3F8F2;border:1px solid #D7E4D7;border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px">' +
+      '<div style="background:#FFFFFF;border:1px solid #D7E4D7;border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px">' +
         '<span style="width:30px;height:30px;border-radius:8px;background:#E2EFE8;color:#1F6E43;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0"><i class="ti ti-bulb" aria-hidden="true"></i></span>' +
-        '<span id="dash-tip-text" style="flex:1;font-size:13px;color:#22372A;line-height:1.4;transition:opacity 0.2s">' + tips[_tipIdx] + '</span>' +
+        '<span id="dash-tip-text" style="flex:1;font-size:13px;color:#111111;line-height:1.4;transition:opacity 0.2s">' + tips[_tipIdx] + '</span>' +
       '</div>';
   }
 
@@ -123,10 +123,10 @@ function renderDashList() {
     const obsDevs = observedDevices();
 
     function attnCard(id, icon, tintBg, tintFg, title, sub) {
-      return '<button onclick="showDetail(' + id + ')" style="width:100%;text-align:left;background:#F3F8F2;border:1px solid #D7E4D7;border-radius:10px;padding:11px 12px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:11px">' +
+      return '<button onclick="showDetail(' + id + ')" style="width:100%;text-align:left;background:#FFFFFF;border:1px solid #D7E4D7;border-left:6px solid #1F4D2E;border-radius:10px;padding:11px 12px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:11px">' +
         '<span style="width:30px;height:30px;border-radius:8px;background:' + tintBg + ';color:' + tintFg + ';display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0"><i class="ti ' + icon + '" aria-hidden="true"></i></span>' +
-        '<span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:500;color:#22372A">' + title + '</span>' +
-        (sub ? '<span style="display:block;font-size:12px;color:#7a8f80;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + sub + '</span>' : '') + '</span>' +
+        '<span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:500;color:#111111">' + title + '</span>' +
+        (sub ? '<span style="display:block;font-size:12px;color:#111111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + sub + '</span>' : '') + '</span>' +
         '<i class="ti ti-chevron-right" style="color:#c3d3c6;font-size:16px;flex-shrink:0"></i>' +
       '</button>';
     }
@@ -216,7 +216,7 @@ function renderDashList() {
       }).join('');
     }
     if (deviceProblems + networkProblems === 0) {
-      html += '<div style="background:#F3F8F2;border:1px solid #D7E4D7;border-radius:8px;padding:12px 14px;font-size:13px;color:#22372A;display:flex;align-items:center;gap:10px"><div style="width:10px;height:10px;border-radius:50%;background:#2E7A4E;flex-shrink:0"></div><span>' + t('allGoodMsg') + '</span></div>';
+      html += '<div style="background:#FFFFFF;border:1px solid #D7E4D7;border-radius:8px;padding:12px 14px;font-size:13px;color:#111111;display:flex;align-items:center;gap:10px"><div style="width:10px;height:10px;border-radius:50%;background:#2E7A4E;flex-shrink:0"></div><span>' + t('allGoodMsg') + '</span></div>';
     }
 
   // ── TECHNICIAN dashboard ───────────────────────────────────────────────────
@@ -268,9 +268,9 @@ function renderDashList() {
           : isFine
           ? { label: t('fhBadgeFine'), icon: 'ti-thumb-up', color: '#1F6E43', bg: '#E2EFE8' }
           : { label: t('fhBadgeKnownIssue'), icon: 'ti-info-circle', color: '#1A5FA8', bg: '#E6F0FA' };
-        return '<div style="background:#F3F8F2;border:1px solid #D7E4D7;border-radius:10px;padding:11px 12px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:10px" onclick="showDetail(' + d.id + ')">' +
+        return '<div style="background:#FFFFFF;border:1px solid #D7E4D7;border-radius:10px;padding:11px 12px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:10px" onclick="showDetail(' + d.id + ')">' +
           '<span style="width:30px;height:30px;border-radius:8px;background:' + fh.bg + ';color:' + fh.color + ';display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0"><i class="ti ti-device-desktop" aria-hidden="true"></i></span>' +
-          '<span style="flex:1;min-width:0;font-size:14px;color:#22372A">' + (d.label || d.type) + '</span>' +
+          '<span style="flex:1;min-width:0;font-size:14px;color:#111111">' + (d.label || d.type) + '</span>' +
           '<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:' + fh.color + ';background:' + fh.bg + ';border-radius:20px;padding:4px 10px"><i class="ti ' + fh.icon + '" style="font-size:12px" aria-hidden="true"></i> ' + fh.label + '</span>' +
         '</div>';
       }).join('');
@@ -334,7 +334,7 @@ function alertRow(level, msg, navFn, meta) {
       ? '<div style="align-self:flex-start;display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#1F4D2E;background:#E2EFE8;border:1px solid #BBD8C2;border-radius:10px;padding:1px 8px"><i class="ti ti-user-check" style="font-size:12px"></i>' + t('assignedToLabel') + ': ' + meta.assignedTo + '</div>'
       : '<div style="align-self:flex-start;display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#7A6514;background:#FBF6E9;border:1px solid #E6D8AE;border-radius:10px;padding:1px 8px"><i class="ti ti-user-question" style="font-size:12px"></i>' + t('unassignedLabel') + '</div>';
   }
-  return '<div class="alert-row alert-row-' + level + '" style="background:#F3F8F2;border:' + borderWidth + ' solid ' + borderColor + ';border-radius:8px;">' +
+  return '<div class="alert-row alert-row-' + level + '" style="background:#FFFFFF;border:' + borderWidth + ' solid ' + borderColor + ';border-radius:8px;">' +
     '<div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">' +
       '<div class="risk-dot" style="flex-shrink:0;width:' + dotSize + ';height:' + dotSize + ';border-radius:50%;background:' + dotColor + (hc ? ';border:2px solid #000' : '') + '"></div>' +
       '<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">' +
@@ -345,4 +345,3 @@ function alertRow(level, msg, navFn, meta) {
     '<button onclick="' + navFn + '" class="alert-fix-btn" style="background:' + (isInfo ? '#1A5FA8' : '#111') + ';color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;padding:4px 10px;white-space:nowrap;flex-shrink:0">' + (isInfo ? t('reviewBtn') : t('fixBtn')) + '</button>' +
   '</div>';
 }
-

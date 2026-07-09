@@ -9,7 +9,103 @@ changed — why / notes.
 
 ---
 
+## 2026-07-09 01:14 ET — Full green-tint sweep: every card white, canvas one continuous surface
+
+Direct follow-up to a screenshot report ("once you get in the background is
+right but the buttons are wrong") and the explicit instruction: "Background
+App: #C6D0C8 from the welcome page all the way in / Menu Cards: #FFFFFF every
+card, no shades of green / Text inside Cards: #111111."
+
+- **`dashboard.js`** — `tabCard()` (Devices/Network/Apps/Backups summary
+  buttons), `attnCard()` ("needs your attention" rows), `securityTipsCard()`,
+  the "all good"/"no work" success banners, the Farm Hand/Viewer device row,
+  and the colorblind-safe `alertRow()` all changed `background:#F3F8F2` →
+  `#FFFFFF`; paired label/value text `color:#22372A`/`#7a8f80` → `#111111`.
+  `tabCard()`/`attnCard()` also gained the same 6px `#1F4D2E` left accent bar
+  used on `.device-card`, for visual consistency across all nav-style cards.
+- **`apps.js`, `settings.js`, `networks.js`, `devices-list.js`,
+  `devices-detail.js`, `report-viewers.js`, `vulnerabilities.js`,
+  `devices-resolve.js` (inline override), `auth-ui.js`, `i18n/set-lang.js`** —
+  every remaining inline `background:#F3F8F2` converted to `#FFFFFF`; primary
+  text `color:#22372A` converted to `#111111` alongside it. Secondary/muted
+  text tones (`#5F7266`, `#7A8F80`) were left as the existing text-hierarchy
+  grays — they're not green and weren't called out.
+- **`index.html` (login/welcome screen)** — `.login-scroll` background
+  changed `#F3F8F2` → `#C6D0C8` to match the post-login `.app` canvas, so the
+  muted-sage surface now runs continuously "from the welcome page all the way
+  in." The demo-box, the "1. Sign in" / "2. I have an invite" nested cards,
+  the persona-picker wrapper and all 5 persona sign-in buttons, and the demo
+  invite-hint box all changed from green-tinted boxes (`#E2EFE8`/`#F3F8F2`)
+  to white cards with `#D7E4D7` borders. The small demo code/password chips
+  (987654, the generated passwords) changed to a neutral `#EEEEEE` rather
+  than pure white, so they still read as distinct chips against the white
+  card behind them — gray, not green. The Hygiene Report / Activity Log modal
+  header bars and the Settings collapsible section headers (Farm account,
+  Team members, Timezone, Session, Language, Accessibility, Security) also
+  changed from `#F3F8F2` to white.
+- **`styles.css`** — `.nav-btn:hover` background changed `#F3F8F2` → `#F1F2F1`
+  (neutral gray hover, no green tint).
+- **`style-guide.html`** — its own reference `.sw`/`.card`/`.statrow`/`.navbar`
+  swatches and the "Outline" button example updated to white to match; the
+  `surf` swatch data array in the Foundations section corrected (dropped the
+  stale `#D1D5DB` canvas value and separate "Card / box" row, replaced with
+  the current `#C6D0C8` surface + single `#FFFFFF` menu-card row).
+- **Deliberately left alone** (semantic, not generic cards): `#E2EFE8`
+  success tint (confirmed/fine/assigned badges, "all good" icon chips,
+  accordion-header active state, checkbox-checked state), the severity/status
+  color families (critical/review/success tints), and all HC (accessibility)
+  overrides — these carry meaning and are documented separately in
+  `PALETTE.md`, not part of the "menu card" surface this pass targeted.
+- `PALETTE.md`'s "Known drift" note is now resolved and rewritten as "Drift
+  fully swept," documenting what changed and what was intentionally spared.
+  `FILE-MAP.md`'s `styles.css`/`dashboard.js` entries updated to match.
+- `BUILD_TIMESTAMP` in `js/i18n/core.js` bumped to `2026-07-09T01:14:02-04:00`.
+- Verification: every edited file checked with `node --check` (JS) and a
+  null-byte scan; `index.html` additionally checked for matching tag counts
+  and line count against the pre-edit version (56 diff lines, all accounted
+  for, no truncation). One truncation did occur mid-edit on `dashboard.js`
+  (`tabCard`'s trailing `alertRow()` button got cut off) — caught immediately
+  by `node --check`, recovered by splicing back the correct tail from the
+  pre-edit copy, then reverified clean.
+
+---
+
 ## [Unreleased / next entry goes here]
+
+---
+
+## 2026-07-09 01:00 ET — Canvas re-tuned to muted sage; white-card treatment extended to every card
+- Corrected a misread from earlier tonight: "Background Canvas" in the color instructions refers to `.app`'s own background (the surface *within* the device frame), not `body` (the page the frame sits on) — same element I already changed once, just a new value this round.
+- `.app` background: `#D1D5DB` → `#C6D0C8` (muted sage, per spec).
+- Extended the "menu card" white-background + `#111111`-text treatment beyond `.device-card` to every shared card-style class: `.stat` (dashboard tiles), `.action-box`, `.resolve-box`, `.health-box`, `.alert-row-red`/`.alert-row-yellow` — all backgrounds off-white/`#f7f7f5` → `#FFFFFF`; all their text (`.stat-label`, `.action-label`, `.action-text`, `.detail-key`, `.detail-val`, `.device-name-large`, `.device-sub`, `.resolve-title`, `.health-title`, alert-row text) → `#111111`.
+- Found and fixed two inline overrides that would've silently defeated the CSS change: `devices-resolve.js` and `networks.js` both reuse the `.resolve-box` class but hardcoded `background:#F3F8F2` inline on top of it — both now `#FFFFFF`. Also whitened/darkened one inline `.risk-detail` "restricted access" notice in `networks.js` that used the same muted off-white/gray pattern outside the severity-colored boxes (red/yellow/green risk-detail boxes were deliberately left alone — those are intentional status colors, not neutral cards).
+- **Not fully swept, flagged honestly:** `dashboard.js`, `apps.js`, `settings.js`, and other spots in `networks.js` still have inline `background:#F3F8F2` panels I didn't touch this round — some look like genuine card rows, others are buttons/dropdown fills that may be intentionally tinted. Documented in `PALETTE.md`'s new "Known drift" note rather than guessing at scope without checking each one.
+- Updated `PALETTE.md` (surface/card values, known-drift note) and `FILE-MAP.md`'s `styles.css` entry.
+- `BUILD_TIMESTAMP` bumped to `2026-07-09T01:00:26-04:00`.
+- Process note: switched to plain file writes (Python/`sed`) instead of the Edit tool for `PALETTE.md`/`FILE-MAP.md`/`core.js` this round, after the Edit tool truncated `PALETTE.md` twice more while documenting this same change. Every file touched this entry verified with `node --check` (JS) and a null-byte/tail check (docs) — all clean.
+
+---
+
+
+## 2026-07-09 00:48 ET — style-guide.html updated for the high-contrast device-row pass
+- Updated the `surf`/`text` swatch groups: "Page / app surface" → "Page / app surface (canvas)" `#D1D5DB` (was sage `#E7F0E7`); added "Device row" `#FFFFFF`, "Device row accent bar" `#1F4D2E`, "Device row text" `#111111`, "Nav inactive" `#374151` as new swatches.
+- Added a live example under the Components section: a device row rendered on the new gray canvas (white row, green left accent bar, black text), with its own caption spelling out the four hex values and what replaced what.
+- Not touched: the "Navigation — light slide-out" (`.ni`/`.navbar`) example lower in the same section documents an older side-drawer nav pattern that predates the bottom-tab-bar nav actually used in `index.html` (`.nav-btn`) — this mismatch predates today's changes and is a separate, pre-existing staleness issue, not part of this color pass.
+- `BUILD_TIMESTAMP` bumped to `2026-07-09T00:48:21-04:00`.
+- Verified with a full diff against git history: only the two intended blocks changed, no truncation this time.
+
+---
+
+## 2026-07-09 00:45 ET — High-contrast device-row redesign (sunlight-readable pass)
+Implements the requested batch: Title Case labels, dark canvas, pure-white device rows, deep-charcoal text, brand-green accent bar, and a darker inactive nav color.
+- **Title Case, not ALL CAPS:** `.action-label`, `.section-title` (`styles.css`), and 10 inline Settings-section/report-card headers in `index.html` switched `text-transform: uppercase` → `text-transform: capitalize`. Left one occurrence alone on purpose — the invite-code `<input>`'s `text-transform:uppercase` is about the entered code value, not a label. Underlying strings in `lang-data.js` stay sentence-case (`"Farm account"`); `capitalize` renders them as Title Case without rewriting ~10 translation keys in two languages.
+- **Canvas:** `.app` background sage `#E7F0E7` → medium-dark gray `#D1D5DB`.
+- **Device rows:** `.device-card` background off-white `#F3F8F2` → pure white `#FFFFFF`; added a new 6px `border-left: solid #1F4D2E` brand-green accent bar on every row.
+- **Device row text:** `.device-name`/`.device-brand` → `#111111` (deep charcoal, was `#22372A`/`#7A8F80`).
+- **Nav bar:** inactive tab color `#888` → `#374151` (deep charcoal-gray, per the two options given — chose the darker of the two for max legibility); active tab was already brand green `#1F4D2E`, confirmed unchanged. `.filter-btn.active` was already brand green too — no change needed there.
+- Updated `PALETTE.md` (new/changed canonical values, plus a "Typography convention" note explaining the capitalize-vs-uppercase decision) and `FILE-MAP.md`'s `styles.css` entry to match.
+- `BUILD_TIMESTAMP` bumped to `2026-07-09T00:45:11-04:00`.
+- Process note: **three more silent truncations** happened applying this batch — `PALETTE.md` and `FILE-MAP.md` both got cut off mid-edit (on top of the `styles.css` truncations from the previous entry). Each was caught immediately via a git-HEAD diff before considering the edit done, and reconstructed the same way: keep everything before the cut (which had the real edits), splice the correct original tail back on. All four files (`lang-data.js`, `styles.css`, `PALETTE.md`, `FILE-MAP.md`) are now verified byte-for-byte correct — diffed in full against git history, only intended changes present.
 
 ---
 
@@ -382,68 +478,4 @@ Applied against the 3-state-observation build, from the audit in `AUDIT-FINDINGS
 ## 2026-07-07 — CORRECTION: accordions were not actually defaulting to collapsed
 - Joy caught this live: several devices under Manager showed multiple sections expanded by default. Earlier tonight I'd verified accordion state *resets on logout* and reported that as satisfying "defaults to collapsed" — those are two different things, and I conflated them. Resetting-on-logout was true; actually defaulting to collapsed was not.
 - Root cause: several sections had "smart" open-by-default logic (open "How to fix this"/"Assignment"/"Remediation checklist" whenever they're actionable for the current role). For Manager, who can act on almost everything, that meant 2-3 sections open simultaneously on most non-green devices — the opposite of what was asked.
-- Fixed by removing all actionability-based auto-open logic — every accordion section (`fix`, `assign`, `remediate`, `details`, `history`, `observe` on devices; `fix`, `assign`, `details`, `notes`, `history`, `resolve` on networks) now hardcodes `false`, full stop.
-- **Verified exhaustively, not spot-checked:** all 4 roles × all 10 devices (each toggled through both assigned-to-them and unassigned states) × all 3 networks (same) — confirmed zero sections open anywhere, by querying every `[id^="dev-acc-body-"]`/`[id^="net-acc-body-"]` element directly rather than trusting the render logic by inspection.
-- **Also fixed, found while investigating the observation workflow:** tonight's device accordion rebuild had accidentally dropped the `observation-box-<id>` wrapper div that `submitObservation()` depends on for its "Sent!" button-text confirmation. The actual submission (handoff log entry, dashboard surfacing) still worked — only the visual confirmation silently stopped firing. Restored the wrapper.
-- **Confirmed, not changed:** the observation → Owner/Manager dashboard surfacing workflow is intact and was never at risk — verified via jsdom that a fresh observation note still appears on the Owner's dashboard immediately after submission. Whether observations should be independently dismissable (separate from resolving/archiving the device) remains an open discussion, not yet decided either way.
-
-## 2026-07-07 — Farm Hand dashboard: bolder label, darker Fine/Known-issue pills
-- "Your devices" label changed from small gray uppercase (11px, `#888`) to bold dark (14px, weight 700, `#111`), matching the "Device Problems" label styling used on Owner/Manager/Technician dashboards.
-- "Fine" pill background darkened `#EAF3EC` → `#CFE8D6` (text/border adjusted to `#14381F`/`#8FC49F` for contrast); "Known issue" pill background darkened `#F4F6F8` → `#DCE3EA` (text/border adjusted to `#334155`/`#B9C4CE`). "Use with caution" (amber) deliberately left unchanged — only blue and green were requested.
-- Scoped narrowly to `dashboard.js`'s Farm Hand render branch only, per explicit instruction not to touch other code. Two other unrelated `#EAF3EC` usages in the same file (the "all good" message box, the assigned-to tag) were left untouched — confirmed via jsdom that they still render with the original color, not accidentally caught by the same find/replace.
-- Mocked and approved before implementation, per Joy's request to see it first.
-- **Separately verified (not a code change — this was already true by construction):** accordion sections reset to their default collapsed state after logout + fresh login. Tested directly: manually toggled a section open via `toggleDeviceAcc()`, called `logOut()`, simulated a fresh login, and re-rendered the same device — the section came back collapsed. This works because `showDetail()`/`showNetDetail()` always rebuild accordion state fresh from the open/closed logic on every render; nothing persists it anywhere (no localStorage, no session variable), so there was nothing that could carry a manually-opened state across a logout in the first place.
-- Verified via jsdom: 9 checks — the 2 color values present, amber pill unaffected, the two unrelated same-file `#EAF3EC` usages unaffected, and a full 4-role render sweep across dashboard/devices/networks confirming no ripple effects.
-
-## 2026-07-07 — Ripple-check on the device rebuild found and fixed a real bug in networks.js
-- Joy asked directly whether tonight's device detail rebuild had been checked for side effects on other files — it hadn't been, beyond the device-specific tests. Doing that check found a real, pre-existing bug that had nothing to do with tonight's device work: **`networks.js`'s Network history section had a nested double-toggle.** `netTimelineHTML(n)` — left over from the *original* network accordion rebuild earlier tonight — still returned its own plain toggle button + collapsed wrapper, which was then nested *inside* the new animated "Network history" accordion section. Practically: opening the accordion revealed a second, plain, unanimated toggle that had to be clicked again just to see the actual timeline.
-- Fixed the same way `deviceTimelineHTML` was just refactored: `netTimelineHTML(n)` now returns bare rows only, since `netAccSection()` already provides the wrapping toggle.
-- Verified via jsdom: confirmed no leftover `toggleSettingsSection` reference remains in the network detail render, and that the timeline content still displays correctly once the (single, correct) accordion section is opened.
-- Also explicitly re-confirmed (not just assumed carried over from earlier in the night): every caller of `showDetail()` app-wide uses the same signature and works unchanged; `deviceTimelineHTML()` has zero external callers outside `devices-detail.js` so its refactor is fully contained; `toggleSettingsSection()` itself is untouched and still correctly used by `accessibility.js`/`settings.js`; no report/PDF generation code references any of the old device-detail section ids that no longer exist.
-- **Lesson:** a "did this change break anything else" check needs to happen after every substantial rebuild, not just the screen being directly worked on — this bug existed in already-shipped code from earlier the same night and would not have been caught without asking the question directly.
-
-## 2026-07-07 (past midnight) — Device detail screen: full accordion rebuild, decision-slot consolidated
-- The big deferred item from earlier tonight — the device detail page never got the animated accordion treatment `networks.js` did, and its "escalate to Owner" option rendered as the literal last thing on a ~330-line page, 14+ sections below where a Manager would actually look after clicking Take Ownership.
-- **Consolidated `deviceDecisionSlotHTML(d)`** — one function replacing 4 previously-independent, scattered banner blocks (returned-to-tech, the 3-case escalation banner, and the standalone escalate box). Returns exactly one thing based on state: nothing / returned-to-you / needs-your-decision / partial-plus-escalated / FYI / read-only-pill / you've-taken-ownership-resolve-or-escalate-further. This is the structural fix, not just a reposition — contradictory or duplicate banners for the same device are no longer possible by construction, the same class of bug as tonight's earlier Manager-dashboard Flagged/Partially-resolved redundancy.
-- **Rebuilt the rest of the page as an accordion**, same animated pattern as `networks.js` (`deviceAccSection()`/`toggleDeviceAcc()`/`initDeviceAccordionState()` — kept device-scoped with distinct DOM ids, not shared functions, to avoid any risk of one screen's accordion state affecting the other's): How to fix this → Assignment → Remediation checklist → Device details → Device history → Notice something (Farm Hand/Viewer only).
-- **Remediation checklist merges what used to be 3 separately-gated blocks** (the green verify-box, the resolve/escalate toggle box, and the view-only farm-hand-status note) into one section, since they're mutually exclusive by role/state anyway.
-- **Device history merges what used to be two separate, near-identical collapsibles** (timeline and handoff log) into one section.
-- **Accordion open-by-default logic follows actionability, not a fixed template:** Assignment opens when unassigned and I can assign it; Remediation checklist opens when there's something for me to actually do; Notice-something opens for Farm Hand/Viewer since reporting is their one real action; Device details and Device history stay closed by default (reference material, not action items).
-- Mocked and discussed with Joy first (5 states: Manager-needs-decision, same-device-post-Take-Ownership, Owner-unassigned, Farm-Hand, Technician-with-Resolve/Escalate-toggle) before any code was written, per her explicit request to talk through workflow/convenience/logic before implementation.
-- **Verified via jsdom, not just code review** — 19 targeted checks: full render sweep across all 4 roles × all 10 devices both before and after every mutation below; Manager's decision slot renders with real Take Ownership/Send Back buttons; clicking Take Ownership actually reassigns, clears escalation, and shows the ownership-taken banner in the *same slot*; from that state, Manager can escalate further via the inline form and it actually sets `needsOwnerAction`; Owner (who has nowhere further to escalate to) correctly does NOT see that inline option; unassigned device correctly assignable via the Assignment accordion; Farm Hand never sees the decision slot even on an escalated device, and can still submit an observation; Technician sees the Resolve/Escalate toggle inside Remediation checklist and `partialResolveAndEscalate()` actually works end to end; the existing "Technician can't resolve unassigned work" rule from earlier tonight survived the rebuild intact.
-- **First test pass had 5 failures** — traced immediately rather than assumed as real bugs: the test device (Siemens) isn't actually in `getRiskData()` and falls back to "Other" (support Unknown, cve 1), which doesn't qualify as `hasStructuralIssue()` — wrong test data, not a code bug. Reran against a device that does qualify (Hog Slat: support Limited, cve 3) — all 5 passed.
-- **Still open, not resolved by guessing:** whether "How to fix this" (pure guidance, no inputs) and "Remediation checklist" (where the fix actually happens) should be merged into one section — flagged mid-session as confusingly adjacent when both are collapsed and only their titles are visible; kept separate for this build pending an explicit decision.
-- New `lang-data.js` keys (EN+ES): `ownershipTakenTitle`, `ownershipTakenDesc`, `escalateToOwnerInsteadBtn`.
-
-## 2026-07-07 (just after midnight) — Manager dashboard: Flagged/Partially-resolved redundancy fixed
-- Found via live testing: a device that was partially resolved and escalated (e.g. "Main barn controller," fixed by Sarah, needing Manager's decision) was showing up **twice** on the Manager dashboard — once counted in the "Flagged — needs action" summary card, and again with full context in the dedicated purple "Partially resolved — needs decision" section below.
-- Root cause: the Owner dashboard branch already correctly excluded partially-resolved devices from its equivalent flagged list (`escalatedDevices().filter(d => !d.partiallyResolved)`), but the Manager branch's "Flagged" card used the raw, unfiltered `escalatedDevices()` count — the same exclusion had just never been applied there.
-- Fixed: Manager's Flagged card now applies the identical `!d.partiallyResolved` filter, and the "escalated only" filtered device-list view (what you land on if you click the Flagged card) was updated to match — so the card's count and what it actually links to no longer disagree with each other.
-- Verified via jsdom: recreated the exact scenario (assigned, escalated, partially resolved, awaiting Manager decision) — confirmed the Flagged card's count is now `0` and doesn't render at all, while the Partially Resolved section still shows the device once. Also reran the full 4-role regression sweep — all passing.
-- **Investigated separately: Farm Hand status (Fine/Known issue/Use with caution) not reflecting Manager/Owner's dropdown selection.** Traced the full flow via jsdom — Manager assigns a device to a Technician while setting the status dropdown to "Use with caution," and confirmed all three surfaces (dashboard, device list, device detail page) correctly showed the amber "Use with caution" styling and text once the assignment actually went through. Could not reproduce the reported bug from code alone; flagged to Joy for more specific repro steps (which device, which build) rather than assuming it's fixed or that it isn't real.
-
-## 2026-07-06 (late night) — Farm Hand experience audit: 5 real bugs found and fixed, 1 design rule changed
-- Joy did a live pass through the app as each role and found real problems this session's earlier testing had missed. Each was verified against actual code/execution before fixing, not assumed.
-- **Fixed: Farm Hand could archive and delete devices/networks** — the action buttons rendered completely unconditionally, no permission check at all (a pre-existing gap; a prior changelog entry had claimed a `canArchiveDevices()` helper already existed, but it didn't — another doc/code mismatch, now actually built). Added `canArchiveDevices()` (gated by the existing `archiveDelete` perm flag) for archive/restore, reused `canHardDelete()` (Owner-only) for permanent delete — applied to both devices and networks, at both the button-rendering level and the function level (defense in depth).
-- **Fixed: Farm Hand saw the purple escalation banner and the escalated/partial-resolve pill tags** — root cause: `canSeeIssue(d)` was being used as the sole gate in several places, but it was designed to mean "this device exists to them," not "they should see operational severity signals." Added `&& canSeeDetailedRisk()` (already `false` for Farm Hand/Viewer) everywhere this pattern appeared: the escalation banner (`devices-detail.js`), and the escalated/partial-resolve tags in the device list (`devices-list.js`).
-- **Changed (explicit new rule, not previously the case):** Technicians (and any non-Owner/Manager role) can no longer resolve an *unassigned* device — previously `canResolveIssues()` let anyone with the resolve permission act on unassigned work; now assignment is required first, no exception. Owner/Manager behavior is unchanged.
-- **Fixed: Farm Hand dashboard and device list had no visual styling** — just plain text labels, no color or icon distinction between states. Replaced with a themed-but-calm 3-state pill system (down from 4 — "do-not-use" retired as a distinct state per explicit decision): Fine (thumbs-up, brand green), Known issue (info icon, neutral gray), Use with caution (alert-triangle, neutral amber — reusing colors already established elsewhere in the app, not a new red/alarm palette). Applied consistently on the dashboard, device list, and the device detail page's own status note. Removed "do-not-use" from the Manager/Owner-facing status-assignment dropdown going forward; existing devices with that value already stored still display correctly (mapped into the caution treatment for backward compatibility).
-- **Verified working, not a bug:** the observation/"Notice something?" reporting workflow already correctly surfaces to the Owner/Manager dashboard as a distinct blue-bordered, clickable card — confirmed via jsdom (Farm Hand submits an observation, Owner's dashboard render includes it).
-- **Identified but deliberately deferred, not silently skipped:** the Manager "Take Ownership → escalate to Owner" flow's escalate option renders far down the page instead of replacing the original decision banner at the top, and device detail's collapsible sections don't have the consistent animated/tinted accordion treatment `networks.js` got. Both are really the same underlying problem — the device detail page never got the full accordion rebuild that network detail did — and reordering pieces of the current ~700-line conditional render carries real risk of breaking the "each role sees exactly one banner" logic it depends on. Scoped as its own next dedicated pass, same size/shape as the network detail rebuild, rather than a rushed partial reorder.
-- Verified via jsdom: 12 new targeted checks covering every fix above, plus a full 4-role × dashboard/device-list/10-devices/network-list/3-networks regression sweep (69 checks) to confirm nothing broke. All passing.
-
-## 2026-07-06 (late evening) — Base corrected: this file replaces an earlier, wrong reconstruction
-- **What happened today, honestly documented:** work was spread across several separate Claude conversations. This conversation initially pulled the GitHub `dev` branch as a base and built on top of it — but `dev` turned out to be stale relative to a `agriguardian-updated.zip` file from a later same-day session ("Managing a change request audit document," ~7:22pm), which had already fixed real things `dev` didn't have (see below). That later file had been deleted from Downloads and was recovered from the Recycle Bin.
-- **Confirmed present in the 7:22pm file (verified directly, not assumed):** a real session-persistence security fix (`pendingLogin` staging pattern in `auth-flow.js`/`session.js`, preventing stale `currentUser` data from silently authenticating someone), Manager-to-Owner escalation working, and networks/network-detail otherwise matching what this conversation had independently built.
-- **Confirmed absent from the 7:22pm file, despite being described in other same-day session summaries:** `reassignEscalation()` (this file still uses the older `sendBackToTech()` naming) and the `isPrincipalTier()`/10-role-hierarchy groundwork functions described in "Code fix token consumption inefficiency" (~6:13pm). That session's specific contributions do not appear to have carried into this file, and no separate copy of that session's output was found in the recovered Trash files. Not fabricating a fix for this — flagged as a real, currently-unrecovered gap.
-- **A second doc/code mismatch found in this same 7:22pm file's own `FILE-MAP.md`:** it confidently claimed the Farm Hand dashboard crash (`canFarmHandSeeDevice` undefined) had already been found and fixed — but the actual `dashboard.js` in the same zip didn't reflect that fix. Corrected directly in `FILE-MAP.md` and fixed properly in `dashboard.js` (see below). This is the same "doc says fixed, code says otherwise" pattern that caused the original confusion earlier today — now confirmed to predate today's work, not something introduced by it.
-- This changelog's own earlier version (built during today's now-corrected work) contained an entry claiming the Farm Hand dashboard crash was "found and fixed" — that entry described a real bug and a real fix, but against the *wrong* (stale GitHub) base. The fix described below is the same fix, correctly re-verified against the right base.
-
-## 2026-07-06 (evening) — Farm Hand dashboard: colored severity count leak fixed
-- `dashboard.js`'s `renderDashList()` computed `redDevices`/`yellowDevices` using only `canSeeIssue(d)`, with no gate on detailed-risk visibility — meaning Farm Hand's numeric issue count silently included colored severity information, contradicting this file's own documented design intent (see the "DEFAULT (Farm Hand, Viewer)" render branch: no count card, specifically because "it would color its number by severity").
-- Fixed: both filters now also require `canSeeDetailedRisk()` (already `false` for Farm Hand/Viewer, `true` for Owner/Manager/Technician) — no new function invented, just gating with what already existed.
-- Verified via jsdom: Farm Hand's dashboard renders with zero `badge-red`/`badge-yellow` classes present, across a full 4-role x dashboard/device-list/10 devices/network-list/3 networks execution audit (69 checks, all passing).
-
-## 2026-07-06 (evening) — Network detail screen: full accordion + assignment/return-to-assigner
-- `showNetDetail()` rebuilt around six animated collapsible sections (How to fix this / Assignment / Network details / Notes / Network history / Remediation checklist — renamed from "What was done?" for this screen only; devices keep their original wording).
-- New 
+- Fixed by removing all actionabili

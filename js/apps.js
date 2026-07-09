@@ -39,7 +39,7 @@ function renderBackupScreen() {
 
     // 3-2-1 status at a glance
     '<p class="section-title">' + t('backup321Title') + '</p>' +
-    '<div style="background:#F3F8F2;border:1px solid #D7E4D7;border-radius:10px;padding:0 12px;margin-bottom:16px">' +
+    '<div style="background:#FFFFFF;border:1px solid #D7E4D7;border-radius:10px;padding:0 12px;margin-bottom:16px">' +
       checkRow(farmBackup.hasPrimary,   'backup321Copy1Label', farmBackup.primaryNote,   'backup321Copy1Note', 'primary') +
       checkRow(farmBackup.hasSecondary, 'backup321Copy2Label', farmBackup.secondaryNote, 'backup321Copy2Note', 'secondary') +
       '<div style="border-bottom:none">' +
@@ -53,9 +53,9 @@ function renderBackupScreen() {
 
     // Notes
     (farmBackup.notes ?
-      '<div style="background:#F3F8F2;border-radius:8px;padding:10px 12px;margin-bottom:16px">' +
+      '<div style="background:#FFFFFF;border-radius:8px;padding:10px 12px;margin-bottom:16px">' +
         '<div style="font-size:11px;font-weight:600;color:#7A8F80;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">' + t('notes') + '</div>' +
-        '<div style="font-size:13px;color:#22372A;white-space:pre-line">' + farmBackup.notes + '</div>' +
+        '<div style="font-size:13px;color:#111111;white-space:pre-line">' + farmBackup.notes + '</div>' +
       '</div>' : '') +
 
     // Edit form
@@ -175,9 +175,9 @@ function appAccSection(key, appId, iconClass, title, previewHTML, bodyHTML) {
   var btnId = 'app-acc-btn-' + key + '-' + appId;
   var chevId = 'app-acc-chev-' + key + '-' + appId;
   return '<div style="border:1px solid #CBD8CB;border-radius:10px;margin-bottom:8px;overflow:hidden">' +
-    '<button type="button" id="' + btnId + '" onclick="toggleAppAcc(\'' + key + '\',' + appId + ')" aria-expanded="false" style="width:100%;display:flex;align-items:center;gap:8px;padding:13px 12px;background:#F3F8F2;border:none;text-align:left;cursor:pointer;min-height:44px;transition:background-color 0.2s ease;font-family:inherit">' +
+    '<button type="button" id="' + btnId + '" onclick="toggleAppAcc(\'' + key + '\',' + appId + ')" aria-expanded="false" style="width:100%;display:flex;align-items:center;gap:8px;padding:13px 12px;background:#FFFFFF;border:none;text-align:left;cursor:pointer;min-height:44px;transition:background-color 0.2s ease;font-family:inherit">' +
       '<i class="ti ' + iconClass + '" style="font-size:16px;color:#1F4D2E;flex-shrink:0"></i>' +
-      '<span style="font-size:13px;font-weight:500;color:#22372A;flex-shrink:0">' + title + '</span>' +
+      '<span style="font-size:13px;font-weight:500;color:#111111;flex-shrink:0">' + title + '</span>' +
       '<span style="margin-left:auto;font-size:11px;color:#7A8F80;white-space:nowrap;flex-shrink:1;padding-left:6px;overflow:hidden;text-overflow:ellipsis;max-width:150px">' + (previewHTML||'') + '</span>' +
       '<i id="' + chevId + '" class="ti ti-chevron-down" style="font-size:15px;color:#7A8F80;flex-shrink:0;display:inline-block;transform:rotate(0deg);transition:transform 0.25s ease"></i>' +
     '</button>' +
@@ -245,7 +245,7 @@ function showAppDetail(id, keepScreen) {
       (a.renewal ? '<div class="detail-row"><span class="detail-key">' + t('appRenewalLabel') + '</span><span class="detail-val">' + a.renewal + '</span></div>' : '')) +
 
     (a.notes ? appAccSection('notes', a.id, 'ti-note', t('notes'), a.notes.split('\n')[0],
-      '<div style="font-size:13px;color:#22372A;white-space:pre-line;margin-top:10px">' + a.notes + '</div>') : '') +
+      '<div style="font-size:13px;color:#111111;white-space:pre-line;margin-top:10px">' + a.notes + '</div>') : '') +
 
     appAccSection('review', a.id, 'ti-checklist', t('appReviewBoxTitle'), '',
       '<div style="margin-top:10px">' +

@@ -51,7 +51,7 @@
   </div>
 
   <!-- BODY -->
-  <div class="login-scroll" style="background:#F3F8F2;padding:24px 20px;">
+  <div class="login-scroll" style="background:#C6D0C8;padding:24px 20px;">
 
     <!-- STEP 1: CHOOSE -->
     <div id="step-choice">
@@ -59,19 +59,19 @@
       <p style="font-size:13px;color:#7A8F80;margin-bottom:16px" id="welcome-sub" data-i18n="loginWelcomeSub">New user or returning?</p>
       <button class="login-btn secondary" style="margin-top:10px" id="btn-signin-choice" data-i18n="loginSigninBtn" onclick="showStep('signin')">Sign in</button>
       <button class="login-btn secondary" style="margin-top:10px" id="btn-invite-choice" data-i18n="loginHaveInviteBtn" onclick="showStep('invite')">I have an invite</button>
-      <div style="margin-top:20px;background:#E2EFE8;border:1px solid #E2EFE8;border-radius:10px;padding:12px 14px" id="demo-box">
+      <div style="margin-top:20px;background:#FFFFFF;border:1px solid #D7E4D7;border-radius:10px;padding:12px 14px" id="demo-box">
         <p style="font-size:10px;color:#aaa;text-align:right;margin-bottom:8px"><span id="lbl-last-updated" data-i18n="loginLastUpdated">Last updated:</span> <span id="build-timestamp"></span></p>
         <p id="lbl-demo-title" data-i18n-prefix="ⓘ " data-i18n="loginDemoTitle" style="font-size:12px;font-weight:600;color:#1F4D2E;margin-bottom:8px">ⓘ How to explore this demo</p>
         <p id="lbl-demo-subtitle" data-i18n="loginDemoSubTitle" style="font-size:12px;color:#444;margin-bottom:8px"><strong data-i18n="loginDemoSubTitle">Two ways in — pick one:</strong></p>
 
-        <div style="background:#F3F8F2;border:1px solid #E2EFE8;border-radius:8px;padding:8px 10px;margin-bottom:6px">
+        <div style="background:#FFFFFF;border:1px solid #D7E4D7;border-radius:8px;padding:8px 10px;margin-bottom:6px">
           <p id="lbl-demo-card1-title" data-i18n="loginDemoCard1Title" style="font-size:12px;color:#1F4D2E;font-weight:600;margin-bottom:3px">1. Sign in → <span style="font-weight:400;color:#5F7266">demo accounts already created</span></p>
           <p id="lbl-demo-card1-desc" data-i18n="loginDemoCard1Desc" style="font-size:11px;color:#5F7266;margin:0">Tap <strong data-i18n="loginSigninTitle">Sign in</strong> and pick a pre-made team member to see the app from their role's perspective. Credentials are shown on the next screen.</p>
         </div>
 
-        <div style="background:#F3F8F2;border:1px solid #E2EFE8;border-radius:8px;padding:8px 10px;margin-bottom:0">
+        <div style="background:#FFFFFF;border:1px solid #D7E4D7;border-radius:8px;padding:8px 10px;margin-bottom:0">
           <p id="lbl-demo-card2-title" data-i18n="loginDemoCard2Title" style="font-size:12px;color:#1F4D2E;font-weight:600;margin-bottom:3px">2. I have an invite → <span style="font-weight:400;color:#5F7266">join an existing farm</span></p>
-          <p id="lbl-demo-card2-desc" data-i18n="loginDemoCard2Desc" style="font-size:11px;color:#5F7266;margin:0">Tap <strong data-i18n="loginHaveInviteBtn">I have an invite</strong> and enter code <strong style="background:#F3F8F2;padding:1px 6px;border-radius:4px;letter-spacing:1px">987654</strong> to see how a new team member accepts a farm invitation and gets real permissions for their role.</p>
+          <p id="lbl-demo-card2-desc" data-i18n="loginDemoCard2Desc" style="font-size:11px;color:#5F7266;margin:0">Tap <strong data-i18n="loginHaveInviteBtn">I have an invite</strong> and enter code <strong style="background:#EEEEEE;padding:1px 6px;border-radius:4px;letter-spacing:1px">987654</strong> to see how a new team member accepts a farm invitation and gets real permissions for their role.</p>
         </div>
       </div>
     </div>
@@ -99,50 +99,50 @@
       <a href="#" onclick="showStep('reset'); return false;" id="lbl-forgot-pw" data-i18n="forgotPassword" style="font-size:12px;color:#1F4D2E;text-decoration:underline">Forgot password?</a>
     </p>
     <!-- Demo accounts -->
-    <div style="margin-top:16px;background:#E2EFE8;border:1px solid #E2EFE8;border-radius:10px;padding:12px 14px">
+    <div style="margin-top:16px;background:#FFFFFF;border:1px solid #D7E4D7;border-radius:10px;padding:12px 14px">
       <p style="font-size:12px;font-weight:600;color:#1F4D2E;margin-bottom:4px" id="lbl-demo-members-title" data-i18n="demoMembersTitle">ⓘ Demo accounts — already created</p>
       <p style="font-size:11px;color:#5F7266;margin-bottom:10px" id="lbl-demo-members-sub" data-i18n="demoMembersSub">Tap a profile to fill in their sign-in details, then send the code and verify like a real sign-in. Verification code for all accounts: 123456</p>
       <div style="display:flex;flex-direction:column;gap:8px">
-        <button onclick="signInAsDemoMember('angus')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#F3F8F2;border:1px solid #E2EFE8;border-radius:8px;cursor:pointer;text-align:left;width:100%">
+        <button onclick="signInAsDemoMember('angus')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#FFFFFF;border:1px solid #D7E4D7;border-radius:8px;cursor:pointer;text-align:left;width:100%">
           <div style="width:36px;height:36px;border-radius:50%;background:#8B5A2B;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff;flex-shrink:0">AM</div>
           <div style="flex:1;min-width:0">
             <div style="font-size:13px;font-weight:600;color:#222">Angus MacDonald · <span style="color:#1F4D2E" data-i18n="roleOwner">Owner</span></div>
-            <div style="font-size:11px;color:#5F7266">(555) 123-4567 · password <code onclick="event.stopPropagation(); copyDemoPassword(this, 'meadow-sunrise-owner8')" title="Tap to copy" style="background:#F3F8F2;padding:1px 4px;border-radius:3px;cursor:pointer" data-i18n-title="tapToCopy">meadow-sunrise-owner8</code></div>
+            <div style="font-size:11px;color:#5F7266">(555) 123-4567 · password <code onclick="event.stopPropagation(); copyDemoPassword(this, 'meadow-sunrise-owner8')" title="Tap to copy" style="background:#EEEEEE;padding:1px 4px;border-radius:3px;cursor:pointer" data-i18n-title="tapToCopy">meadow-sunrise-owner8</code></div>
           </div>
           <i class="ti ti-arrow-right" style="color:#1F4D2E;font-size:16px;flex-shrink:0"></i>
         </button>
-        <button onclick="signInAsDemoMember('carlos')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#F3F8F2;border:1px solid #E2EFE8;border-radius:8px;cursor:pointer;text-align:left;width:100%">
+        <button onclick="signInAsDemoMember('carlos')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#FFFFFF;border:1px solid #D7E4D7;border-radius:8px;cursor:pointer;text-align:left;width:100%">
           <div style="width:36px;height:36px;border-radius:50%;background:#1F4D2E;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff;flex-shrink:0">CM</div>
           <div style="flex:1;min-width:0">
             <div style="font-size:13px;font-weight:600;color:#222">Carlos Mendez · <span style="color:#1F4D2E" data-i18n="roleManager">Manager</span></div>
-            <div style="font-size:11px;color:#5F7266">(555) 201-3344 · password <code onclick="event.stopPropagation(); copyDemoPassword(this, 'harvest-tractor-lead4')" title="Tap to copy" style="background:#F3F8F2;padding:1px 4px;border-radius:3px;cursor:pointer" data-i18n-title="tapToCopy">harvest-tractor-lead4</code></div>
+            <div style="font-size:11px;color:#5F7266">(555) 201-3344 · password <code onclick="event.stopPropagation(); copyDemoPassword(this, 'harvest-tractor-lead4')" title="Tap to copy" style="background:#EEEEEE;padding:1px 4px;border-radius:3px;cursor:pointer" data-i18n-title="tapToCopy">harvest-tractor-lead4</code></div>
             <div style="font-size:11px;color:#7A8F80" id="lbl-carlos-desc" data-i18n="carlosDesc">Almost all Owner abilities — cannot hard-delete</div>
           </div>
           <i class="ti ti-arrow-right" style="color:#1F4D2E;font-size:16px;flex-shrink:0"></i>
         </button>
-        <button onclick="signInAsDemoMember('sarah')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#F3F8F2;border:1px solid #E2EFE8;border-radius:8px;cursor:pointer;text-align:left;width:100%">
+        <button onclick="signInAsDemoMember('sarah')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#FFFFFF;border:1px solid #D7E4D7;border-radius:8px;cursor:pointer;text-align:left;width:100%">
           <div style="width:36px;height:36px;border-radius:50%;background:#A0522D;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff;flex-shrink:0">ST</div>
           <div style="flex:1;min-width:0">
             <div style="font-size:13px;font-weight:600;color:#222">Sarah Tully · <span style="color:#1F4D2E" data-i18n="roleTechnician">Technician</span></div>
-            <div style="font-size:11px;color:#5F7266">(555) 442-7781 · password <code onclick="event.stopPropagation(); copyDemoPassword(this, 'wrench-fieldwork-tech6')" title="Tap to copy" style="background:#F3F8F2;padding:1px 4px;border-radius:3px;cursor:pointer" data-i18n-title="tapToCopy">wrench-fieldwork-tech6</code></div>
+            <div style="font-size:11px;color:#5F7266">(555) 442-7781 · password <code onclick="event.stopPropagation(); copyDemoPassword(this, 'wrench-fieldwork-tech6')" title="Tap to copy" style="background:#EEEEEE;padding:1px 4px;border-radius:3px;cursor:pointer" data-i18n-title="tapToCopy">wrench-fieldwork-tech6</code></div>
             <div style="font-size:11px;color:#7A8F80" data-i18n="addDevicesResolveIssues">Add devices, resolve issues</div>
           </div>
           <i class="ti ti-arrow-right" style="color:#1F4D2E;font-size:16px;flex-shrink:0"></i>
         </button>
-        <button onclick="signInAsDemoMember('joni')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#F3F8F2;border:1px solid #E2EFE8;border-radius:8px;cursor:pointer;text-align:left;width:100%">
+        <button onclick="signInAsDemoMember('joni')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#FFFFFF;border:1px solid #D7E4D7;border-radius:8px;cursor:pointer;text-align:left;width:100%">
           <div style="width:36px;height:36px;border-radius:50%;background:#6B7FD7;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff;flex-shrink:0">JD</div>
           <div style="flex:1;min-width:0">
             <div style="font-size:13px;font-weight:600;color:#222">Joni Dear · <span style="color:#1F4D2E" data-i18n="roleTechnician">Technician</span></div>
-            <div style="font-size:11px;color:#5F7266">(555) 014-2208 · password <code onclick="event.stopPropagation(); copyDemoPassword(this, 'toolkit-morning-tech3')" title="Tap to copy" style="background:#F3F8F2;padding:1px 4px;border-radius:3px;cursor:pointer" data-i18n-title="tapToCopy">toolkit-morning-tech3</code></div>
+            <div style="font-size:11px;color:#5F7266">(555) 014-2208 · password <code onclick="event.stopPropagation(); copyDemoPassword(this, 'toolkit-morning-tech3')" title="Tap to copy" style="background:#EEEEEE;padding:1px 4px;border-radius:3px;cursor:pointer" data-i18n-title="tapToCopy">toolkit-morning-tech3</code></div>
             <div style="font-size:11px;color:#7A8F80" data-i18n="addDevicesResolveIssues">Add devices, resolve issues</div>
           </div>
           <i class="ti ti-arrow-right" style="color:#1F4D2E;font-size:16px;flex-shrink:0"></i>
         </button>
-        <button onclick="signInAsDemoMember('jamie')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#F3F8F2;border:1px solid #E2EFE8;border-radius:8px;cursor:pointer;text-align:left;width:100%">
+        <button onclick="signInAsDemoMember('jamie')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#FFFFFF;border:1px solid #D7E4D7;border-radius:8px;cursor:pointer;text-align:left;width:100%">
           <div style="width:36px;height:36px;border-radius:50%;background:#1A5FA8;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff;flex-shrink:0">JO</div>
           <div style="flex:1;min-width:0">
             <div style="font-size:13px;font-weight:600;color:#222">Jamie Ortiz · <span style="color:#1F4D2E" data-i18n="roleFarmHand">Farm Hand</span></div>
-            <div style="font-size:11px;color:#5F7266">(555) 309-6612 · password <code onclick="event.stopPropagation(); copyDemoPassword(this, 'chores-morning-hand2')" title="Tap to copy" style="background:#F3F8F2;padding:1px 4px;border-radius:3px;cursor:pointer" data-i18n-title="tapToCopy">chores-morning-hand2</code></div>
+            <div style="font-size:11px;color:#5F7266">(555) 309-6612 · password <code onclick="event.stopPropagation(); copyDemoPassword(this, 'chores-morning-hand2')" title="Tap to copy" style="background:#EEEEEE;padding:1px 4px;border-radius:3px;cursor:pointer" data-i18n-title="tapToCopy">chores-morning-hand2</code></div>
             <div style="font-size:11px;color:#7A8F80" id="lbl-jamie-desc" data-i18n="jamieDesc">View only</div>
           </div>
           <i class="ti ti-arrow-right" style="color:#1F4D2E;font-size:16px;flex-shrink:0"></i>
@@ -217,9 +217,9 @@
       </div>
       <button class="login-btn" id="btn-validate-code" data-i18n="inviteContinueBtn" onclick="validateInviteCode()" style="margin-bottom:6px">Continue</button>
       <!-- Demo hint -->
-      <div style="margin-top:12px;background:#E2EFE8;border:1px solid #E2EFE8;border-radius:10px;padding:12px 14px">
+      <div style="margin-top:12px;background:#FFFFFF;border:1px solid #D7E4D7;border-radius:10px;padding:12px 14px">
         <p style="font-size:12px;font-weight:600;color:#1F4D2E;margin-bottom:4px" id="lbl-invite-demo-hint-title" data-i18n="inviteDemoHintTitle">ⓘ Demo invite code</p>
-        <p style="font-size:12px;color:#444;margin-bottom:0" id="lbl-invite-demo-hint">Use code <strong style="background:#F3F8F2;padding:2px 8px;border-radius:6px;border:1px solid #E2EFE8;letter-spacing:2px">987654</strong> to register. Then use "Sign in" to explore as Carlos or Jamie.</p>
+        <p style="font-size:12px;color:#444;margin-bottom:0" id="lbl-invite-demo-hint">Use code <strong style="background:#EEEEEE;padding:2px 8px;border-radius:6px;border:1px solid #D7E4D7;letter-spacing:2px">987654</strong> to register. Then use "Sign in" to explore as Carlos or Jamie.</p>
       </div>
       <button class="login-btn secondary" style="margin-top:10px" id="btn-back-invite" data-i18n="inviteBackBtn" onclick="showStep('choice')">Back</button>
     </div>
@@ -302,7 +302,7 @@
     <div id="report-buttons" style="margin:12px 0;display:none;flex-direction:column;gap:12px">
       <!-- Hygiene Report -->
       <div style="border:1px solid #D7E4D7;border-radius:10px;overflow:hidden">
-        <div style="padding:10px 14px;background:#F3F8F2;font-size:12px;font-weight:600;color:#1F4D2E;text-transform:uppercase;letter-spacing:0.5px" id="lbl-report-hygiene-title" data-i18n="lblReportHygieneTitle">Hygiene Report</div>
+        <div style="padding:10px 14px;background:#FFFFFF;font-size:12px;font-weight:600;color:#1F4D2E;text-transform:capitalize;letter-spacing:0.5px" id="lbl-report-hygiene-title" data-i18n="lblReportHygieneTitle">Hygiene Report</div>
         <div style="display:flex;gap:0">
           <button id="btn-view-report" onclick="viewHygieneReport()" style="flex:1;background:#1F4D2E;color:#fff;border:none;border-right:1px solid rgba(255,255,255,0.2);font-size:13px;font-weight:600;cursor:pointer;padding:11px 8px;display:flex;align-items:center;justify-content:center;gap:6px">
             <i class="ti ti-eye" style="font-size:16px"></i><span id="lbl-view-report" data-i18n="viewLabel">View</span>
@@ -317,7 +317,7 @@
       </div>
       <!-- Activity Log -->
       <div style="border:1px solid #D7E4D7;border-radius:10px;overflow:hidden">
-        <div style="padding:10px 14px;background:#F3F8F2;font-size:12px;font-weight:600;color:#1F4D2E;text-transform:uppercase;letter-spacing:0.5px" id="lbl-report-activity-title" data-i18n="lblReportActivityTitle">Activity Log</div>
+        <div style="padding:10px 14px;background:#FFFFFF;font-size:12px;font-weight:600;color:#1F4D2E;text-transform:capitalize;letter-spacing:0.5px" id="lbl-report-activity-title" data-i18n="lblReportActivityTitle">Activity Log</div>
         <div style="display:flex;gap:0">
           <button id="btn-view-activity" onclick="viewActivityReport()" style="flex:1;background:#1F4D2E;color:#fff;border:none;border-right:1px solid rgba(255,255,255,0.2);font-size:13px;font-weight:600;cursor:pointer;padding:11px 8px;display:flex;align-items:center;justify-content:center;gap:6px">
             <i class="ti ti-eye" style="font-size:16px"></i><span id="lbl-view-activity" data-i18n="viewLabel">View</span>
@@ -673,9 +673,9 @@
     <p class="section-title" id="lbl-settings-title" data-i18n="settingsTitle">Farm settings</p>
 
 
-    <div id="settings-farm"></div><div style="border:1px solid #D7E4D7;border-radius:10px;overflow:hidden;margin-bottom:12px"><button onclick="toggleSettingsSection('settings-farm', this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#F3F8F2;border:none;cursor:pointer;text-align:left"><span style="font-size:13px;font-weight:600;color:#1F4D2E;text-transform:uppercase;letter-spacing:0.5px" id="sec-hdr-farm" data-i18n="farmAccountHeader">Farm account</span><span class="sec-arrow" style="font-size:14px;color:#7A8F80">▾</span></button><div id="sec-settings-farm" style="display:none;padding:12px 14px">
+    <div id="settings-farm"></div><div style="border:1px solid #D7E4D7;border-radius:10px;overflow:hidden;margin-bottom:12px"><button onclick="toggleSettingsSection('settings-farm', this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#FFFFFF;border:none;cursor:pointer;text-align:left"><span style="font-size:13px;font-weight:600;color:#1F4D2E;text-transform:capitalize;letter-spacing:0.5px" id="sec-hdr-farm" data-i18n="farmAccountHeader">Farm account</span><span class="sec-arrow" style="font-size:14px;color:#7A8F80">▾</span></button><div id="sec-settings-farm" style="display:none;padding:12px 14px">
     <!-- Farm info — condensed -->
-    <div style="background:#F3F8F2;border-radius:10px;padding:10px 14px;margin-bottom:14px;border:0.5px solid #D7E4D7">
+    <div style="background:#FFFFFF;border-radius:10px;padding:10px 14px;margin-bottom:14px;border:0.5px solid #D7E4D7">
       <div id="settings-farm-name" style="font-size:14px;font-weight:600;color:#22372A"></div>
       <div id="settings-owner-role" style="font-size:12px;color:#7A8F80;margin-top:2px"></div>
     </div>
@@ -689,7 +689,7 @@
       <p style="font-size:11px;color:#7A8F80;margin-top:4px" id="lbl-owner-email-hint" data-i18n="ownerEmailHint">Used when emailing hygiene and activity reports.</p>
     </div>
     </div></div>
-    <div id="settings-team"></div><div style="border:1px solid #D7E4D7;border-radius:10px;overflow:hidden;margin-bottom:12px"><button onclick="toggleSettingsSection('settings-team', this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#F3F8F2;border:none;cursor:pointer;text-align:left"><span style="font-size:13px;font-weight:600;color:#1F4D2E;text-transform:uppercase;letter-spacing:0.5px" id="sec-hdr-team" data-i18n="teamMembersHeader">Team members</span><span class="sec-arrow" style="font-size:14px;color:#7A8F80">▾</span></button><div id="sec-settings-team" style="display:none;padding:12px 14px">
+    <div id="settings-team"></div><div style="border:1px solid #D7E4D7;border-radius:10px;overflow:hidden;margin-bottom:12px"><button onclick="toggleSettingsSection('settings-team', this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#FFFFFF;border:none;cursor:pointer;text-align:left"><span style="font-size:13px;font-weight:600;color:#1F4D2E;text-transform:capitalize;letter-spacing:0.5px" id="sec-hdr-team" data-i18n="teamMembersHeader">Team members</span><span class="sec-arrow" style="font-size:14px;color:#7A8F80">▾</span></button><div id="sec-settings-team" style="display:none;padding:12px 14px">
     <!-- Team members -->
     <div id="team-section">
     <div class="filter-row" id="user-filter-row">
@@ -739,7 +739,7 @@
       <p style="font-size:11px;color:#7A8F80;margin-top:8px;font-style:italic" id="lbl-invite-note" data-i18n="inviteNote">The worker will receive an SMS with instructions to download AgriGuardian and join your farm account.</p>
     </div>
 
-    </div></div><div id="settings-timezone"></div><div style="border:1px solid #D7E4D7;border-radius:10px;overflow:hidden;margin-bottom:12px"><button onclick="toggleSettingsSection('settings-timezone', this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#F3F8F2;border:none;cursor:pointer;text-align:left"><span style="font-size:13px;font-weight:600;color:#1F4D2E;text-transform:uppercase;letter-spacing:0.5px" id="sec-hdr-timezone" data-i18n="timezoneHeader">Farm time zone</span><span class="sec-arrow" style="font-size:14px;color:#7A8F80">▾</span></button><div id="sec-settings-timezone" style="display:none;padding:12px 14px">
+    </div></div><div id="settings-timezone"></div><div style="border:1px solid #D7E4D7;border-radius:10px;overflow:hidden;margin-bottom:12px"><button onclick="toggleSettingsSection('settings-timezone', this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#FFFFFF;border:none;cursor:pointer;text-align:left"><span style="font-size:13px;font-weight:600;color:#1F4D2E;text-transform:capitalize;letter-spacing:0.5px" id="sec-hdr-timezone" data-i18n="timezoneHeader">Farm time zone</span><span class="sec-arrow" style="font-size:14px;color:#7A8F80">▾</span></button><div id="sec-settings-timezone" style="display:none;padding:12px 14px">
     <!-- Farm timezone - owner only -->
     <div id="tz-section">
     <div class="action-box">
@@ -808,7 +808,7 @@
     </div>
     </div>
 
-    </div></div><div id="settings-session"></div><div style="border:1px solid #D7E4D7;border-radius:10px;overflow:hidden;margin-bottom:12px"><button onclick="toggleSettingsSection('settings-session', this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#F3F8F2;border:none;cursor:pointer;text-align:left"><span style="font-size:13px;font-weight:600;color:#1F4D2E;text-transform:uppercase;letter-spacing:0.5px" id="sec-hdr-session" data-i18n="sessionHeader">Session settings</span><span class="sec-arrow" style="font-size:14px;color:#7A8F80">▾</span></button><div id="sec-settings-session" style="display:none;padding:12px 14px">
+    </div></div><div id="settings-session"></div><div style="border:1px solid #D7E4D7;border-radius:10px;overflow:hidden;margin-bottom:12px"><button onclick="toggleSettingsSection('settings-session', this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#FFFFFF;border:none;cursor:pointer;text-align:left"><span style="font-size:13px;font-weight:600;color:#1F4D2E;text-transform:capitalize;letter-spacing:0.5px" id="sec-hdr-session" data-i18n="sessionHeader">Session settings</span><span class="sec-arrow" style="font-size:14px;color:#7A8F80">▾</span></button><div id="sec-settings-session" style="display:none;padding:12px 14px">
     <!-- Session timeout -->
     <div class="action-box">
       <div class="action-label" id="lbl-timeout-label" data-i18n="timeoutLabel">Auto sign-out after inactivity</div>
@@ -821,7 +821,7 @@
       <p style="font-size:11px;color:#7A8F80;margin-top:6px;font-style:italic" id="lbl-timeout-note" data-i18n="timeoutNote">Shorter timeout recommended for shared or field devices.</p>
     </div>
 
-    </div></div><div id="settings-language"></div><div style="border:1px solid #D7E4D7;border-radius:10px;overflow:hidden;margin-bottom:12px"><button onclick="toggleSettingsSection('settings-language', this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#F3F8F2;border:none;cursor:pointer;text-align:left"><span style="font-size:13px;font-weight:600;color:#1F4D2E;text-transform:uppercase;letter-spacing:0.5px" id="sec-hdr-language" data-i18n="languageHeader">Language</span><span class="sec-arrow" style="font-size:14px;color:#7A8F80">▾</span></button><div id="sec-settings-language" style="display:none;padding:12px 14px">
+    </div></div><div id="settings-language"></div><div style="border:1px solid #D7E4D7;border-radius:10px;overflow:hidden;margin-bottom:12px"><button onclick="toggleSettingsSection('settings-language', this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#FFFFFF;border:none;cursor:pointer;text-align:left"><span style="font-size:13px;font-weight:600;color:#1F4D2E;text-transform:capitalize;letter-spacing:0.5px" id="sec-hdr-language" data-i18n="languageHeader">Language</span><span class="sec-arrow" style="font-size:14px;color:#7A8F80">▾</span></button><div id="sec-settings-language" style="display:none;padding:12px 14px">
     <div class="action-box">
       <div class="action-label" id="lbl-account-language" data-i18n="accountLanguageLabel">App language</div>
       <select id="account-lang-select" style="width:100%;font-size:14px;padding:8px 12px;border:1px solid #CBD8CB;border-radius:8px;margin-top:8px" onchange="setLang(this.value,'app')">
@@ -831,7 +831,7 @@
     </div>
 
     <!-- Accessibility -->
-    </div></div><div id="a11y-section"></div><div style="border:1px solid #D7E4D7;border-radius:10px;overflow:hidden;margin-bottom:12px"><button onclick="toggleSettingsSection('a11y-section', this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#F3F8F2;border:none;cursor:pointer;text-align:left"><span style="font-size:13px;font-weight:600;color:#1F4D2E;text-transform:uppercase;letter-spacing:0.5px" id="sec-hdr-a11y" data-i18n="accessibilityLabel">Accessibility</span><span class="sec-arrow" style="font-size:14px;color:#7A8F80">▾</span></button><div id="sec-a11y-section" style="display:none;padding:12px 14px">
+    </div></div><div id="a11y-section"></div><div style="border:1px solid #D7E4D7;border-radius:10px;overflow:hidden;margin-bottom:12px"><button onclick="toggleSettingsSection('a11y-section', this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#FFFFFF;border:none;cursor:pointer;text-align:left"><span style="font-size:13px;font-weight:600;color:#1F4D2E;text-transform:capitalize;letter-spacing:0.5px" id="sec-hdr-a11y" data-i18n="accessibilityLabel">Accessibility</span><span class="sec-arrow" style="font-size:14px;color:#7A8F80">▾</span></button><div id="sec-a11y-section" style="display:none;padding:12px 14px">
     <div class="action-box">
       <div class="a11y-toggle">
         <div><div class="a11y-toggle-label" id="lbl-a11y-large" data-i18n="a11yLargeText">Large text</div><div class="a11y-toggle-sub" id="lbl-a11y-large-desc" data-i18n="a11yLargeTextDesc">Increases text size across the whole app</div></div>
@@ -858,7 +858,7 @@
       </div>
     </div>
 
-    </div></div><div id="settings-security"></div><div style="border:1px solid #D7E4D7;border-radius:10px;overflow:hidden;margin-bottom:12px"><button onclick="toggleSettingsSection('settings-security', this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#F3F8F2;border:none;cursor:pointer;text-align:left"><span style="font-size:13px;font-weight:600;color:#1F4D2E;text-transform:uppercase;letter-spacing:0.5px" id="sec-hdr-security" data-i18n="securityTitle">Security</span><span class="sec-arrow" style="font-size:14px;color:#7A8F80">▾</span></button><div id="sec-settings-security" style="display:none;padding:12px 14px">
+    </div></div><div id="settings-security"></div><div style="border:1px solid #D7E4D7;border-radius:10px;overflow:hidden;margin-bottom:12px"><button onclick="toggleSettingsSection('settings-security', this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#FFFFFF;border:none;cursor:pointer;text-align:left"><span style="font-size:13px;font-weight:600;color:#1F4D2E;text-transform:capitalize;letter-spacing:0.5px" id="sec-hdr-security" data-i18n="securityTitle">Security</span><span class="sec-arrow" style="font-size:14px;color:#7A8F80">▾</span></button><div id="sec-settings-security" style="display:none;padding:12px 14px">
     <!-- Security -->
     <div class="action-box">
       <div class="action-label" id="lbl-pw-rules-label" data-i18n="pwRulesLabel">Password requirements</div>
@@ -887,7 +887,7 @@
       </div>
     
         <div style="margin-top:12px;padding-top:12px;border-top:1px solid #E4EEE4">
-          <div id="lbl-prod-sec-title" data-i18n="productionSecTitle" style="font-size:11px;font-weight:600;color:#7A8F80;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Production security</div>
+          <div id="lbl-prod-sec-title" data-i18n="productionSecTitle" style="font-size:11px;font-weight:600;color:#7A8F80;text-transform:capitalize;letter-spacing:0.5px;margin-bottom:8px">Production security</div>
           <div style="font-size:12px;color:#5F7266;line-height:1.7">
             <p style="margin-bottom:6px">🔐 <strong id="lbl-enc-head" data-i18n="encHead">Data encryption:</strong> <span id="lbl-enc-body" data-i18n="encryptionNote">All data encrypted in transit (TLS) and at rest (AES-256) in production.</span></p>
             <p style="margin-bottom:6px">💾 <strong id="lbl-backup-head" data-i18n="backupHead">Backup strategy:</strong> <span id="lbl-backup-body" data-i18n="backupNote">Automated daily backups with 30-day retention planned for production.</span></p>

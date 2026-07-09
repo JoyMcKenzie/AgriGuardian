@@ -13,7 +13,7 @@ function verifyIsStale(d) {
 function verifyBoxHTML(d) {
   var stale = verifyIsStale(d);
   if (d.verifiedDate && !stale) {
-    return '<div class="resolve-box" style="background:#F3F8F2;border:1px solid #E2EFE8;display:flex;align-items:center;justify-content:space-between;gap:10px">' +
+    return '<div class="resolve-box" style="background:#FFFFFF;border:1px solid #E2EFE8;display:flex;align-items:center;justify-content:space-between;gap:10px">' +
       '<span style="font-size:13px;color:#1F4D2E;display:inline-flex;align-items:center;gap:6px"><i class="ti ti-circle-check" style="font-size:16px"></i>' + t('verifiedOn') + ' ' + d.verifiedDate + '</span>' +
       '<a href="#" onclick="markVerified(' + d.id + ');return false;" style="font-size:12px;color:#1F4D2E;text-decoration:underline;white-space:nowrap">' + t('verifyAgain') + '</a>' +
     '</div>';

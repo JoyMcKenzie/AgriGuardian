@@ -7,7 +7,7 @@ function _openReportViewer(titleText, bodyHtml) {
     overlay.id = 'report-viewer-overlay';
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
     overlay.innerHTML =
-      '<div style="background:#F3F8F2;max-width:520px;width:100%;max-height:90vh;border-radius:12px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.25)">' +
+      '<div style="background:#FFFFFF;max-width:520px;width:100%;max-height:90vh;border-radius:12px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.25)">' +
       '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#1F4D2E;color:#fff">' +
       '<span id="report-viewer-title" style="font-size:14px;font-weight:600"></span>' +
       '<button onclick="closeReportViewer()" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer">' + t('closeLabel') + '</button>' +
@@ -59,7 +59,7 @@ function viewHygieneReport() {
   }
   html += '<div style="font-weight:600;color:#1F4D2E;margin-bottom:6px">' + t('pdfDeviceInventory') + ' (' + active.length + ')</div>' +
     '<table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:10px">' +
-    '<tr style="background:#F3F8F2;color:#1F4D2E"><th style="text-align:left;padding:6px">' + t('pdfDevice') + '</th><th style="text-align:left;padding:6px">' + t('brandLabel') + '</th><th style="text-align:left;padding:6px">' + t('pdfStatus') + '</th></tr>' +
+    '<tr style="background:#FFFFFF;color:#1F4D2E"><th style="text-align:left;padding:6px">' + t('pdfDevice') + '</th><th style="text-align:left;padding:6px">' + t('brandLabel') + '</th><th style="text-align:left;padding:6px">' + t('pdfStatus') + '</th></tr>' +
     active.map(function(d){
       var r = getRisk(d.brand, d.pw, d.healthStatus);
       var statusTxt = d.resolved ? t('pdfResolved') : (r === 'red' ? t('pdfHigh') : r === 'yellow' ? t('pdfMedium') : t('pdfLow'));
@@ -81,7 +81,7 @@ function viewActivityReport() {
     html += '<div style="color:#7A8F80;font-size:13px">' + t('pdfNoActivity') + '</div>';
   } else {
     html += '<table style="width:100%;border-collapse:collapse;font-size:12px">' +
-      '<tr style="background:#F3F8F2;color:#1F4D2E"><th style="text-align:left;padding:6px">' + t('pdfWhen') + '</th><th style="text-align:left;padding:6px">' + t('pdfWho') + '</th><th style="text-align:left;padding:6px">' + t('pdfWhat') + '</th></tr>' +
+      '<tr style="background:#FFFFFF;color:#1F4D2E"><th style="text-align:left;padding:6px">' + t('pdfWhen') + '</th><th style="text-align:left;padding:6px">' + t('pdfWho') + '</th><th style="text-align:left;padding:6px">' + t('pdfWhat') + '</th></tr>' +
       auditLog.map(function(e){
         var detail = tAudit(e.detail);
         return '<tr style="border-top:1px solid #eee"><td style="padding:6px;color:#5F7266;white-space:nowrap">' + formatAuditTs(e.ts) + '</td>' +

@@ -77,7 +77,7 @@ function renderVulnResults(el, cisa, nvd, d) {
   let html = '<div style="border:1px solid #D7E4D7;border-radius:10px;overflow:hidden;margin-bottom:8px">';
 
   // CISA results
-  html += '<div style="background:#F3F8F2;padding:8px 12px;font-size:12px;font-weight:600;color:#5F7266;border-bottom:1px solid #D7E4D7">' + t('cisaKevTitle') + '</div>';
+  html += '<div style="background:#FFFFFF;padding:8px 12px;font-size:12px;font-weight:600;color:#5F7266;border-bottom:1px solid #D7E4D7">' + t('cisaKevTitle') + '</div>';
   if (cisa && cisa.error) {
     html += '<div style="padding:10px 12px;font-size:13px;color:#7A6514">⚠️ ' + cisa.error + '</div>';
   } else if (!cisa || cisa.length === 0) {
@@ -86,7 +86,7 @@ function renderVulnResults(el, cisa, nvd, d) {
     html += '<div style="padding:8px 12px;font-size:12px;color:#A32D2D;font-weight:500">' + t(cisa.length>1?'kevFoundPlural':'kevFoundSingular', {n: cisa.length}) + '</div>';
     cisa.slice(0, 3).forEach(function(v) {
       html += '<div style="padding:8px 12px;border-top:1px solid #E4EEE4">' +
-        '<div style="font-size:12px;font-weight:600;color:#22372A">' + v.cveID + '</div>' +
+        '<div style="font-size:12px;font-weight:600;color:#111111">' + v.cveID + '</div>' +
         '<div style="font-size:12px;color:#5F7266;margin-top:2px">' + (v.vulnerabilityName || v.shortDescription || '') + '</div>' +
         '<div style="font-size:11px;color:#7A8F80;margin-top:2px">' + t('dueLabel') + ' ' + (v.dueDate || t('naLabel')) + ' &middot; ' + (v.product || '') + '</div>' +
       '</div>';
@@ -95,7 +95,7 @@ function renderVulnResults(el, cisa, nvd, d) {
   }
 
   // NVD results
-  html += '<div style="background:#F3F8F2;padding:8px 12px;font-size:12px;font-weight:600;color:#5F7266;border-top:1px solid #D7E4D7;border-bottom:1px solid #D7E4D7">' + t('nvdTitle') + '</div>';
+  html += '<div style="background:#FFFFFF;padding:8px 12px;font-size:12px;font-weight:600;color:#5F7266;border-top:1px solid #D7E4D7;border-bottom:1px solid #D7E4D7">' + t('nvdTitle') + '</div>';
   if (nvd === null) {
     html += '<div style="padding:10px 12px;font-size:13px;color:#5F7266">' +
       '<div style="font-weight:500;margin-bottom:4px">' + t('nvdApiKeyTitle') + '</div>' +
@@ -110,7 +110,7 @@ function renderVulnResults(el, cisa, nvd, d) {
       const desc = (cve.descriptions || []).find(d => d.lang === 'en');
       const metrics = cve.metrics?.cvssMetricV31?.[0]?.cvssData || cve.metrics?.cvssMetricV2?.[0]?.cvssData || {};
       html += '<div style="padding:8px 12px;border-top:1px solid #E4EEE4">' +
-        '<div style="font-size:12px;font-weight:600;color:#22372A">' + (cve.id || '') + (metrics.baseScore ? ' <span style="background:#FBF6E9;color:#3D2B00;padding:1px 6px;border-radius:10px;font-size:10px">CVSS ' + metrics.baseScore + '</span>' : '') + '</div>' +
+        '<div style="font-size:12px;font-weight:600;color:#111111">' + (cve.id || '') + (metrics.baseScore ? ' <span style="background:#FBF6E9;color:#3D2B00;padding:1px 6px;border-radius:10px;font-size:10px">CVSS ' + metrics.baseScore + '</span>' : '') + '</div>' +
         '<div style="font-size:12px;color:#5F7266;margin-top:2px">' + (desc ? desc.value.substring(0,120) + (desc.value.length>120?'...':'') : '') + '</div>' +
       '</div>';
     });

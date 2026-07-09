@@ -16,15 +16,15 @@
   h2 { font-size: 13px; letter-spacing: 0.7px; text-transform: uppercase; color: #5F7266; margin: 30px 0 12px; font-weight: 700; }
   h2 span { text-transform: none; font-weight: 400; color: #7A8F80; }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
-  .sw { background: #F3F8F2; border: 1px solid #D7E4D7; border-radius: 12px; overflow: hidden; }
+  .sw { background: #FFFFFF; border: 1px solid #D7E4D7; border-radius: 12px; overflow: hidden; }
   .chip { height: 62px; }
   .sw .meta { padding: 9px 11px; }
   .sw .role { font-size: 12px; font-weight: 600; color: #22372A; }
   .sw .hex { font-size: 11px; color: #7A8F80; font-family: ui-monospace, Menlo, monospace; margin-top: 1px; }
-  .card { background: #F3F8F2; border: 1px solid #D7E4D7; border-radius: 12px; padding: 16px; }
+  .card { background: #FFFFFF; border: 1px solid #D7E4D7; border-radius: 12px; padding: 16px; }
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .row2b { display: grid; grid-template-columns: 1.1fr 1fr; gap: 16px; align-items:start; }
-  .statrow { display: flex; align-items: center; gap: 12px; background: #F3F8F2; border: 1px solid #D7E4D7; border-radius: 12px; padding: 14px 15px; margin-bottom: 9px; }
+  .statrow { display: flex; align-items: center; gap: 12px; background: #FFFFFF; border: 1px solid #D7E4D7; border-radius: 12px; padding: 14px 15px; margin-bottom: 9px; }
   .ric { width: 32px; height: 32px; border-radius: 9px; background: #E2EFE8; color: #1F6E43; display: flex; align-items: center; justify-content: center; font-size: 17px; }
   .nm { flex: 1; font-weight: 500; }
   .dot { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
@@ -37,7 +37,7 @@
   .logo-dark .wm { color:#fff; font-size:26px; font-weight:600; line-height:1; }
   .logo-dark .tg { color:#9FE1CB; font-size:12px; margin-top:3px; }
   .note { font-size:12px; color:#5F7266; margin-top:8px; }
-  .navbar { width: 232px; background:#F3F8F2; border:1px solid #D7E4D7; border-radius:12px; overflow:hidden; padding-top:10px; }
+  .navbar { width: 232px; background:#FFFFFF; border:1px solid #D7E4D7; border-radius:12px; overflow:hidden; padding-top:10px; }
   .ni { display:flex; align-items:center; gap:12px; padding:12px 18px; font-size:15px; font-weight:500; color:#22372A; border-left:3px solid transparent; }
   .ni i { font-size:19px; color:#5F7266; }
   .ni.active { background:#E2EFE8; color:#1F4D2E; border-left-color:#1F4D2E; font-weight:600; }
@@ -100,10 +100,21 @@
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn" style="background:#1F4D2E;color:#fff">Primary</button>
           <button class="btn" style="background:#2E7A4E;color:#fff">Accent</button>
-          <button class="btn" style="background:#F3F8F2;color:#1F4D2E;border:1px solid #2E7A4E">Outline</button>
+          <button class="btn" style="background:#FFFFFF;color:#1F4D2E;border:1px solid #2E7A4E">Outline</button>
           <button class="btn" style="background:#fff;color:#1F4D2E;border:2px solid #1F4D2E">Login secondary</button>
         </div>
         <div style="font-size:11px;color:#7A8F80;margin-top:6px">"Login secondary" = <code>.login-btn.secondary</code> — sign-in screen's "Sign in" / "I have an invite" / "Back" buttons. White fill, 2px brand-green border (was a 1px border on a near-white tint; widened for contrast/affordance against the dark green header).</div>
+        <div style="background:#D1D5DB;padding:14px;border-radius:10px;margin-top:12px">
+          <div style="font-size:11px;color:#374151;margin-bottom:8px;font-weight:600">Device row, on canvas (2026-07-09 high-contrast pass)</div>
+          <div style="background:#FFFFFF;border-left:6px solid #1F4D2E;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px">
+            <span class="dot" style="background:#E24B4A"></span>
+            <div>
+              <div style="font-size:14px;font-weight:500;color:#111111">Main barn controller</div>
+              <div style="font-size:12px;color:#111111">Hog Slat &middot; Barn ventilation controller</div>
+            </div>
+          </div>
+          <div style="font-size:11px;color:#374151;margin-top:8px">Canvas `#D1D5DB`, row `#FFFFFF`, text `#111111`, left accent bar `#1F4D2E` (brand green, 6px) — replaces the old sage canvas / off-white row / muted text treatment.</div>
+        </div>
       </div>
     </div>
     <div>
@@ -121,8 +132,8 @@
 <script>
   var groups = {
     brand: [['Brand green','#1F4D2E'],['Brand hover','#17391F'],['Accent green','#2E7A4E'],['Mint accent','#8FD3B4'],['Secondary on dark','#9FE1CB']],
-    surf: [['Page / app surface','#E7F0E7'],['Card / box','#F3F8F2'],['Card border','#D7E4D7'],['Divider','#E4EEE4'],['Field fill','#FFFFFF'],['Field border','#CBD8CB']],
-    text: [['Primary','#22372A'],['Secondary','#5F7266'],['Muted / hint','#7A8F80'],['On dark','#FFFFFF']],
+    surf: [['Page / app surface (within frame)','#C6D0C8'],['Menu card (every card)','#FFFFFF'],['Card accent bar','#1F4D2E'],['Card border','#D7E4D7'],['Divider','#E4EEE4'],['Field fill','#FFFFFF'],['Field border','#CBD8CB']],
+    text: [['Primary','#22372A'],['Secondary','#5F7266'],['Muted / hint','#7A8F80'],['On dark','#FFFFFF'],['Device row text','#111111'],['Nav inactive','#374151']],
     sev: [['Critical dot','#E24B4A'],['Critical text','#A32D2D'],['Critical tint','#FCEBEB'],['Critical border','#F09595'],['Review dot','#D4C000'],['Caution text','#7A6514'],['Review tint','#FBF6E9'],['OK dot','#2E7A4E'],['Success text','#1F6E43'],['Success tint','#E2EFE8'],['Success border','#BBD8C2']],
     sem: [['Escalation fg','#5B21B6'],['Escalation deep','#3B0764'],['Escalation tint','#EFEAF7'],['Escalation border','#C4B5FD'],['Info fg','#1A5FA8'],['Info tint','#E6F0FA'],['Info border','#92B4E3'],['Returned fg','#7A3200'],['Returned tint','#FFF3E0'],['Returned accent','#E6823A']],
     fh: [['Fine fg','#1F6E43'],['Fine bg','#E2EFE8'],['Known issue fg','#1A5FA8'],['Known issue bg','#E6F0FA'],['Caution fg','#41506A'],['Caution bg','#E4E8EE']]
