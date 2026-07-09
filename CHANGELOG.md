@@ -9,6 +9,32 @@ changed — why / notes.
 
 ---
 
+## 2026-07-09 02:09 ET — Report action bars unified to one solid color, cleaner dividers
+
+Per screenshot feedback on the Hygiene Report / Activity Log action bars
+(View / Download PDF / Email Report).
+
+- **`index.html`** — `#btn-email-report` and `#btn-email-activity` changed
+  background from accent green `#2E7A4E` to brand green `#1F4D2E`, matching
+  View and Download so all three segments read as one uniform bar instead of
+  Email standing out as a different shade. The vertical divider between
+  segments (`border-right`) changed from a barely-visible
+  `rgba(255,255,255,0.2)` to a cleaner, more visible `rgba(255,255,255,0.35)`
+  — a simple white line rather than a near-invisible one, so the bar reads
+  as clearly segmented.
+- Confirmed the two remaining `#2E7A4E` uses elsewhere in `index.html`
+  (the "Code accepted" invite-status text, the "Connected" status dot) are
+  unrelated semantic accent-green uses, not part of these action bars —
+  left untouched.
+- `BUILD_TIMESTAMP` bumped to `2026-07-09T02:09:16-04:00`.
+- **Truncation incident (again):** `index.html` truncated mid-tag right
+  after the divider-opacity edit — caught immediately via null-byte/tail
+  check, recovered by splicing the correct closing tail back on from the
+  known-good backup, then reverified (divider + email-button counts both
+  matched expected totals, no stray changes).
+
+---
+
 ## 2026-07-09 01:58 ET — 8 new security tips added to the ticker (2 skipped as redundant)
 
 Joy provided 10 candidate tips for the rotating security-tip ticker. Checked
@@ -733,9 +759,4 @@ Applied against the 3-state-observation build, from the audit in `AUDIT-FINDINGS
 - **Still open, not resolved by guessing:** whether "How to fix this" (pure guidance, no inputs) and "Remediation checklist" (where the fix actually happens) should be merged into one section — flagged mid-session as confusingly adjacent when both are collapsed and only their titles are visible; kept separate for this build pending an explicit decision.
 - New `lang-data.js` keys (EN+ES): `ownershipTakenTitle`, `ownershipTakenDesc`, `escalateToOwnerInsteadBtn`.
 
-## 2026-07-07 (just after midnight) — Manager dashboard: Flagged/Partially-resolved redundancy fixed
-- Found via live testing: a device that was partially resolved and escalated (e.g. "Main barn controller," fixed by Sarah, needing Manager's decision) was showing up **twice** on the Manager dashboard — once counted in the "Flagged — needs action" summary card, and again with full context in the dedicated purple "Partially resolved — needs decision" section below.
-- Root cause: the Owner dashboard branch already correctly excluded partially-resolved devices from its equivalent flagged list (`escalatedDevices().filter(d => !d.partiallyResolved)`), but the Manager branch's "Flagged" card used the raw, unfiltered `escalatedDevices()` count — the same exclusion had just never been applied there.
-- Fixed: Manager's Flagged card now applies the identical `!d.partiallyResolved` filter, and the "escalated only" filtered device-list view (what you land on if you click the Flagged card) was updated to match — so the card's count and what it actually links to no longer disagree with each other.
-
-_Note: the remainder of this historical entry and any entries below it were found cut off mid-sentence — a pre-existing/recurring instance of the file-truncation bug documented elsewhere in this log. Trimmed cleanly rather than left dangling. Everything above this note, including all of tonight's entries, is verified complete.]_
+_Note: the remainder of this historical entry ("Manager dashboard: Flagged/Partially-resolved redundancy fixed", 2026-07-07 just after midnight) and any entries below it were found cut off — a pre-existing/recurring instance of the file-truncation bug documented elsewhere in this log. Trimmed cleanly rather than left dangling. Everything above this note, including all of tonight's entries, is verified complete.]_
