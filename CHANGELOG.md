@@ -13,6 +13,21 @@ changed — why / notes.
 
 ---
 
+## 2026-07-08 21:26 ET — Spanish tagline synced to match "Guarding"
+- Followed up the previous entry's flagged gap: Spanish `appTag`/`loginSub` updated from "Defendiendo contra depredadores cibernéticos" to "Protegiendo contra depredadores cibernéticos" ("Protecting against cyber predators"), matching the new English "Guarding" wording. Not a literal cognate translation — "Guardando" is a Spanish false friend (means "storing/saving," not protecting) — "Protegiendo" is the accurate, natural equivalent for the protective sense intended.
+- `BUILD_TIMESTAMP` bumped to `2026-07-08T21:26:14-04:00`.
+
+---
+
+## 2026-07-08 21:23 ET — Tagline copy change + nav layout merge (build 070820262123)
+- **Tagline changed:** "Defending against cyber predators" → "Guarding against cyber predators", English only, in every live location: `js/i18n/lang-data.js` (`appTag`, `loginSub` keys — the single source both index.html and JS renders pull from) and the three static fallback copies in `index.html` (login sub-text, header tag, settings "About" footer), plus `style-guide.html`'s reference copy.
+- **Spanish left untouched, flagged not fixed:** `appTag`/`loginSub` (ES) still read "Defendiendo contra depredadores cibernéticos" ("Defending..."), now out of sync with the new English wording. Not auto-translated because "Guarding" has no literal Spanish cognate ("Guardando" is a false friend — means "storing/saving," not protecting) and the correct wording is a judgment call ("Protegiendo", "Vigilando", "Cuidando", etc.) — needs a decision, not a guess.
+- **Not touched, flagged as dead:** `app.js.monolithic.bak` (2 instances) and two stray scratch files `_index_fixed.html` / `_index_test_copy.html` (3 instances each) still contain the old "Defending..." copy. These aren't part of the live app — the two scratch files are leftover temp copies pending manual deletion (sandbox can't delete files on this mount).
+- **Merged nav layout change** (`index.html`, `styles.css`): nav bar moved from a fixed/absolutely-positioned bottom bar to a flex-based layout — `#main-app` now `display:flex; flex-direction:column`, screens wrapped in a new scrollable `.screens-wrap` (`overflow-y:auto`), `.nav-panel` no longer `position:absolute`, `.screen` padding no longer reserves bottom space for the old absolute bar. Verified: all `data-i18n` attributes (including the 3 placeholder fixes from the previous entry) survived the restructuring untouched.
+- `BUILD_TIMESTAMP` bumped to `2026-07-08T21:23:35-04:00`.
+
+---
+
 ## 2026-07-08 20:56 ET — BUILD_TIMESTAMP convention switched to Eastern time
 - `BUILD_TIMESTAMP` in `js/i18n/core.js` was being stamped in UTC (`Z` suffix, via `date -u`). Standing rule going forward: always Eastern time with an explicit UTC offset (`TZ=America/New_York date +"%Y-%m-%dT%H:%M:%S%:z"`), not UTC. Updated the in-file instructional comment to match, and re-stamped `BUILD_TIMESTAMP` to `2026-07-08T20:56:01-04:00`.
 - No functional/UI code changed — `formatBuildTimestamp()` parses any valid ISO 8601 offset the same way, so the displayed "Last updated" value is unaffected other than reflecting the corrected stamp.
