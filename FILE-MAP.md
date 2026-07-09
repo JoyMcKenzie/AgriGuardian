@@ -41,6 +41,7 @@ this doc is about *what things do*, that one is about *what loads first*.
 | PDF report generation (download/email) | `reports.js` |
 | In-app report viewer modal | `report-viewers.js` |
 | Translations / adding a language string | `lang-data.js` (strings), `set-lang.js` (apply-on-switch logic), `core.js` (`t()` lookup) |
+| Invite-language toggle, invite→account language handoff, Settings language control | `team.js` (`inviteMember`), `auth-ui.js` (`validateInviteCode`, `joinFarm`, `_enterApp`), `settings.js` (`renderSettings` sync), `index.html` (`#member-language`, `#account-lang-select`) |
 | Screen navigation (`showScreen`) | defined in `devices-detail.js`, called everywhere |
 | Navigation slide-out (drawer open/drag/close) | `js/nav-drawer.js` |
 | Build timestamp | `core.js` |
@@ -59,7 +60,7 @@ this doc is about *what things do*, that one is about *what loads first*.
 **Key exports:** `currentLang`, `currentDetailView`, `currentUser` (global state), `t(key)` (translation lookup), `formatBuildTimestamp()`, `applyBuildTimestamp()`, `localTimestamp()`.
 **Depends on:** `LANG` (from `lang-data.js`).
 **Used by:** every file that calls `t()` or reads `currentUser` — effectively all of them.
-**Notes:** `BUILD_TIMESTAMP` constant lives here — must be bumped by hand on every edit (see standing workflow rule). Never reintroduce `fetch`/`HEAD` timestamp detection — fails silently under `file://`.
+**Notes:** `BUILD_TIMESTAMP` constant lives here — must be bumped by hand on every edit (see standing workflow rule). Never reintroduce `fetch`/`HEAD` timestamp detection — fails silently under `file://`. **Pending (not yet applied — HTML/CSS-only merge so far):** `currentLang` should initialize from `localStorage.getItem('agriguardian_lang')` (falling back to `'en'`) and persist there on every `setLang()` call, so a chosen language survives a page reload.
 
 ### `audit.js` (27 lines)
 **Purpose:** Audit log storage and rendering.
@@ -161,6 +162,7 @@ this doc is about *what things do*, that one is about *what loads first*.
 **Depends on:** `permissions.js`, `settings.js` (role list), `defaultPermsForRole()` (`permissions.js`).
 **Fixed (was a known issue):** `inviteMember()` used to create a duplicate/disconnected record when the invited person later completed "I have an invite" — `joinFarm()` (`auth-ui.js`) now updates the pending `'Invited'` record in place by phone number instead of pushing a second one. The demo invite placeholder (`demoInviteProfile`, `auth-ui.js`) is "Casey Aitch," distinct from every real team member, specifically to avoid recreating this collision.
 **Relevant to locked spec:** "team member section cleanup" and "phone numbers visible to all employees" land here.
+**Pending (not yet applied — HTML/CSS-only merge so far):** a new `#member-language` toggle exists in `index.html`'s invite form, defaulted to the inviter's current language and reset after each send; `inviteMember()` needs to read it and stamp the chosen language onto the new `teamMembers` row and `demoInviteProfile`.
 
 ### `settings.js` (273 lines)
 **Purpose:** Settings screen — owner email, per-role permission matrix, member detail view, custom role creation.
@@ -168,6 +170,7 @@ this doc is about *what things do*, that one is about *what loads first*.
 **Depends on:** `permissions.js`.
 **Relevant to locked spec:** "Manager-to-Owner escalation toggles (Manager default on, Technician default off)" — the default values and the checkbox UI both live here.
 **Fixed:** `togglePermission()` enforced its two access guards (`canActOnMember()`, the self-escalation cap) correctly, but never actually recorded a permission change anywhere — no audit trail of who granted or revoked what, for whom. Least privilege is prevention *and* accountability; only having the first half was a real gap. Now logs every change via `logAction()`, and grants (not revokes — narrowing access is always the safe direction) require an explicit confirm() before taking effect. **Found in a later cross-check:** canceling that confirmation left the checkbox visually stuck in its new (clicked) state without updating the underlying data, since a checkbox's `.checked` flips natively before `onchange` even fires — the cancel path now re-renders from the real data, matching the pattern the other two guards in this function already used.
+**Pending (not yet applied — HTML/CSS-only merge so far):** a new Settings → Language section (`#account-lang-select` in `index.html`) needs `renderSettings()` to keep it synced with `currentLang`, mirroring the (now-hidden) post-login header `#lang-dropdown`.
 
 ### `accessibility.js` (~165 lines)
 **Purpose:** Accessibility settings (text size, contrast, etc.), the collapsible-section toggle helper, and per-user default preferences (accessibility + language).
@@ -186,6 +189,7 @@ this doc is about *what things do*, that one is about *what loads first*.
 **Key exports:** `togglePwVisibility()`, `copyDemoPassword()`, `showStep()`, `validateInviteCode()`, `joinFarm()`, `signInAsDemoMember()`, `_enterApp()`. *(`saveHealth()` removed 2026-07-07 — dead code, audit CL1.)*
 **Depends on:** `auth-flow.js` (`resolveDemoAccount()`), `session.js`.
 **Notes:** `signInAsDemoMember()` pre-fills the real sign-in form with a demo account's credentials — it no longer bypasses MFA directly; the person still sends the code and verifies through the normal `sendCode()`/`verifyCode()` path. `joinFarm()` updates an existing pending ('Invited') `teamMembers` record in place if one exists (created by `inviteMember()` in `team.js`), rather than pushing a duplicate entry.
+**Pending (not yet applied — HTML/CSS-only merge so far):** `validateInviteCode()` needs to capture the invite's language into `pendingInviteLanguage`; `joinFarm()` needs to stamp it onto the new account and team-member row; `_enterApp()` needs to seed `currentLang` from `currentUser.language` before syncing dropdowns and calling `setLang()`.
 
 ### `session.js` (140 lines)
 **Purpose:** Session timeout, logout, password reset flow.
@@ -222,7 +226,7 @@ this doc is about *what things do*, that one is about *what loads first*.
 
 ### `index.html` (1003 lines)
 **Purpose:** All screen markup/containers (`screen-dashboard`, `screen-devices`, `screen-detail`, `screen-add`, `screen-network`, `screen-net-detail`, `screen-apps`, `screen-app-detail`, `screen-backups`, `screen-settings`), plus static forms that get cloned by JS. `<head>` also carries favicon links and Open Graph/Twitter meta tags for link-preview sharing (2026-07-08).
-**Notes:** known prior defects — duplicate element IDs, malformed div nesting in the Settings section. Verify structure with a linter/grep before assuming a given `id` is unique. `og:url`/`og:image` are hardcoded to `https://joymckenzie.github.io/AgriGuardian/` — update both if the Pages URL ever changes.
+**Notes:** known prior defects — duplicate element IDs, malformed div nesting in the Settings section. Verify structure with a linter/grep before assuming a given `id` is unique. `og:url`/`og:image` are hardcoded to `https://joymckenzie.github.io/AgriGuardian/` — update both if the Pages URL ever changes. **2026-07-09 merge:** added `#member-language` (invite form, Team section) and a new Settings → Language section (`#account-lang-select`); the post-login header `#lang-dropdown` is now hidden (`display:none`, element kept in the DOM for existing code) since `#account-lang-select` is its replacement for signed-in users. HTML/CSS only — see `core.js`/`team.js`/`auth-ui.js`/`settings.js` "Pending" notes for the JS half.
 **Redesign stage 2 (2026-07-07):** the nav is no longer a top bar — the `.nav` list is wrapped in `#nav-panel` (right-side slide-out) with `#nav-handle` and `#nav-scrim`, controlled by `js/nav-drawer.js`. The six `.nav-btn` buttons themselves are unchanged (class/order/ids/onclick), so every `showScreen`/index-based reference still resolves. **Stage 2b:** the `#report-buttons` block (Hygiene Report / Activity Log actions) now lives inside the drawer under the tabs, not on the dashboard screen — same ids, so `dashboard.js` gating is unchanged.
 
 ### `nav-drawer.js`
@@ -233,7 +237,7 @@ this doc is about *what things do*, that one is about *what loads first*.
 
 ### `styles.css` (125 lines)
 **Icon audit batch 1 (2026-07-07):** added `.sr-only` (visually-hidden but screen-reader-readable) and compact icon styling for `.device-action-btn`; drawer nav tabs gained leading icons; device/network/app card actions are icon-only with `.sr-only` labels + `title` tooltips.
-**Purpose:** All visual styling — brand colors (forest green `#1F4D2E`, risk red/yellow/green variants, off-white `#f5f5f0`), layout, component styles.
+**Purpose:** All visual styling — brand colors (forest green `#1F4D2E`, risk red/yellow/green variants, off-white `#f5f5f0`), layout, component styles. **2026-07-09 merge:** `.login-btn.secondary` changed to a white background with a 2px forest-green border (was a light-green `#E2EFE8` background with a 1px border), for stronger contrast against the dark green header.
 **Redesign stage 1 (2026-07-07):** the post-login app surface (`.app`) is tinted light sage `#EAF3EA` (was `#fff`) with a softer `#cfe0cf` border, so the whitespace reads as one theme with the green header; cards stay white. Body page bg (`#f5f5f0`) and the login screen are unchanged.
 
 ### `module-load-order.json`

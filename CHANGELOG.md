@@ -13,6 +13,21 @@ changed — why / notes.
 
 ---
 
+## 2026-07-09 — Invite-language selection + persisted app language
+- `demoInviteProfile` (the invite-demo placeholder) is now Casey Aitch, phone `(555) 872-3341`, role Farm Hand, seeded in Spanish (`language: 'es'`) — replacing Sarah Tully, who remains a separate Technician persona for the "sign in as a pre-made team member" flow.
+- The team invite form (Settings → Team → Add a team member) has a new language toggle (`#member-language`), defaulted to the inviter's current language and reset back to it after each send. The chosen language is stored on the new `teamMembers` row and on `demoInviteProfile`.
+- `validateInviteCode()` captures the invite's language into `pendingInviteLanguage`; `joinFarm()` stamps it onto the new account and team-member row; `_enterApp()` seeds `currentLang` from `currentUser.language` before syncing dropdowns and calling `setLang()` — so accepting Casey's invite lands the new account in Spanish, matching what was actually sent.
+- `currentLang` now persists to `localStorage` (`agriguardian_lang`) on every `setLang()` call and is restored from it on load (`core.js`), so a chosen language survives a page reload instead of resetting to English.
+- Sign-in screen: the language dropdown moved from a separate bar below the header into the top-right corner of the dark green header card itself (absolutely positioned, no layout change to the logo/title row).
+- Sign-in screen buttons ("Sign in", "I have an invite") now use a white background with a 2px forest-green border instead of a 1px border on a near-white tint, for stronger contrast/affordance against the header.
+- Post-login app header: the language dropdown is removed from view (element kept in the DOM, hidden, so existing code referencing it doesn't break). The visible language control for signed-in users of any role now lives in a new Settings → Language section (`#account-lang-select`).
+- Added `languageHeader`, `accountLanguageLabel`, and `inviteLanguageLabel` translation keys (EN/ES) in `lang-data.js`; wired into `set-lang.js`.
+- **Merge note:** the `index.html`/`styles.css` markup for this feature (`#member-language` in the team invite form, `#account-lang-select` in a new Settings → Language section, and the `.login-btn.secondary` white/2px-border style) has been merged into the live files. The live repo's existing fixes were preserved during the merge: the unique `lbl-cred-warn` / `lbl-cred-warn-net` ids (no duplicate reintroduced), and `js/nav-drawer.js` (kept in `module-load-order.json` and `index.html`). **The JS half of this feature was not supplied in this merge** — `js/auth-ui.js`, `js/team.js`, `js/settings.js`, `js/i18n/core.js`, `js/i18n/set-lang.js`, and `js/i18n/lang-data.js` still need their corresponding changes applied before the invite-language toggle, the persisted app language, and the Settings language selector will actually function.
+
+**Files touched (this merge):** `index.html`, `styles.css`. **Files still pending:** `js/auth-ui.js`, `js/team.js`, `js/settings.js`, `js/i18n/core.js`, `js/i18n/set-lang.js`, `js/i18n/lang-data.js`.
+
+---
+
 ## 2026-07-08 21:26 ET — Spanish tagline synced to match "Guarding"
 - Followed up the previous entry's flagged gap: Spanish `appTag`/`loginSub` updated from "Defendiendo contra depredadores cibernéticos" to "Protegiendo contra depredadores cibernéticos" ("Protecting against cyber predators"), matching the new English "Guarding" wording. Not a literal cognate translation — "Guardando" is a Spanish false friend (means "storing/saving," not protecting) — "Protegiendo" is the accurate, natural equivalent for the protective sense intended.
 - `BUILD_TIMESTAMP` bumped to `2026-07-08T21:26:14-04:00`.

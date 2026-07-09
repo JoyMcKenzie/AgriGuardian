@@ -280,7 +280,7 @@
   </div>
   <div style="display:flex;justify-content:flex-end;align-items:center;gap:8px;padding:4px 12px 6px 12px;background:#1F4D2E">
     <button onclick="goToAccessibility()" title="Accessibility settings" aria-label="Accessibility settings" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;font-size:14px;padding:2px 9px;border-radius:20px;cursor:pointer;line-height:1.4" data-i18n-title="accessibilitySettings" data-i18n-aria="accessibilitySettings">♿</button>
-    <select id="lang-dropdown" onchange="setLang(this.value,'app')" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;font-size:11px;padding:3px 8px;border-radius:20px;cursor:pointer;outline:none;width:auto;max-width:fit-content">
+    <select id="lang-dropdown" onchange="setLang(this.value,'app')" style="display:none">
       <option value="en" style="color:#22372A">English</option>
       <option value="es" style="color:#22372A">Español</option>
     </select>
@@ -724,6 +724,13 @@
           <p style="font-size:11px;color:#7A8F80;margin-top:4px;font-style:italic" id="lbl-unique-role-note" data-i18n="uniqueRoleNote">Role names must be unique (not case-sensitive).</p>
         </div>
       </div>
+      <div class="form-group" style="margin-bottom:10px">
+        <label class="form-label" id="lbl-member-language" data-i18n="memberLanguage">Invitation language</label>
+        <select id="member-language" style="width:100%;font-size:14px;padding:9px 12px;border:1px solid #CBD8CB;border-radius:8px">
+          <option value="en" data-i18n="langEnglish">English</option>
+          <option value="es" data-i18n="langSpanish">Español</option>
+        </select>
+      </div>
       <button class="submit-btn" id="btn-invite" data-i18n="inviteBtn" onclick="inviteMember()">Invite</button>
       <p style="font-size:11px;color:#7A8F80;margin-top:8px;font-style:italic" id="lbl-invite-note" data-i18n="inviteNote">The worker will receive an SMS with instructions to download AgriGuardian and join your farm account.</p>
     </div>
@@ -808,6 +815,15 @@
         <option value="3600" id="opt-session-60" data-i18n="sessionTitle1hr">1 hour</option>
       </select>
       <p style="font-size:11px;color:#7A8F80;margin-top:6px;font-style:italic" id="lbl-timeout-note" data-i18n="timeoutNote">Shorter timeout recommended for shared or field devices.</p>
+    </div>
+
+    </div></div><div id="settings-language"></div><div style="border:1px solid #D7E4D7;border-radius:10px;overflow:hidden;margin-bottom:12px"><button onclick="toggleSettingsSection('settings-language', this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#F3F8F2;border:none;cursor:pointer;text-align:left"><span style="font-size:13px;font-weight:600;color:#1F4D2E;text-transform:uppercase;letter-spacing:0.5px" id="sec-hdr-language" data-i18n="languageHeader">Language</span><span class="sec-arrow" style="font-size:14px;color:#7A8F80">▾</span></button><div id="sec-settings-language" style="display:none;padding:12px 14px">
+    <div class="action-box">
+      <div class="action-label" id="lbl-account-language" data-i18n="accountLanguage">App language</div>
+      <select id="account-lang-select" style="width:100%;font-size:14px;padding:8px 12px;border:1px solid #CBD8CB;border-radius:8px;margin-top:8px" onchange="setLang(this.value,'app')">
+        <option value="en" data-i18n="langEnglish">English</option>
+        <option value="es" data-i18n="langSpanish">Español</option>
+      </select>
     </div>
 
     <!-- Accessibility -->
