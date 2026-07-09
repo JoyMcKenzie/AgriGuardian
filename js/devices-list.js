@@ -151,7 +151,7 @@ function unarchiveDevice(id) {
   // a replacement, or archived while unresolved), revert to the unresolved
   // state so it re-enters the hygiene queue instead of showing a stale green.
   var wasReplaced = /replaced/i.test(d.archiveReason || '') ||
-    (typeof d.resolveStatus === 'string' && /Device replaced|Dispositivo reemplazado/i.test(d.resolveStatus));
+    actionCodes(d.resolveStatus, 'device').includes('replaced');
   d.archiveReason = '';
   if (!d.resolved || wasReplaced) {
     d.resolved = false;

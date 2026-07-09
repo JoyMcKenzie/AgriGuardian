@@ -21,8 +21,9 @@ function getRisk(brand, pw, healthStatus) {
   if (d.support === "Limited" && pw === "no") return "red";
   if (d.cve >= 1 || pw === "no") return "yellow";
   if (d.support === "Unknown") return "yellow";
-  if (healthStatus && healthStatus.includes("I update it myself")) return "yellow";
-  if (healthStatus && (healthStatus.includes("No updates available") || healthStatus.includes("Sin actualizaciones"))) return "yellow";
+  const hCode = healthCode(healthStatus);
+  if (hCode === "manual") return "yellow";
+  if (hCode === "none") return "yellow";
   return "green";
 }
 

@@ -113,8 +113,7 @@ function hasStructuralIssue(d) {
   const info = getRiskData()[d.brand] || getRiskData()['Other'];
   if (info.support === 'Limited') return true;
   if (info.cve >= 3) return true; // meaningful CVE exposure, not just 1-2 minor
-  const h = d.healthStatus || '';
-  if (h.includes('No updates available') || h.includes('Sin actualizaciones')) return true;
+  if (healthCode(d.healthStatus) === 'none') return true;
   return false;
 }
 

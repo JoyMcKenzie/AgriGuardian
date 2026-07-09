@@ -52,7 +52,7 @@ function netTimelineHTML(n) {
   }
   if (n.resolved) {
     events.push({ date: n.savedDate || '', icon: 'ti-circle-check', color: '#2E7A4E',
-      label: t('netEvtResolved') + (n.resolveStatus ? ' — ' + n.resolveStatus : '') });
+      label: t('netEvtResolved') + (n.resolveStatus ? ' — ' + tResolveStatus(n.resolveStatus, 'net') : '') });
   }
   if (events.length === 0) return '';
   var rows = events.map(function(e, i) {
@@ -235,15 +235,16 @@ function showNetDetail(id, keepScreen) {
 
     ) : '') +
 
-    (n.resolved ? '<div class="resolved-badge" style="margin-top:14px">✅ ' + t('resolvedBadge') + ' ' + n.resolveStatus + (n.note ? ' — ' + n.note : '') + (n.savedDate ? '<span style="font-weight:400;margin-left:8px;color:#5F7266">(' + n.savedDate + ')</span>' : '') + '</div>' : '') +
+    (n.resolved ? '<div class="resolved-badge" style="margin-top:14px">✅ ' + t('resolvedBadge') + ' ' + tResolveStatus(n.resolveStatus, 'net') + (n.note ? ' — ' + n.note : '') + (n.savedDate ? '<span style="font-weight:400;margin-left:8px;color:#5F7266">(' + n.savedDate + ')</span>' : '') + '</div>' : '') +
 
     (canAct ?
       netAccSection('resolve', n.id, 'ti-checklist', t('netRemediationChecklist'), '',
         '<div style="display:flex;flex-direction:column;gap:6px;margin:10px 0 12px">' +
-        (Array.isArray(t('netActions')) ? t('netActions') : []).map(function(opt) {
-          const checked = n.resolveStatus && n.resolveStatus.includes(opt);
+        (Array.isArray(t('netActions')) ? t('netActions') : []).map(function(opt, i) {
+          const code = NET_ACTION_CODES[i];
+          const checked = actionCodes(n.resolveStatus, 'net').includes(code);
           return '<label style="display:flex;align-items:center;gap:8px;font-size:12.5px;padding:6px 10px;border:1px solid #CBD8CB;border-radius:8px;cursor:pointer;background:' + (checked?'#E2EFE8':'#fff') + '">' +
-            '<input type="checkbox" value="' + opt + '" class="net-action" ' + (checked?'checked':'') + ' style="width:auto;accent-color:#1F4D2E"> ' + opt +
+            '<input type="checkbox" value="' + code + '" class="net-action" ' + (checked?'checked':'') + ' style="width:auto;accent-color:#1F4D2E"> ' + opt +
           '</label>';
         }).join('') +
         '</div>' +
@@ -328,8 +329,8 @@ function returnNetIssue(id) {
   const ctx = panel || document;
   const checked = ctx.querySelectorAll('.net-action:checked');
   n.resolveStatus = Array.from(checked).map(c => c.value).join(', ');
-  if (/Password changed|Contraseña cambiada/i.test(n.resolveStatus)) n.pw = 'yes';
-  if (/Encryption enabled|Cifrado habilitado/i.test(n.resolveStatus)) n.encrypted = 'yes';
+  if (actionCodes(n.resolveStatus, 'net').includes('pwChanged')) n.pw = 'yes';
+  if (actionCodes(n.resolveStatus, 'net').includes('encryption')) n.encrypted = 'yes';
   const noteEl = ctx.querySelector('#net-note-' + id);
   const note = noteEl ? noteEl.value.trim() : '';
   if (!note) { alert(t('handoffNoteRequired')); return; }
@@ -338,7 +339,7 @@ function returnNetIssue(id) {
   n.needsOwnerAction = true;
   if (!Array.isArray(n.handoffLog)) n.handoffLog = [];
   n.handoffLog.push({ type: 'return', from: currentUser.name || currentUser.role, to: n.assignedBy, note: note, date: localTimestamp() });
-  logAction('logReturnedNetworkIssue', {raw: (n.label || n.type) + ' → ' + (n.assignedBy || '') + (n.resolveStatus ? ' | progress: ' + n.resolveStatus : '') + ' | ' + note});
+  logAction('logReturnedNetworkIssue', {raw: (n.label || n.type) + ' → ' + (n.assignedBy || '') + (n.resolveStatus ? ' | progress: ' + tResolveStatus(n.resolveStatus, 'net') : '') + ' | ' + note});
   renderDashList();
   renderNetworkList();
   showScreen('network', document.querySelectorAll('.nav-btn')[2]);
@@ -379,7 +380,7 @@ function unarchiveNetwork(id) {
   if (!n) return;
   n.archived = false;
   var wasReplaced = /replaced/i.test(n.archiveReason || '') ||
-    (typeof n.resolveStatus === 'string' && /Router replaced|Enrutador reemplazado/i.test(n.resolveStatus));
+    actionCodes(n.resolveStatus, 'net').includes('routerReplaced');
   n.archiveReason = '';
   if (!n.resolved || wasReplaced) {
     n.resolved = false;
@@ -419,14 +420,14 @@ function saveNetwork(id) {
   const checked = ctx.querySelectorAll('.net-action:checked');
   n.resolveStatus = Array.from(checked).map(c => c.value).join(', ');
   n.resolved = checked.length > 0;
-  if (/Password changed|Contraseña cambiada/i.test(n.resolveStatus)) n.pw = 'yes';
-  if (/Encryption enabled|Cifrado habilitado/i.test(n.resolveStatus)) n.encrypted = 'yes';
+  if (actionCodes(n.resolveStatus, 'net').includes('pwChanged')) n.pw = 'yes';
+  if (actionCodes(n.resolveStatus, 'net').includes('encryption')) n.encrypted = 'yes';
   const noteEl = ctx.querySelector('#net-note-' + id);
   n.note = noteEl ? noteEl.value.trim() : '';
   n.savedDate = localTimestamp();
   if (n.resolved) {
     n.resolvedDate = n.savedDate;
-    logAction('logNetworkIssueAddressed', {raw: (n.label || n.type || 'Network') + (n.resolveStatus ? ' — ' + n.resolveStatus : '') + (n.note ? ' (' + n.note + ')' : '')});
+    logAction('logNetworkIssueAddressed', {raw: (n.label || n.type || 'Network') + (n.resolveStatus ? ' — ' + tResolveStatus(n.resolveStatus, 'net') : '') + (n.note ? ' (' + n.note + ')' : '')});
   } else {
     logAction('logNetworkUpdated', {raw: (n.label || n.type || 'Network') + (n.note ? ' — ' + n.note : '')});
   }

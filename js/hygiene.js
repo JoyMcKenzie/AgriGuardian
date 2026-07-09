@@ -14,9 +14,8 @@ function computeHygiene() {
   // Resolved issues count as good.
   let upTotal = active.length, upGood = active.filter(function(d) {
     if (d.resolved) return true;
-    const h = d.healthStatus || '';
-    const bad = h.includes('I update it myself') || h.includes('No updates available') ||
-                h.includes('actualizo yo') || h.includes('Sin actualizaciones');
+    const hCode = healthCode(d.healthStatus);
+    const bad = hCode === 'manual' || hCode === 'none';
     return !bad;
   }).length;
 

@@ -172,7 +172,7 @@
         <div class="login-group">
           <label class="login-label" id="lbl-invite-pw" data-i18n="createPassword">Create password</label>
           <div style="position:relative">
-            <input class="login-input" type="password" id="invite-pass" data-i18n-ph="invitePasswordPlaceholder" placeholder="At least 8 characters" autocomplete="new-password" value="F@rm6ua7d" readonly style="padding-right:40px">
+            <input class="login-input" type="password" id="invite-pass" placeholder="At least 8 characters" autocomplete="new-password" value="F@rm6ua7d" readonly style="padding-right:40px">
             <button type="button" onclick="togglePwVisibility('invite-pass', this)" aria-label="Show password" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:6px;color:#7A8F80;display:flex;align-items:center" data-i18n-aria="showPassword">
               <i class="ti ti-eye" style="font-size:18px"></i>
             </button>
@@ -182,7 +182,7 @@
         <div class="login-group">
           <label class="login-label" id="lbl-invite-pw2" data-i18n="confirmPassword">Confirm password</label>
           <div style="position:relative">
-            <input class="login-input" type="password" id="invite-pass2" data-i18n-ph="inviteConfirmPasswordPlaceholder" placeholder="Re-enter password" autocomplete="new-password" value="F@rm6ua7d" readonly style="padding-right:40px">
+            <input class="login-input" type="password" id="invite-pass2" placeholder="Re-enter password" autocomplete="new-password" value="F@rm6ua7d" readonly style="padding-right:40px">
             <button type="button" onclick="togglePwVisibility('invite-pass2', this)" aria-label="Show password" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:6px;color:#7A8F80;display:flex;align-items:center" data-i18n-aria="showPassword">
               <i class="ti ti-eye" style="font-size:18px"></i>
             </button>
@@ -599,7 +599,7 @@
       <div class="form-group" style="margin-bottom:10px">
         <label class="form-label" id="lbl-net-notes-label"><span data-i18n="netNotesLabel">Notes</span> <span id="lbl-net-notes-opt" data-i18n="optional" style="color:#aaa;font-weight:400;font-size:11px">(optional)</span></label>
         <p style="font-size:11px;color:#A32D2D;background:#FCEBEB;border-radius:6px;padding:6px 10px;margin-bottom:6px" id="lbl-cred-warn-net" data-i18n-prefix="⚠️ " data-i18n="credWarning">⚠️ Never enter usernames, passwords, or login credentials here.</p>
-        <textarea id="net-notes" rows="3" data-i18n-ph="addNetworkNotesPlaceholder" placeholder="e.g. ISP: Rural Telecom — 800-555-1234&#10;Contract renewal: Jan 2027&#10;Router located in main office closet" style="width:100%;font-size:13px;padding:9px 12px;border:1px solid #CBD8CB;border-radius:8px;resize:none;font-family:inherit"></textarea>
+        <textarea id="net-notes" rows="3" placeholder="e.g. ISP: Rural Telecom — 800-555-1234&#10;Contract renewal: Jan 2027&#10;Router located in main office closet" style="width:100%;font-size:13px;padding:9px 12px;border:1px solid #CBD8CB;border-radius:8px;resize:none;font-family:inherit"></textarea>
         <p style="font-size:11px;color:#7A8F80;margin-top:4px" data-i18n="includeIspNote">Include ISP contact, router location, contract info, or any reference notes.</p>
       </div>
       <button class="submit-btn" id="lbl-add-net-btn" data-i18n="addNetworkBtn" onclick="addNetwork()">Add network connection</button>

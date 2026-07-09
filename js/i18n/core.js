@@ -98,6 +98,85 @@ function tRole(role) {
   return map[role] ? t(map[role]) : (role || '');
 }
 
+// ── LANGUAGE-NEUTRAL DATA CODES ──────────────────────────────────────
+// Device/network state is stored as canonical CODES, never as displayed
+// strings. Previously d.healthStatus held "🟡 I update it myself" or
+// "🟡 Lo actualizo yo mismo" depending on the active language, and the
+// scoring logic string-matched both languages by hand — which broke the
+// moment someone resolved an issue in one language and viewed in another
+// (and silently mis-scored any future third language). Codes are stored;
+// t()-translation happens only at display time, via the helpers below.
+
+// Health-status codes, index-aligned with the t('healthOpts') label array.
+var HEALTH_CODES = ['auto', 'manual', 'none'];
+
+// Normalize a stored health status — a code, or a legacy displayed string
+// in any language — to its canonical code ('' if unset/unknown).
+function healthCode(v) {
+  if (!v) return '';
+  if (HEALTH_CODES.indexOf(v) >= 0) return v;
+  if (/Updates automatically|actualiza autom/i.test(v)) return 'auto';
+  if (/I update it myself|actualizo yo/i.test(v)) return 'manual';
+  if (/No updates available|Sin actualizaciones/i.test(v)) return 'none';
+  return '';
+}
+
+// Translate a stored health status (code or legacy string) for display.
+function tHealth(v) {
+  var i = HEALTH_CODES.indexOf(healthCode(v));
+  var opts = t('healthOpts');
+  return (i >= 0 && Array.isArray(opts)) ? opts[i] : (v || '');
+}
+
+// Resolve-action codes, index-aligned with t('resolveActions') / t('netActions').
+var RESOLVE_ACTION_CODES = ['pwChanged', 'disconnected', 'replaced', 'mfa', 'monitoring'];
+var NET_ACTION_CODES = ['pwChanged', 'encryption', 'segmented', 'routerReplaced', 'monitoring'];
+
+// Normalize one stored action part (code, legacy label in any language, or
+// free-text "Other: …") to canonical form. kind: 'device' | 'net'.
+function actionCode(part, kind) {
+  if (!part) return '';
+  var codes = kind === 'net' ? NET_ACTION_CODES : RESOLVE_ACTION_CODES;
+  if (codes.indexOf(part) >= 0) return part;
+  if (/^other:/i.test(part) && part.indexOf('other:') === 0) return part; // canonical free text
+  var m = part.match(/^(Other|Otro):\s*(.*)$/i);
+  if (m) return 'other:' + m[2]; // legacy free text
+  var key = kind === 'net' ? 'netActions' : 'resolveActions';
+  for (var lang in LANG) {
+    var arr = LANG[lang] && LANG[lang][key];
+    if (Array.isArray(arr)) {
+      var i = arr.indexOf(part);
+      if (i >= 0) return codes[i];
+    }
+  }
+  return part; // unknown legacy value — pass through untouched
+}
+
+// Split a stored resolveStatus into canonical action codes.
+function actionCodes(status, kind) {
+  if (!status) return [];
+  return status.split(',').map(function (s) { return actionCode(s.trim(), kind); }).filter(Boolean);
+}
+
+// Translate one action code (or legacy value) for display.
+function tAction(part, kind) {
+  var c = actionCode(part, kind);
+  if (c.indexOf('other:') === 0) return t('otherPrefix') + c.slice(6);
+  var codes = kind === 'net' ? NET_ACTION_CODES : RESOLVE_ACTION_CODES;
+  var i = codes.indexOf(c);
+  if (i >= 0) {
+    var arr = t(kind === 'net' ? 'netActions' : 'resolveActions');
+    if (Array.isArray(arr)) return arr[i];
+  }
+  return part;
+}
+
+// Translate a full stored resolveStatus ("pwChanged, replaced, other:…") for display.
+function tResolveStatus(status, kind) {
+  if (!status) return '';
+  return status.split(',').map(function (s) { return tAction(s.trim(), kind); }).join(', ');
+}
+
 // Always use browser's local timezone for all timestamps
 function localTimestamp() {
   const now = new Date();

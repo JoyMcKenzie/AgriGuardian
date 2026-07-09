@@ -94,13 +94,13 @@ function deviceTimelineHTML(d) {
   // Health/update status recorded
   if (d.healthStatus) {
     events.push({ date: d.healthDate || '', icon: 'ti-refresh', color: '#1A5FA8',
-      label: t('tlHealthSet') + ' ' + d.healthStatus });
+      label: t('tlHealthSet') + ' ' + tHealth(d.healthStatus) });
   }
 
   // Resolved
   if (d.resolved) {
     events.push({ date: d.resolvedDate || '', icon: 'ti-circle-check', color: '#2E7A4E',
-      label: t('tlResolved') + (d.resolveStatus ? ' — ' + d.resolveStatus : '') });
+      label: t('tlResolved') + (d.resolveStatus ? ' — ' + tResolveStatus(d.resolveStatus, 'device') : '') });
   }
 
   // Verified
@@ -473,7 +473,7 @@ function showDetail(id, keepScreen) {
       (canAct ?
         deviceAccSection('remediate', d.id, 'ti-checklist', t('whatWasDone'), '',
           (risk === 'green' && !d.resolved ? verifyBoxHTML(d) : addressIssueBoxHTML(d)) +
-          (d.resolved ? '<div class="resolved-badge" style="margin-top:14px">✅ ' + t('resolvedBadge') + ' ' + d.resolveStatus + (d.resolveNote ? ' — ' + d.resolveNote : '') + (d.resolvedDate ? '<span style="font-weight:400;margin-left:8px;color:#5F7266">(' + d.resolvedDate + ')</span>' : '') + '</div>' : ''),
+          (d.resolved ? '<div class="resolved-badge" style="margin-top:14px">✅ ' + t('resolvedBadge') + ' ' + tResolveStatus(d.resolveStatus, 'device') + (d.resolveNote ? ' — ' + d.resolveNote : '') + (d.resolvedDate ? '<span style="font-weight:400;margin-left:8px;color:#5F7266">(' + d.resolvedDate + ')</span>' : '') + '</div>' : ''),
           false)
       : isViewOnlyNote ?
         deviceAccSection('remediate', d.id, 'ti-checklist', t('whatWasDone'), '',
@@ -565,24 +565,28 @@ function addressIssueBoxHTML(d) {
       '<div class="health-box" style="margin-top:0">' +
         '<div class="health-title">' + t('healthTitle') + ' <span style="color:#A32D2D;font-size:11px;font-weight:600">* ' + t('required') + '</span></div>' +
         '<div id="health-warning-' + d.id + '" style="display:none;background:#FCEBEB;border:1px solid #F09595;border-radius:6px;padding:8px 12px;margin-bottom:8px;font-size:12px;color:#791F1F;align-items:center;gap:6px">' + t('healthWarnSelectStatus') + '</div>' +
-        (Array.isArray(t('healthOpts')) ? t('healthOpts') : []).map(function(opt) {
-          const sel = d.healthStatus === opt;
+        (Array.isArray(t('healthOpts')) ? t('healthOpts') : []).map(function(opt, i) {
+          const code = HEALTH_CODES[i];
+          const sel = healthCode(d.healthStatus) === code;
           return '<label class="health-opt ' + (sel ? 'selected' : '') + '">' +
-            '<input type="radio" name="health-' + d.id + '" value="' + opt + '" ' + (sel ? 'checked' : '') + ' style="width:auto;accent-color:#1F4D2E"> ' + opt +
+            '<input type="radio" name="health-' + d.id + '" value="' + code + '" ' + (sel ? 'checked' : '') + ' style="width:auto;accent-color:#1F4D2E"> ' + opt +
           '</label>';
         }).join('') +
         (d.healthDate ? '<p class="health-stamp">' + t('healthStamp') + ' ' + d.healthDate + '</p>' : '') +
       '</div>' +
       '<div style="display:flex;flex-direction:column;gap:6px;margin:12px 0">' +
-        (Array.isArray(t('resolveActions')) ? t('resolveActions') : []).map(function(opt) {
-          const checked = d.resolveStatus && d.resolveStatus.split(',').map(s=>s.trim()).includes(opt);
+        (Array.isArray(t('resolveActions')) ? t('resolveActions') : []).map(function(opt, i) {
+          const code = RESOLVE_ACTION_CODES[i];
+          const checked = actionCodes(d.resolveStatus, 'device').includes(code);
           return '<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:6px 10px;border:1px solid #CBD8CB;border-radius:8px;background:' + (checked ? '#E2EFE8' : '#fff') + '">' +
-            '<input type="checkbox" value="' + opt + '" class="resolve-action" ' + (checked ? 'checked' : '') + ' style="width:auto;accent-color:#1F4D2E"> ' + opt +
+            '<input type="checkbox" value="' + code + '" class="resolve-action" ' + (checked ? 'checked' : '') + ' style="width:auto;accent-color:#1F4D2E"> ' + opt +
           '</label>';
         }).join('') +
         (function() {
-          const otherChecked = d.resolveStatus && d.resolveStatus.split(',').map(s=>s.trim()).some(s => s.startsWith('Other:'));
-          const otherText = otherChecked ? d.resolveStatus.split(',').map(s=>s.trim()).find(s => s.startsWith('Other:')).replace('Other: ','') : '';
+          const codes = actionCodes(d.resolveStatus, 'device');
+          const otherCode = codes.find(function(c) { return c.indexOf('other:') === 0; });
+          const otherChecked = !!otherCode;
+          const otherText = otherChecked ? otherCode.slice(6) : '';
           return '<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:6px 10px;border:1px solid #CBD8CB;border-radius:8px;background:' + (otherChecked ? '#E2EFE8' : '#fff') + '">' +
             '<input type="checkbox" id="resolve-other-check-' + d.id + '" ' + (otherChecked ? 'checked' : '') + ' style="width:auto;accent-color:#1F4D2E" onchange="document.getElementById(\'resolve-other-text-' + d.id + '\').style.display = this.checked ? \'block\' : \'none\'">' + t('resolveOther') + '</label>' +
             '<input type="text" id="resolve-other-text-' + d.id + '" placeholder="' + t('describeWhatDone') + '" value="' + otherText + '" style="display:' + (otherChecked ? 'block' : 'none') + ';width:100%;font-size:13px;padding:8px 12px;border:1px solid #CBD8CB;border-radius:8px;margin-top:-2px;font-family:inherit">';

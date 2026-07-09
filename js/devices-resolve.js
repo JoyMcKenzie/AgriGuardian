@@ -66,7 +66,7 @@ function saveAll(id) {
   const otherChk = ctx.querySelector('#resolve-other-check-' + id);
   const otherTxt = ctx.querySelector('#resolve-other-text-' + id);
   if (otherChk && otherChk.checked && otherTxt && otherTxt.value.trim()) {
-    statusParts.push(t('otherPrefix') + otherTxt.value.trim());
+    statusParts.push('other:' + otherTxt.value.trim());
   }
   // Real bug found via user report: with no requirement here, clicking "Mark
   // as resolved" with zero boxes checked used to silently set d.resolved =
@@ -104,7 +104,7 @@ function saveAll(id) {
       type: 'resolved',
       from: currentUser.name || currentUser.role,
       to: '',
-      note: (noteEl2 ? noteEl2.value.trim() : '') || statusParts.join(', '),
+      note: (noteEl2 ? noteEl2.value.trim() : '') || tResolveStatus(statusParts.join(', '), 'device'),
       date: localTimestamp()
     });
   }
@@ -118,18 +118,18 @@ function saveAll(id) {
   var risk = getRisk(d.brand, d.pw, d.healthStatus);
   var actionWas = getRiskAction(risk, d.pw, d.brand);
   var auditDetail = (d.label || d.type) + ' (' + d.brand + ')';
-  if (d.flaggedDate) auditDetail += ' | Flagged: ' + d.flaggedDate;
-  auditDetail += ' | Addressed: ' + localTimestamp();
-  auditDetail += ' | Recommended action was: ' + actionWas;
-  if (d.resolveStatus) auditDetail += ' | Actions taken: ' + d.resolveStatus;
-  if (d.resolveNote) auditDetail += ' | Note: ' + d.resolveNote;
-  if (d.healthStatus) auditDetail += ' | Update status: ' + d.healthStatus;
+  if (d.flaggedDate) auditDetail += ' | ' + t('auditFlagged') + ': ' + d.flaggedDate;
+  auditDetail += ' | ' + t('auditAddressed') + ': ' + localTimestamp();
+  auditDetail += ' | ' + t('auditRecommendedActionWas') + ': ' + actionWas;
+  if (d.resolveStatus) auditDetail += ' | ' + t('auditActionsTaken') + ': ' + tResolveStatus(d.resolveStatus, 'device');
+  if (d.resolveNote) auditDetail += ' | ' + t('auditNote') + ': ' + d.resolveNote;
+  if (d.healthStatus) auditDetail += ' | ' + t('auditUpdateStatus') + ': ' + tHealth(d.healthStatus);
   logAction(d.resolved ? 'logIssueAddressed' : 'logDeviceUpdated', {raw: auditDetail});
 
   // ── Device replaced → archive the old device & prompt for replacement ──
   // Lifecycle hygiene: a decommissioned device shouldn't keep counting toward
   // the hygiene score. Archive (not delete) preserves history & audit trail.
-  var wasReplaced = statusParts.some(function(s){ return s === 'Device replaced' || s === 'Dispositivo reemplazado'; });
+  var wasReplaced = statusParts.some(function(s){ return s === 'replaced'; });
   var replacedSnapshot = wasReplaced ? { id: d.id, label: d.label || d.type, type: d.type, location: d.location, brand: d.brand } : null;
   if (wasReplaced) {
     d.archived = true;
