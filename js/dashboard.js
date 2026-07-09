@@ -316,7 +316,7 @@ function startTipTicker() {
 }
 
 function alertRow(level, msg, navFn, meta) {
-  if (a11ySettings.colorBlind) msg = (level === 'red' ? '⛔ ' : level === 'info' ? 'ℹ️ ' : '⚠️ ') + msg;
+  if (a11ySettings.colorBlind) msg = (level === 'red' ? '⛔ ' : level === 'info' ? 'ℹ️ ' : level === 'green' ? '✅ ' : '⚠️ ') + msg;
   const hc = a11ySettings.highContrast;
   const isInfo = (level === 'info');
   const dotColor = level === 'red'

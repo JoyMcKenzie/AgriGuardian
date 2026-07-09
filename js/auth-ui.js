@@ -206,7 +206,7 @@ function signInAsDemoMember(who) {
 // pre-filled demo accounts) and joinFarm() (invite acceptance).
 function _enterApp() {
   document.getElementById('login-wrapper').style.display = 'none';
-  document.getElementById('main-app').style.display = 'block';
+  document.getElementById('main-app').style.display = 'flex';
   loadMyPreferences();
   if (typeof resetSettingsSections === 'function') resetSettingsSections(); // always start Settings collapsed on login
   document.getElementById('header-farm').textContent = currentUser.farm || '';

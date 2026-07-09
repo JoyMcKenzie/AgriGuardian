@@ -13,6 +13,94 @@ changed — why / notes.
 
 ---
 
+## 2026-07-09 00:31 ET — Fixed header compressing on content-heavy screens
+- Reported and confirmed via screenshot: navigating from Dashboard to Devices visibly shrank the green header (farm-name text overlapping/clipped) — Dashboard's content is short, Devices' (10 seeded devices) is tall enough to overflow. Root cause: `.header` never had `flex-shrink: 0`. It's a flex child of `#main-app`'s column layout; without an explicit `flex-shrink`, its default (`1`, can shrink) meant that whenever a screen's content pressured the layout, the browser shrank the fixed-height header instead of just leaving it alone and letting `.screens-wrap` scroll internally.
+- Added `flex-shrink: 0` to `.header`, the new `.signout-strip` class (added to the sign-out row's wrapper `<div>` in `index.html`, which previously had no class/selector hook), and `.timeout-banner` — none of the fixed-height chrome around the scrollable area should ever be allowed to compress, regardless of how tall the active screen's content is.
+- Process note: `styles.css` got silently truncated by the edit tool a **third** time this session (same tail-truncation pattern as the two earlier incidents). Caught and repaired the same way — diffed against git HEAD, spliced the clean original tail back onto the correctly-edited head — verified with a full diff showing only intended cumulative changes remain. Given the repeated pattern specifically on this file, treating "diff full file vs. git HEAD immediately after every edit to `styles.css`" as mandatory, not optional, for the rest of this project.
+- `BUILD_TIMESTAMP` bumped to `2026-07-09T00:31:32-04:00`.
+
+---
+
+## 2026-07-09 00:24 ET — Hid the scroll track on `.screens-wrap`/`.login-scroll`
+- Scrolling worked, but showed a visible scrollbar track — not how a native phone app looks. Added `scrollbar-width:none` (Firefox), `-ms-overflow-style:none` (legacy Edge/IE), and a `::-webkit-scrollbar{display:none}` rule (Chrome/Safari) to both scroll containers. Scroll behavior (wheel/touch/drag) is unaffected — only the visible track is gone.
+- Process note: my edit to `styles.css` truncated the file again (this time not a stray byte — the tail ~15 lines, starting mid-declaration at `.login-input[readonly]`, were cut off entirely). Caught it via a diff against git HEAD before considering the change done, reconstructed the file by taking everything before the truncation point (which had all of this session's real changes intact) and appending the clean original tail from git history. Verified with a full diff against git HEAD showing only the intended cumulative changes from this session, nothing else lost or altered.
+- Given this is the second time an edit has silently truncated a file this session (previously `lang-data.js`), treating "diff the whole file against git HEAD after editing" as a mandatory step from here on for any edit to a file with long single-line content, not just a spot-check.
+
+---
+
+## 2026-07-09 00:22 ET — BUILD_TIMESTAMP bump (housekeeping)
+- Missed the standing rule ("bump `BUILD_TIMESTAMP` on every edit") across this entire session's changes — header cleanup, style-guide refresh, device frame, Inter font, sign-out repositioning, missing translation keys, and the flex/scroll fix all landed without it. Bumped `js/i18n/core.js`'s `BUILD_TIMESTAMP` to `2026-07-09T00:22:19-04:00` now to cover all of it. Verified with `node --check` and a diff against git history showing only that one line changed.
+
+---
+
+## 2026-07-09 00:14 ET — Fixed the actual scroll bug: inline `display:block` was overriding the flex layout
+- Root cause of "logged in, mouse wheel does nothing": the fixed-frame change (previous entry) made `.screens-wrap`/`.login-scroll` depend on their parent (`#main-app`/`#login-wrapper`) actually being `display:flex`. But `_enterApp()` in `auth-ui.js` shows the app with `document.getElementById('main-app').style.display = 'block'` — an inline style, which always wins over the `#main-app { display:flex }` CSS rule. So on login, the flex column silently became a plain block: `.screens-wrap`'s `flex:1` had no effect, it just grew to fit all its content with nothing ever registering as "overflow," and anything past the fixed 844px frame got invisibly clipped by `.app`'s `overflow:hidden` — no scrollbar, no scroll, content just cut off. Same bug existed in reverse for logout: `session.js` set `login-wrapper`'s display to `'block'`.
+- Fix: changed both to `'flex'` — `js/auth-ui.js` (`_enterApp()`, showing `#main-app`) and `js/session.js` (`logOut()`, showing `#login-wrapper`). One-line change in each file; confirmed no other places in the codebase set either element's display to `'block'`.
+- Process note: my first attempt at these two edits left a stray trailing null byte (`\x00`) at the end of each file, which broke `node --check` ("Invalid or unexpected token") and made `diff`/`grep` treat them as binary files. Caught it immediately by running `node --check` (now a standing habit after the `lang-data.js` incident), diffed against git HEAD to confirm it was byte-identical apart from the null byte and the one intended line, stripped the null byte, and reverified. Both files are clean now — verified with `node --check` and a `diff --strip-trailing-cr` against git history showing only the single intended line changed in each.
+
+---
+
+## 2026-07-09 00:00 ET — Fixed-size phone frame; content scrolls, frame doesn't
+Goal: make the demo feel like a real app on a phone — the device frame stays a constant size, and only the screen content scrolls inside it, like a real mobile viewport.
+- `.app` (`#main-app`, post-login): `min-height: 600px` → `height: 844px` (fixed, not a floor — the frame no longer grows or shrinks with content or window size).
+- `#login-wrapper` (pre-login): new rule, `height: 844px; display:flex; flex-direction:column;` — previously had no height constraint at all and just grew to fit whatever step (welcome/sign-in/invite/reset) was showing. Now matches `#main-app`'s height exactly, so there's no frame-size jump when moving between logged-out and logged-in states.
+- `.screens-wrap` (post-login screen container): was `max-height: calc(100vh - 200px)` — tied the scrollable area's size to the browser viewport, so the frame effectively resized with the window. Changed to `flex: 1 1 auto; min-height: 0;` so it fills whatever space is left inside the now-fixed 844px frame (header + the sign-out strip + timeout banner, when shown, all still flex-shrink naturally) and scrolls independently — frame size no longer depends on viewport at all.
+- Added the equivalent for the login side: new `.login-scroll` class on the login body wrapper (the step-choice/sign-in/invite/reset container in `index.html`), same `flex:1 1 auto; overflow-y:auto; min-height:0` treatment, so long login steps scroll internally instead of growing the frame.
+- Net effect: `.device-shell` (the bezel) is now effectively fixed at 900×440px (844+30+26 padding, 420+20 padding) in every state — dashboard, settings, sign-in, invite flow, all identical frame size, exactly like a real phone screen.
+- Verified div-nesting balance unchanged (same single pre-existing stray `</div>` as before, nothing new introduced).
+
+---
+
+## 2026-07-08 23:53 ET — Sign-out button repositioned again; missing language translation keys added
+- `#header-signout-btn` was overlapping the header title/tagline/farm-name text — the title column is `flex:1` with no reserved right-hand space, so absolute-positioning the button at the app's top-right corner sat directly on top of that text. Moved it out of absolute positioning entirely: it's now a normal-flow button, right-aligned in its own slim green strip directly below the header row (same `#1F4D2E` background, so it still reads as part of the banner), instead of an overlay. No more overlap risk regardless of farm-name length or role-badge visibility.
+- Found and fixed the actual bug behind Settings showing literal **"LANGUAGEHEADER"** instead of "Language": the 2026-07-09 invite-language merge added the HTML (`data-i18n="languageHeader"` etc.) but, as flagged at the time, never got the corresponding `js/i18n/lang-data.js` keys — so `t()` fell back to returning the raw key name, which the section-header CSS then uppercases. Added the five missing keys (EN + ES): `languageHeader`, `accountLanguageLabel`, `inviteLanguageLabel`, `langEnglish`, `langSpanish`. Verified with `node --check` and a byte-diff against git HEAD that nothing else in the 1,868-line file was disturbed.
+- Process note: a first attempt at this edit corrupted the tail of `lang-data.js` (truncated the last ~10 lines and the closing braces). Caught immediately via `node --check`, restored the file byte-for-byte from git history, and reapplied the two additions with a verified whole-file string replace instead. Flagging in case similar corruption is ever seen elsewhere — always run `node --check` after editing this file.
+
+---
+
+## 2026-07-08 23:48 ET — Switched prototype body font to Inter
+- `index.html` `<head>`: added `<link>`s for Inter (400/500/600/700 — the four weights actually used across `index.html`/`styles.css`) from Google Fonts, with `preconnect` hints for `fonts.googleapis.com`/`fonts.gstatic.com`.
+- `styles.css`: `body`'s `font-family` is now `'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif` — Inter first, same system stack kept as fallback if the Google Fonts request is blocked/offline, so the app degrades gracefully rather than breaking.
+- Scope: prototype only (`index.html`/`styles.css`). Deliberately not touched: `style-guide.html` (has its own separate, duplicated `body` font rule, not shared from `styles.css`) and PDF report generation in `reports.js` (uses jsPDF's own `helvetica` core font, entirely independent of the page's CSS) — both would need separate follow-up work if Inter is wanted there too.
+
+---
+
+## 2026-07-08 23:36 ET — Device-frame treatment: notch, home indicator, neutral canvas
+Implements the three "grown-up prototype" controls discussed (visual framing, canvas styling, component boundaries).
+- **Visual framing:** added a new `.device-shell` wrapper (`index.html`, wraps both `#login-wrapper` and `#main-app` — the same shell persists across the logged-out/logged-in transition) — a neutral charcoal (`#26282B`) bezel with a `.device-notch` pill at the top and a `.device-home-indicator` bar at the bottom, so the prototype now visually reads as a phone mockup rather than a plain rounded card. Bezel color is deliberately brand-independent (not forest green) so it reads as hardware, not app chrome.
+- **Canvas styling:** page `body` background changed from `#ffffff` to `#EEEEEA` — this is `PALETTE.md`'s documented canvas value (which the page had drifted away from at some point after a prior fix reverted it to white). Restores the intended "canvas vs. prototype" contrast: soft neutral gray behind, phone frame on top.
+- **Component boundaries:** audited for anything escaping the frame — `#header-signout-btn` (fixed in the prior entry) is the only element using non-flow positioning, and it's `position:absolute` anchored to `.app`, so it stays locked inside the device frame. `.app` already had `overflow:hidden`, so no other screen content can bleed past the frame edges; the new `.device-shell` doesn't clip (no `overflow:hidden` on it) since the notch/home-indicator intentionally sit in its own padding band above/below `.app`, not inside `.app`'s clipped content area — verified no overlap with the bottom nav bar.
+- Not touched: the pre-existing stray extra `</div>` near the end of the body (flagged in earlier reviews) — left exactly as-is; the new device-shell markup was inserted around it without disturbing it, confirmed via a div-balance check (same single pre-existing issue, nothing new introduced).
+- Follow-up not done here: the `#791F1F`/`#A8CBB8`/`#B8B8B8`/`#CFE0CF`/`#EFEFEF` colour-drift items flagged in the last style-guide entry are still open.
+
+---
+
+## 2026-07-08 — Correction: Sign out repositioned back inside the app frame
+- The prior entry ("Header cleanup") moved `#header-signout-btn` to `position:fixed`, anchoring it to the browser viewport — outside the `.app` device frame entirely. That was a misreading of "top-right corner of the prototype, not the canvas": "prototype" means the app/device frame, "canvas" means the surrounding page background — the opposite of how it was applied. Corrected to `position:absolute` (anchored to `.app`, which already has `position:relative`), `top:12px;right:12px`, so the button now sits in the app frame's own top-right corner and stays locked to it regardless of page scroll or viewport size. Border tweaked to a translucent white (was solid, matching the old fixed-to-page treatment) since it's back to sitting on the dark green header inside the frame.
+
+---
+
+## 2026-07-08 — Style-guide refresh: restored PALETTE.md, regenerated og-image.png, documented missing button
+- `PALETTE.md` had been deleted from the repo at some point (confirmed via git history — a literal "Delete PALETTE.md" commit) even though `FILE-MAP.md` and this file still cited it as the canonical colour source. Restored it verbatim from the last commit before deletion. Not yet re-audited against current `styles.css` for new drift — a quick scan found 5 colours in use (`#791F1F`, `#A8CBB8`, `#B8B8B8`, `#CFE0CF`, `#EFEFEF`) that aren't in the restored palette; flagging for a follow-up pass, not fixed here.
+- `og-image.png` still read the old tagline ("Defending against cyber predators") after the app-wide copy change to "Guarding against cyber predators" — the regeneration FILE-MAP.md calls for never happened. Patched the tagline line in place (same font/color/position, logo and wordmark untouched) so the share-card image matches current copy.
+- `style-guide.html`'s Components section documented Primary/Accent/Outline buttons but not the sign-in screen's actual secondary button (`.login-btn.secondary` — "Sign in", "I have an invite", "Back"). Added a fourth swatch ("Login secondary") with a caption noting its white-fill/2px-border treatment.
+
+---
+
+## 2026-07-08 — Header cleanup: removed accessibility icon, moved Sign out outside the app canvas
+- Removed the `♿` accessibility shortcut button from the app header (`goToAccessibility()` in `js/accessibility.js` is now unused/dead — left in place but nothing calls it anymore). Redundant since Settings already has its own collapsible Accessibility section (`#a11y-section`); the shortcut was just a fast path to the same content.
+- Moved `#header-signout-btn` (Sign out) out of the in-header flex row and gave it `position:fixed;top:16px;right:16px`, so it now sits in the top-right corner of the whole prototype page rather than inside the phone-mockup app canvas. It's still a child of `#main-app`, so it still only shows/hides with login state (no JS changes needed). Restyled with a solid forest-green background (was translucent-white-on-dark-green, meant for the old header context) so it stays legible against the light page background outside the card.
+- The now-empty header flex row wrapper was removed; the hidden `#lang-dropdown` select (still referenced by `_enterApp()`/`setLang()`) was kept, unstyled, immediately after the header.
+- Not touched: `goToAccessibility()` is dead code now — flagged, not deleted, in case it's wanted back.
+
+---
+
+## 2026-07-08 — Colorblind-mode dashboard alert icons fixed
+- `alertRow()` in `dashboard.js` only special-cased `red` and `info` risk levels for colorblind-mode icons, so `green`-level alerts fell through to the generic `⚠️` (warning) icon — same symbol as `yellow`, misleadingly flagging a low-risk item as a warning. Added an explicit `green` → `✅` case, matching the red/yellow/green icon mapping already used consistently in `apps.js`, `devices-list.js`, `networks.js`, and `vulnerabilities.js`.
+- No `BUILD_TIMESTAMP` bump — single-line JS fix, not a build-worthy release.
+
+---
+
 ## 2026-07-09 — Invite-language selection + persisted app language
 - `demoInviteProfile` (the invite-demo placeholder) is now Casey Aitch, phone `(555) 872-3341`, role Farm Hand, seeded in Spanish (`language: 'es'`) — replacing Sarah Tully, who remains a separate Technician persona for the "sign in as a pre-made team member" flow.
 - The team invite form (Settings → Team → Add a team member) has a new language toggle (`#member-language`), defaulted to the inviter's current language and reset back to it after each send. The chosen language is stored on the new `teamMembers` row and on `demoInviteProfile`.

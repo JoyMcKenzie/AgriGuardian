@@ -49,7 +49,7 @@ function logOut(timedOut) {
   document.body.classList.remove('reduced-motion', 'colorblind-mode');
   setLang(currentLang, 'login');
   document.getElementById('main-app').style.display = 'none';
-  document.getElementById('login-wrapper').style.display = 'block';
+  document.getElementById('login-wrapper').style.display = 'flex';
   const hRole = document.getElementById('header-role');
   if (hRole) hRole.textContent = '';
   const tb = document.getElementById('timeout-banner');
