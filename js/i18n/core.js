@@ -17,9 +17,10 @@ function formatBuildTimestamp(src) {
 // server and fails silently under file:// (local open / extracted zip), which
 // is exactly when the stamp gets checked most. So the version is assigned by
 // hand here. Bump the line below on every edit that touches js/ modules — run:
-//     date -u +"%Y-%m-%dT%H:%M:%SZ"
-// and paste the result. This is a required last step of the edit workflow.
-const BUILD_TIMESTAMP = '2026-07-08T15:14:56Z';
+//     TZ=America/New_York date +"%Y-%m-%dT%H:%M:%S%:z"
+// and paste the result (Eastern time, with explicit UTC offset — not UTC/Z).
+// This is a required last step of the edit workflow.
+const BUILD_TIMESTAMP = '2026-07-08T20:56:01-04:00';
 
 function applyBuildTimestamp() {
   const el = document.getElementById('build-timestamp');
