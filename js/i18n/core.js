@@ -20,7 +20,7 @@ function formatBuildTimestamp(src) {
 //     TZ=America/New_York date +"%Y-%m-%dT%H:%M:%S%:z"
 // and paste the result (Eastern time, with explicit UTC offset — not UTC/Z).
 // This is a required last step of the edit workflow.
-const BUILD_TIMESTAMP = '2026-07-09T02:09:16-04:00';
+const BUILD_TIMESTAMP = '2026-07-11T14:55:25-04:00';
 
 function applyBuildTimestamp() {
   const el = document.getElementById('build-timestamp');
