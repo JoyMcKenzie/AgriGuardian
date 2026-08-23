@@ -7,7 +7,7 @@
 
 ## Project Status & Legal Notice
 
-This is an individual student project developed by Joy McKenzie for academic and portfolio purposes. All Rights Reserved. See the [LICENSE](./LICENSE) file for full terms.
+AgriGuardian is proprietary software. Copyright (c) 2026 Joy McKenzie. All rights reserved. See the [LICENSE](./LICENSE) file for full terms.
 
 ***
 
