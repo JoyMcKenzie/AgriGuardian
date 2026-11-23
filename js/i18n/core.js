@@ -11,22 +11,29 @@ function formatBuildTimestamp(src) {
   return datePart + ' ' + timePart + ' ET';
 }
 
-// ── BUILD STAMP (manual version marker) ──────────────────────────────
-// This value is NOT auto-derived. A previous version tried to read app.js's
-// Last-Modified header via fetch()/HEAD, but that only works over a real HTTP
-// server and fails silently under file:// (local open / extracted zip), which
-// is exactly when the stamp gets checked most. So the version is assigned by
-// hand here. Bump the line below on every edit that touches js/ modules — run:
-//     TZ=America/New_York date +"%Y-%m-%dT%H:%M:%S%:z"
-// and paste the result (Eastern time, with explicit UTC offset — not UTC/Z).
-// This is a required last step of the edit workflow.
+// ── BUILD STAMP ──────────────────────────────────────────────────────
+// On the live site (GitHub Pages) the "Last updated" stamp is the date of
+// the latest commit to main, read from the public GitHub API, so it updates
+// itself on every commit and no file has to be edited by hand.
+// BUILD_TIMESTAMP is only the fallback, shown when the page is opened from
+// a local file or the API cannot be reached (offline, or GitHub's limit of
+// 60 unauthenticated requests per hour per visitor is hit).
 const BUILD_TIMESTAMP = '2026-11-23T12:36:45-05:00';
+const BUILD_STAMP_API = 'https://api.github.com/repos/joymckenzie/AgriGuardian/commits?sha=main&per_page=1';
 
 function applyBuildTimestamp() {
   const el = document.getElementById('build-timestamp');
   if (!el) return;
   try { el.textContent = formatBuildTimestamp(new Date(BUILD_TIMESTAMP)); }
   catch(e) {}
+  if (!/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;
+  fetch(BUILD_STAMP_API, { headers: { 'Accept': 'application/vnd.github+json' } })
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(list) {
+      const date = list && list[0] && list[0].commit && list[0].commit.committer && list[0].commit.committer.date;
+      if (date) el.textContent = formatBuildTimestamp(new Date(date));
+    })
+    .catch(function() {});
 }
 
 document.addEventListener('DOMContentLoaded', applyBuildTimestamp);
