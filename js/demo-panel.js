@@ -54,13 +54,21 @@ function buildDemoPanel() {
   panel.setAttribute('aria-label', 'About this demo');
   layout.appendChild(panel);
 
-  // 1. About this demo: the page note.
-  var about = _demoSection(panel, 'demoPanelTitle', 'About this demo');
-  _demoMove(document.getElementById('canvas-footnote'), about);
-
-  // 2. How to explore, with the build stamp.
+  // 1. How to explore, with the build stamp.
   var explore = _demoSection(panel);
   _demoMove(document.getElementById('demo-box'), explore);
+
+  // 2. What to try once signed in.
+  var tryIt = _demoSection(panel, 'demoTryTitle', 'What to try once you are in');
+  var list = document.createElement('ol');
+  list.className = 'demo-try-list';
+  ['demoTry1', 'demoTry2', 'demoTry3', 'demoTry4', 'demoTry5'].forEach(function(key) {
+    var li = document.createElement('li');
+    li.setAttribute('data-i18n', key);
+    li.textContent = (typeof t === 'function') ? t(key) : key;
+    list.appendChild(li);
+  });
+  tryIt.appendChild(list);
 
   // 3. Demo accounts (tap to fill), with the note about their passwords.
   var accounts = _demoSection(panel);
@@ -82,6 +90,10 @@ function buildDemoPanel() {
   if (protoLabel) { protoLabel.className = 'demo-proto-label'; _demoMove(protoLabel, proto); }
   _demoMove(_demoBoxOf('lbl-pw-rules-label'), proto);
   _demoMove(_demoBoxOf('lbl-nvd-title'), proto);
+
+  // 6. About this demo: the page note, last.
+  var about = _demoSection(panel, 'demoPanelTitle', 'About this demo');
+  _demoMove(document.getElementById('canvas-footnote'), about);
 
   // Tapping a demo account from the panel always lands on a fresh sign-in,
   // even if someone is already signed in, and brings the phone into view.
