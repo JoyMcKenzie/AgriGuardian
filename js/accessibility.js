@@ -172,6 +172,7 @@ function applyA11yUI() {
 
   // Reduced motion
   body.classList.toggle('reduced-motion', a11ySettings.reducedMotion);
+  body.classList.toggle('high-contrast', a11ySettings.highContrast);
 
   // Color blind mode
   body.classList.toggle('colorblind-mode', a11ySettings.colorBlind);

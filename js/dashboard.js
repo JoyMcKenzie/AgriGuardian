@@ -53,8 +53,9 @@ function renderDashList() {
       if (yellowCount > 0) parts.push(cb ? chipShape('ti-alert-circle', '#B4611A', yellowCount) : chipDot('#D4C000', yellowCount));
       sev = parts.join('<span style="display:inline-block;width:8px"></span>');
     }
-    return '<button onclick="' + navFn + '" style="width:100%;text-align:left;background:#FFFFFF;border:' + bd + ';border-left:6px solid #1F4D2E;border-radius:12px;padding:15px 16px;margin-bottom:11px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px">' +
-      '<div><div style="font-size:15px;font-weight:500;color:#111111">' + label + '</div>' + sub + '</div>' +
+    const icon = /backups/.test(navFn) ? 'ti-cloud' : /apps/.test(navFn) ? 'ti-apps' : /network/.test(navFn) ? 'ti-wifi' : 'ti-device-desktop';
+    return '<button onclick="' + navFn + '" style="width:100%;text-align:left;background:#FFFFFF;border:' + bd + ';border-left:6px solid #1F4D2E;border-radius:12px;padding:13px 14px;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px">' +
+      '<div style="display:flex;align-items:center;gap:12px;min-width:0"><span class="tab-icon" aria-hidden="true"><i class="ti ' + icon + '"></i></span><div style="min-width:0"><div style="font-size:15px;font-weight:600;color:#111111">' + label + '</div>' + sub + '</div></div>' +
       '<div style="display:flex;align-items:center;gap:14px">' + sev + '<i class="ti ti-chevron-right" style="font-size:18px;color:#7A8F80" aria-hidden="true"></i></div>' +
     '</button>';
   }

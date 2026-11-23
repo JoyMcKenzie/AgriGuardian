@@ -74,8 +74,16 @@ function renderSettings() {
   if (tzCard) tzCard.style.display = isOwner ? '' : 'none';
   const tzSel = document.getElementById('farm-timezone-select');
   if (tzSel && currentUser && currentUser.timezone) tzSel.value = currentUser.timezone;
+  // Time zone is set once at provisioning and corrected only through
+  // AgriGuardian (Section 9.4, revised 2026-07-20), so it is read-only here.
+  if (tzSel) { tzSel.disabled = true; tzSel.style.background = '#F7F9F7'; tzSel.style.color = '#22372A'; tzSel.style.cursor = 'not-allowed'; }
   const tzNote = document.getElementById('tz-owner-note');
-  if (tzNote) tzNote.style.display = 'none';
+  if (tzNote) tzNote.style.display = 'flex';
+
+  // Session timeout is an Owner-only setting (Section 9.4).
+  const sessAnchor = document.getElementById('settings-session');
+  const sessCard = sessAnchor && sessAnchor.nextElementSibling;
+  if (sessCard) sessCard.style.display = isOwner ? '' : 'none';
 
   const inviteBox = document.getElementById('invite-box');
   if (inviteBox) {
