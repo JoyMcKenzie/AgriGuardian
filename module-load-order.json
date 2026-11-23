@@ -23,5 +23,6 @@
     "js/session.js",
     "js/i18n/set-lang.js",
     "js/devices-resolve.js",
-    "js/nav-drawer.js"
+    "js/nav-drawer.js",
+    "js/demo-panel.js"
 ]
