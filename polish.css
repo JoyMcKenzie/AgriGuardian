@@ -206,3 +206,50 @@ body.high-contrast .report-card-actions .rc-secondary { background: #fff; color:
 body.high-contrast .tab-icon { background: #fff; color: #000; border: 2px solid #000; }
 body.high-contrast .nav-btn.active i { background: #000; color: #fff !important; }
 body.high-contrast .header .logout-btn { background: #000; border: 2px solid #fff; color: #fff; }
+
+/* ---------- Demo panel (outside the phone) ----------
+   Holds everything that is about the demo rather than the app.
+   Beside the phone on wide screens, below it on narrow ones. */
+.demo-layout { gap: 20px; }
+#demo-panel { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 16px; color: var(--ag-text); }
+#demo-below-hint {
+  display: none; margin: 0 0 4px; font-size: 13px; font-weight: 600; color: var(--ag-brand);
+  background: #FFFFFF; border: 1px solid var(--ag-border); border-radius: 20px; padding: 8px 14px;
+}
+@media (max-width: 899px) {
+  #demo-below-hint { display: block; }
+}
+@media (min-width: 900px) {
+  .demo-layout { flex-direction: row !important; align-items: flex-start !important; justify-content: center; gap: 40px; }
+  .demo-layout > .device-shell { flex-shrink: 0; }
+  #demo-panel { width: 400px; max-width: 400px; max-height: calc(100vh - 48px); overflow-y: auto; position: sticky; top: 24px; padding-right: 4px; }
+}
+.demo-panel-section {
+  background: #FFFFFF; border: 1px solid var(--ag-border); border-radius: var(--ag-radius);
+  box-shadow: var(--ag-shadow); padding: 16px;
+}
+.demo-panel-heading { font-size: 15px; font-weight: 700; color: var(--ag-brand); margin: 0 0 10px; letter-spacing: -0.005em; }
+/* Moved boxes sit inside a section card, so drop their own card chrome. */
+#demo-panel #demo-box,
+#demo-panel .demo-panel-section > div {
+  margin: 0 !important; padding: 0 !important; border: none !important; box-shadow: none !important; background: transparent !important;
+}
+#demo-panel #canvas-footnote {
+  max-width: none !important; margin: 0 !important; padding: 0 !important; border: none !important;
+  box-shadow: none !important; background: transparent !important; font-size: 13px !important; line-height: 1.55;
+}
+#demo-panel #demo-box > div { border-radius: 10px !important; }
+#demo-panel #lbl-signin-pw-hygiene-note { margin: 0 0 10px !important; }
+#demo-panel .demo-code-line { font-size: 13px !important; font-style: normal !important; color: var(--ag-text) !important; margin: 0 0 12px !important; }
+#demo-panel #lbl-invite-pw-hygiene-note { margin: 12px 0 0 !important; }
+#demo-panel .demo-proto-label { font-size: 12px !important; color: var(--ag-on-sage) !important; margin: 0 0 12px !important; }
+#demo-panel .action-box { padding: 12px 0 0 !important; border-top: 1px solid var(--ag-divider) !important; }
+#demo-panel .action-box + .action-box { margin-top: 12px !important; }
+#demo-panel button[onclick^="signInAsDemoMember"] { background: #FFFFFF; }
+@media (max-width: 440px) {
+  .signin-band { gap: 10px; padding: 16px 12px 12px; }
+  .signin-band img { width: 58px; height: 58px; }
+  .signin-band .wm { font-size: 22px; }
+  .signin-band .tag { font-size: 12px; }
+  .signin-band select { font-size: 11px; padding: 3px 4px; }
+}
