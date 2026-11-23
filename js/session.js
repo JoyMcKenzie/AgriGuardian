@@ -46,7 +46,7 @@ function logOut(timedOut) {
   // main-app here — it's about to be hidden anyway.)
   a11ySettings = { largeText: false, xlText: false, highContrast: false, colorBlind: false, reducedMotion: false };
   currentLang = 'en';
-  document.body.classList.remove('reduced-motion', 'colorblind-mode');
+  document.body.classList.remove('reduced-motion', 'colorblind-mode', 'high-contrast');
   setLang(currentLang, 'login');
   document.getElementById('main-app').style.display = 'none';
   document.getElementById('login-wrapper').style.display = 'flex';
