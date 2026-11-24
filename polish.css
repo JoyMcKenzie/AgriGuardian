@@ -255,3 +255,4 @@ body.high-contrast .header .logout-btn { background: #000; border: 2px solid #ff
 }
 #demo-panel .demo-try-list { margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.5; color: var(--ag-text); }
 #demo-panel .demo-try-list li + li { margin-top: 6px; }
+@media (min-width: 900px) { #demo-panel { order: -1; } }
